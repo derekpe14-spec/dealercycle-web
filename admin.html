@@ -355,6 +355,14 @@ function closeModal(){ document.getElementById("overlay").innerHTML=""; }
 
 /* ---------- boot ---------- */
 if(!PASS){ promptPass(false); } else { refresh().catch(function(){}); }
+
+/* keep the dashboard current without a manual reload — refresh when the tab
+   regains focus and on a gentle poll, but only on the dashboard so we never
+   interrupt editing a customer, pricing, etc. */
+function autoRefreshOk(){ return PASS && view==="dashboard"; }
+window.addEventListener("focus", function(){ if(autoRefreshOk()) refresh().catch(function(){}); });
+document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible" && autoRefreshOk()) refresh().catch(function(){}); });
+setInterval(function(){ if(autoRefreshOk() && document.visibilityState==="visible") refresh().catch(function(){}); }, 45000);
 </script>
 </body>
 </html>
