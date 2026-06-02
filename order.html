@@ -19,8 +19,8 @@ var cart = {};           // product_id -> qty
 var step = "shop";       // shop | review | conf
 var openCat = null;
 var lastBags = 0;
-var screen = "order";    // order | history
-var history = null;      // customer's invoice history
+var appScreen = "order"; // order | history
+var invHistory = null;   // customer's invoice history
 
 function money(n){ return "$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
@@ -39,16 +39,16 @@ function load(){
 }
 
 function goHistory(){
-  screen="history";
+  appScreen="history";
   document.getElementById("app").innerHTML='<div class="phone"><div class="conf"><p class="muted" style="padding:30px">Loading your invoices…</p></div></div>';
   fetch("/api/my-history?token="+encodeURIComponent(TOKEN)).then(function(r){return r.json();}).then(function(d){
-    if(screen!=="history") return;
-    history=d; renderHistory();
+    if(appScreen!=="history") return;
+    invHistory=d; renderHistory();
   }).catch(function(){ document.getElementById("app").innerHTML='<div class="bigerr"><h2>Couldn\'t load invoices</h2><p class="muted">Please try again.</p></div>'; });
 }
-function backToOrder(){ screen="order"; render(); }
+function backToOrder(){ appScreen="order"; render(); }
 function renderHistory(){
-  var d=history||{years:[],invoices:[],customer:B?B.customer:{name:""},dealer:B?B.dealer:""};
+  var d=invHistory||{years:[],invoices:[],customer:B?B.customer:{name:""},dealer:B?B.dealer:""};
   var years=(d.years||[]).map(function(y){
     return '<div class="selbar" style="display:block;text-align:left;margin-bottom:8px"><div><b>'+esc(y.year)+'</b> — '+money(y.total)+' total · '+y.count+' order'+(y.count===1?'':'s')+'</div>'+
       '<div class="muted" style="font-size:12px;margin-top:2px">Paid '+money(y.paid)+' · Outstanding '+money(y.unpaid)+'</div></div>';
@@ -68,7 +68,7 @@ function renderHistory(){
   document.getElementById("app").innerHTML=html;
 }
 function render(){
-  if(screen==="history") return renderHistory();
+  if(appScreen==="history") return renderHistory();
   if(step==="conf") return renderConf();
   if(step==="review") return renderReview();
   var win=B.window.open;
