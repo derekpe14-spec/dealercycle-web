@@ -41,16 +41,24 @@ function refresh(){ return api("/api/admin/data").then(function(d){ D=d; renderT
 
 /* ---------- passcode gate ---------- */
 function promptPass(failed){
+  var ab=document.querySelector(".appbar"); if(ab) ab.style.display="none";
   document.getElementById("switch").innerHTML="";
-  document.getElementById("view").innerHTML='<div class="bigerr"><h2 style="color:var(--navy)">Dealer sign-in</h2>'+
-    (failed?'<p class="muted" style="margin-top:6px;color:var(--red)">Wrong passcode.</p>':'<p class="muted" style="margin-top:6px">Enter your dealer passcode.</p>')+
-    '<input id="passin" type="password" placeholder="Passcode" style="width:100%;margin-top:14px;padding:11px;border:1px solid var(--border);border-radius:9px;font-size:15px">'+
-    '<button class="btn primary" style="margin-top:12px;width:100%" onclick="doLogin()">Enter</button></div>';
+  document.getElementById("view").innerHTML='<div class="loginwrap"><div class="loginbig">'+
+    '<div class="spin"><svg viewBox="0 0 24 22" fill="none" stroke="#F5EEDD" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg></div>'+
+    '<div class="core">'+
+    '<div class="lc-brand">Dealer<span>Cycle</span></div>'+
+    '<div class="lc-tag">DEALER SIGN-IN</div>'+
+    (failed?'<div class="lc-err">Wrong passcode — try again.</div>':'')+
+    '<input id="passin" class="lc-pass" type="password" placeholder="passcode">'+
+    '<button class="lc-go" onclick="doLogin()">Sign in &rarr;</button>'+
+    '<div class="lc-foot">Enter your dealer passcode</div>'+
+    '</div></div></div>';
   var el=document.getElementById("passin"); if(el){ el.focus(); el.onkeydown=function(e){ if(e.key==="Enter") doLogin(); }; }
 }
 function doLogin(){ PASS=document.getElementById("passin").value.trim(); localStorage.setItem("dc_pass",PASS); refresh().catch(function(){}); }
 
 function renderTabs(){
+  var ab=document.querySelector(".appbar"); if(ab) ab.style.display="";
   document.getElementById("switch").innerHTML=TABS.map(function(t){return '<button class="'+(view===t[0]?'active':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>';}).join("");
 }
 function go(v){ view=v; renderTabs(); render(); }
