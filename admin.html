@@ -276,8 +276,29 @@ function renderSetup(){
         '<p class="muted" style="font-size:12px;margin-top:8px">Get a free Resend key at resend.com → API Keys. Until then, everything still works — you just send from the Outbox yourself.</p>'
       : '<p class="muted" style="font-size:13px">Emails send automatically via <b>'+esc(D.mail_provider)+'</b>. Confirmations go out on order, invoices on generate, reminders on demand, and the order link from the dashboard.</p>')+
     '</div></div>';
+  var yy=String(new Date().getFullYear()).slice(-2);
+  var nextNum=yy+'-'+String((s.invoice_counter||0)+1).padStart(3,'0');
+  var invnum='<div class="panel"><div class="panel-h"><h3>Invoice numbering</h3></div><div class="pad">'+
+    '<p class="muted" style="font-size:13px">The next invoice will be <b>'+nextNum+'</b>. To continue your existing sequence, enter the number the <b>next</b> invoice should use (e.g. enter <code>'+yy+'-086</code> or just <code>86</code> so the next invoice is '+yy+'-086).</p>'+
+    '<div class="ctlgrid" style="margin-top:8px"><div class="field"><label>Next invoice number</label><input id="s_invnext" placeholder="e.g. '+yy+'-086 or 86"></div></div>'+
+    '<button class="btn primary sm" style="margin-top:6px" onclick="saveInvoiceNumber()">Set invoice number</button></div></div>';
+  var danger='<div class="panel"><div class="panel-h"><h3>Clear test data</h3></div><div class="pad">'+
+    '<p class="muted" style="font-size:13px">Wipes all orders, invoices, payments, and the email Outbox, and resets invoice numbering to start fresh. <b>Keeps</b> your products, customers, and their order links. Use this once before real customers start ordering.</p>'+
+    '<button class="btn ghost sm" style="margin-top:10px;border-color:var(--red);color:var(--red)" onclick="clearTestData()">Clear test data</button></div></div>';
   document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><h2 class="sec" style="margin:0">Setup · '+esc(s.dealer_name)+'</h2><button class="btn primary sm" onclick="saveSetup()">Save setup</button></div>'+
-    '<p class="sub-h">Everything the order system needs to run this dealer.</p>'+cycle+company+email;
+    '<p class="sub-h">Everything the order system needs to run this dealer.</p>'+cycle+company+email+invnum+danger;
+}
+function saveInvoiceNumber(){
+  var v=(document.getElementById('s_invnext').value||'').trim();
+  var m=v.match(/(\d+)\s*$/);
+  if(!m){ toast('Enter a number like 86 or 26-086.'); return; }
+  var n=parseInt(m[1],10);
+  if(!n||n<1){ toast('Enter a valid number.'); return; }
+  api('/api/admin/settings','POST',{invoice_counter:n-1}).then(function(){ toast('Next invoice will be '+String(n).padStart(3,'0')+'.'); refresh(); });
+}
+function clearTestData(){
+  if(!confirm("Clear ALL orders, invoices, payments, and the Outbox, and reset invoice numbering? Your customers and their links are kept. This cannot be undone.")) return;
+  api("/api/admin/reset","POST",{}).then(function(){ toast("Test data cleared — starting fresh."); go("dashboard"); });
 }
 function saveSetup(){
   var keys=["dealer_name","payable_to","address","phone","email","venmo","cycle_anchor","frequency_days","open_day","open_time","close_day","close_time","mill_day","mill_time","invoice_day","invoice_time","mill_contact_name","mill_contact_email","order_window"];
