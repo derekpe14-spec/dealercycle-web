@@ -1,22 +1,40 @@
 // Email transport. Provider chosen by environment variables:
-//   RESEND_API_KEY=...           -> sends via Resend (zero install, uses built-in fetch)
-//   EMAIL_PROVIDER=gmail + GMAIL_USER + GMAIL_APP_PASSWORD  -> sends via Gmail (needs `nodemailer`)
-//   (nothing set)                -> "outbox" mode: nothing leaves the building; every message
-//                                   is captured so you can review it and tap "open in email".
-// EMAIL_FROM overrides the From address (default: Resend onboarding sender or the dealer email).
 //
-// send() always RESOLVES with a result object; it never throws, so a mail problem
-// can never break an order or invoice.
+//   Google Workspace / Gmail (orders@dealercycle.app):
+//     EMAIL_PROVIDER=workspace   (or "gmail")
+//     GMAIL_USER=orders@dealercycle.app
+//     GMAIL_APP_PASSWORD=<16-char app password from the Google account>
+//     EMAIL_FROM=DealerCycle — Evans Cattle <orders@dealercycle.app>   (optional display name)
+//
+//   Resend:
+//     RESEND_API_KEY=...         (zero install, uses built-in fetch)
+//
+//   Generic SMTP (any host):
+//     EMAIL_PROVIDER=smtp + SMTP_HOST + SMTP_PORT + SMTP_USER + SMTP_PASS
+//
+//   (nothing set) -> "outbox" mode: nothing leaves the building; every message is
+//                    captured so you can review it and tap "open in email".
+//
+// The Workspace/Gmail and SMTP paths require the `nodemailer` package (in package.json;
+// Render installs it on deploy). send() always RESOLVES with a result object — it never
+// throws — so an email problem can never break an order or invoice.
 
 function providerName() {
-  if (process.env.EMAIL_PROVIDER) return process.env.EMAIL_PROVIDER;
+  if (process.env.EMAIL_PROVIDER) return process.env.EMAIL_PROVIDER.toLowerCase();
   if (process.env.RESEND_API_KEY) return "resend";
+  if (process.env.GMAIL_USER || process.env.SMTP_USER) return "workspace";
   return "outbox";
 }
+function isSmtpProvider(p) { return p === "workspace" || p === "gmail" || p === "smtp"; }
 
 function fromAddress(dealerEmail, dealerName) {
   if (process.env.EMAIL_FROM) return process.env.EMAIL_FROM;
-  if (providerName() === "resend") return (dealerName ? dealerName + " " : "") + "<onboarding@resend.dev>";
+  const p = providerName();
+  if (p === "resend") return (dealerName ? dealerName + " " : "") + "<onboarding@resend.dev>";
+  if (isSmtpProvider(p)) {
+    const addr = process.env.GMAIL_USER || process.env.SMTP_USER || dealerEmail || "no-reply@dealercycle.app";
+    return dealerName ? `${dealerName} <${addr}>` : addr;
+  }
   return dealerEmail || "no-reply@dealercycle.app";
 }
 
@@ -35,16 +53,27 @@ async function sendViaResend(msg, from) {
   }
 }
 
-async function sendViaGmail(msg, from) {
+// Workspace/Gmail (smtp.gmail.com) or any generic SMTP host. Uses nodemailer.
+async function sendViaSmtp(msg, from, provider) {
   let nodemailer;
   try { nodemailer = require("nodemailer"); }
-  catch { return { status: "failed", provider: "gmail", error: "Gmail selected but 'nodemailer' is not installed. Run: npm install nodemailer" }; }
+  catch { return { status: "failed", provider, error: "Email selected but 'nodemailer' is not installed. Run: npm install" }; }
   try {
-    const t = nodemailer.createTransport({ service: "gmail", auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD } });
+    const user = process.env.GMAIL_USER || process.env.SMTP_USER;
+    const pass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASS;
+    let transport;
+    if (process.env.SMTP_HOST) {
+      const port = Number(process.env.SMTP_PORT || 587);
+      transport = { host: process.env.SMTP_HOST, port, secure: port === 465, auth: { user, pass } };
+    } else {
+      // Google Workspace + Gmail both use the "gmail" service (smtp.gmail.com).
+      transport = { service: "gmail", auth: { user, pass } };
+    }
+    const t = nodemailer.createTransport(transport);
     const info = await t.sendMail({ from, to: msg.to, subject: msg.subject, text: msg.text, html: msg.html });
-    return { status: "sent", provider: "gmail", id: info.messageId };
+    return { status: "sent", provider, id: info.messageId };
   } catch (e) {
-    return { status: "failed", provider: "gmail", error: String(e) };
+    return { status: "failed", provider, error: String(e) };
   }
 }
 
@@ -55,7 +84,7 @@ async function send(msg, cfg) {
   const from = fromAddress(cfg.dealerEmail, cfg.dealerName);
   if (!msg.to) return { status: "captured", provider, error: "no recipient email on file" };
   if (provider === "resend") return await sendViaResend(msg, from);
-  if (provider === "gmail") return await sendViaGmail(msg, from);
+  if (isSmtpProvider(provider)) return await sendViaSmtp(msg, from, provider);
   return { status: "captured", provider: "outbox" }; // preview mode
 }
 

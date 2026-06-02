@@ -5,7 +5,7 @@ services:
     name: dealercycle
     runtime: node
     plan: starter            # Starter ($7/mo) is needed for the persistent disk below.
-    buildCommand: ""         # zero dependencies — nothing to install
+    buildCommand: npm install # installs nodemailer (used for Workspace/Gmail/SMTP email)
     startCommand: node server.js
     autoDeploy: true
     envVars:
@@ -14,11 +14,18 @@ services:
       - key: ADMIN_PASSCODE
         sync: false          # set your own in the Render dashboard
       - key: BASE_URL
-        sync: false          # e.g. https://dealercycle.onrender.com (or your domain)
-      - key: RESEND_API_KEY
-        sync: false          # optional — add to send real emails
+        sync: false          # e.g. https://dealercycle.onrender.com (or https://dealercycle.app)
+      # ---- Email (set these when Google Workspace is active) ----
+      - key: EMAIL_PROVIDER
+        sync: false          # set to: workspace
+      - key: GMAIL_USER
+        sync: false          # orders@dealercycle.app
+      - key: GMAIL_APP_PASSWORD
+        sync: false          # 16-char app password from the Google account
       - key: EMAIL_FROM
-        sync: false          # optional — e.g. orders@dealercycle.app
+        sync: false          # e.g. DealerCycle — Evans Cattle <orders@dealercycle.app>
+      - key: RESEND_API_KEY
+        sync: false          # optional alternative to Workspace
     disk:
       name: data
       mountPath: /var/data

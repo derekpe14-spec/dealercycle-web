@@ -1,13 +1,16 @@
 {
   "name": "dealercycle-web",
   "version": "1.0.0",
-  "description": "DealerCycle — Phase 1 web ordering system for an Umbarger feed dealer. Zero dependencies; runs on Node 18+.",
+  "description": "DealerCycle — Phase 1 web ordering system for an Umbarger feed dealer. Runs on Node 18+. Only optional dependency: nodemailer (for Workspace/Gmail/SMTP email).",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "seed": "node seed.js"
   },
   "engines": { "node": ">=18" },
+  "dependencies": {
+    "nodemailer": "^6.9.14"
+  },
   "license": "UNLICENSED",
   "private": true
 }

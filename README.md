@@ -48,16 +48,22 @@ The app sends four emails: **order confirmation** (on submit), the **cycle-open 
 (Dashboard → "Email order link to all customers"), the **invoice** (on generate), and **payment
 reminders** (Payments → "Send reminders"). How they go out depends on how you start it:
 
-```bash
-node server.js                                  # PREVIEW: emails captured in the Outbox tab (nothing sent)
-RESEND_API_KEY=your_key node server.js          # send for real via Resend (free key at resend.com → API Keys)
-EMAIL_PROVIDER=gmail GMAIL_USER=you@gmail.com GMAIL_APP_PASSWORD=app_pw node server.js   # via Gmail (run `npm install nodemailer` first)
-```
+**Preview (default):** `node server.js` — nothing is sent; every message is captured in the **Outbox**
+tab to read and send yourself.
 
-In preview mode nothing leaves your computer — open the **Outbox** tab to read each message and tap
-"Open in email" to send it yourself. The moment you add a key, the same emails send automatically.
-Set `BASE_URL=https://app.dealercycle.app` (or your real URL) so the links inside emails are clickable;
-set `EMAIL_FROM` to control the From address.
+**Google Workspace (orders@dealercycle.app) — the planned setup:** set these env vars (on Render, or
+locally), then it sends automatically:
+```
+EMAIL_PROVIDER=workspace
+GMAIL_USER=orders@dealercycle.app
+GMAIL_APP_PASSWORD=<16-char app password from the Google account>
+EMAIL_FROM=DealerCycle — Evans Cattle <orders@dealercycle.app>
+```
+(Needs `nodemailer`, which is in package.json — `npm install` / Render installs it automatically.)
+
+**Resend (alternative):** `RESEND_API_KEY=your_key` instead.
+
+Set `BASE_URL=https://dealercycle.app` (or the onrender URL) so links inside emails are clickable.
 
 Every email — sent or captured — is logged in the **Outbox** with its status, and failed ones can be retried.
 
