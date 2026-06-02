@@ -1,0 +1,13 @@
+{
+  "name": "dealercycle-web",
+  "version": "1.0.0",
+  "description": "DealerCycle — Phase 1 web ordering system for an Umbarger feed dealer. Zero dependencies; runs on Node 18+.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js"
+  },
+  "engines": { "node": ">=18" },
+  "license": "UNLICENSED",
+  "private": true
+}

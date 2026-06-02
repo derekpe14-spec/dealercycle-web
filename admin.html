@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DealerCycle — Dealer</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="appbar">
+  <div class="brand"><span class="dot">◆</span><div>DealerCycle <small>dealer back office</small></div></div>
+  <div class="switch" id="switch"></div>
+</header>
+<div class="wrap" id="view"></div>
+<div id="overlay"></div>
+<script>
+"use strict";
+var PASS = localStorage.getItem("dc_pass") || "";
+var D = null;                 // admin data
+var view = "dashboard";
+var dealerTab = "product";
+var custScreen = "list";
+
+var TABS = [["dashboard","Dashboard"],["customers","Customers"],["pricing","Pricing"],["invoices","Invoices"],["payments","Payments"],["outbox","Outbox"],["setup","Setup"],["network","Umbarger"]];
+
+function money(n){ return "$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function money0(n){ return "$"+Math.round(n).toLocaleString("en-US"); }
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+function bagSvg(hex,sz){ sz=sz||.8; var w=24*sz,h=28*sz;
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 24 28" style="flex-shrink:0;vertical-align:middle"><path d="M4 6 Q12 1 20 6 L20 24 Q20 26.5 17.5 26.5 L6.5 26.5 Q4 26.5 4 24 Z" fill="'+hex+'" stroke="rgba(0,0,0,.28)" stroke-width="1"/></svg>'; }
+function toast(m){ var t=document.createElement("div"); t.className="toast"; t.textContent=m; document.body.appendChild(t); setTimeout(function(){t.remove();},2200); }
+
+function api(path, method, body){
+  return fetch(path,{method:method||"GET",headers:{"Content-Type":"application/json","x-dc-pass":PASS},body:body?JSON.stringify(body):undefined})
+    .then(function(r){ if(r.status===401){ promptPass(true); throw new Error("unauth"); } return r.json(); });
+}
+function refresh(){ return api("/api/admin/data").then(function(d){ D=d; renderTabs(); render(); }); }
+
+/* ---------- passcode gate ---------- */
+function promptPass(failed){
+  document.getElementById("switch").innerHTML="";
+  document.getElementById("view").innerHTML='<div class="bigerr"><h2 style="color:var(--navy)">Dealer sign-in</h2>'+
+    (failed?'<p class="muted" style="margin-top:6px;color:var(--red)">Wrong passcode.</p>':'<p class="muted" style="margin-top:6px">Enter your dealer passcode.</p>')+
+    '<input id="passin" type="password" placeholder="Passcode" style="width:100%;margin-top:14px;padding:11px;border:1px solid var(--border);border-radius:9px;font-size:15px">'+
+    '<button class="btn primary" style="margin-top:12px;width:100%" onclick="doLogin()">Enter</button></div>';
+  var el=document.getElementById("passin"); if(el){ el.focus(); el.onkeydown=function(e){ if(e.key==="Enter") doLogin(); }; }
+}
+function doLogin(){ PASS=document.getElementById("passin").value.trim(); localStorage.setItem("dc_pass",PASS); refresh().catch(function(){}); }
+
+function renderTabs(){
+  document.getElementById("switch").innerHTML=TABS.map(function(t){return '<button class="'+(view===t[0]?'active':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>';}).join("");
+}
+function go(v){ view=v; renderTabs(); render(); }
+
+/* =================== DASHBOARD =================== */
+function render(){
+  if(view==="dashboard") return renderDash();
+  if(view==="customers") return renderCustomers();
+  if(view==="pricing") return renderPricing();
+  if(view==="invoices") return renderInvoices();
+  if(view==="payments") return renderPayments();
+  if(view==="outbox") return renderOutbox();
+  if(view==="setup") return renderSetup();
+  if(view==="network") return renderNetwork();
+}
+function mailBadge(){
+  var p=D.mail_provider;
+  if(p==="outbox") return '<span class="pill warn">Email: preview (Outbox)</span>';
+  return '<span class="pill live">Email: sending via '+esc(p)+'</span>';
+}
+function kpi(v,l,d){ return '<div class="kpi"><div class="v">'+v+'</div><div class="l">'+l+'</div>'+(d?'<div class="d">'+d+'</div>':'')+'</div>'; }
+function dtab(id,label){ return '<button class="'+(dealerTab===id?'active':'')+'" onclick="dealerTab=\''+id+'\';renderDash()">'+label+'</button>'; }
+
+function renderDash(){
+  var bags=D.tally.reduce(function(a,r){return a+r.bags;},0);
+  var rev=D.orders.reduce(function(a,o){return a+o.total;},0);
+  var prof=D.pricing; var profMap={}; prof.forEach(function(p){profMap[p.id]=p.margin;});
+  var profit=D.tally.reduce(function(a,r){return a+r.bags*(profMap[r.id]||0);},0);
+  var k='<div class="kpis">'+kpi(D.orders.length,"Customers ordered","of "+D.customers.length+" on file")+
+    kpi(bags,"Total bags","live cycle")+kpi(D.tally.length,"Line items","distinct products")+
+    kpi(money0(rev),"Cycle revenue","all-in")+kpi(money0(profit),"Est. gross profit","product margin")+'</div>';
+  var content="";
+  if(dealerTab==="product"){
+    content='<table><thead><tr><th>Product</th><th class="hide-sm">Category</th><th class="num">Bags</th><th class="num">Revenue</th></tr></thead><tbody>'+
+      D.tally.map(function(r){return '<tr><td><span class="bag-td">'+bagSvg(r.bag_hex)+esc(r.name)+'</span></td><td class="hide-sm"><span class="pill cat" style="background:'+(D.categoryColors[r.category]||'#888')+'">'+esc(r.category)+'</span></td><td class="num"><b>'+r.bags+'</b></td><td class="num">'+money0(r.revenue)+'</td></tr>';}).join("")+
+      (D.tally.length?'':'<tr><td colspan="4" class="muted" style="padding:24px;text-align:center">No orders yet this cycle.</td></tr>')+'</tbody></table>';
+  } else if(dealerTab==="customer"){
+    content='<table><thead><tr><th>Customer</th><th class="hide-sm">Items</th><th class="num">Bags</th><th class="num">Total</th></tr></thead><tbody>'+
+      D.orders.map(function(o){ var names=o.items.map(function(i){return esc(i.name)+" ×"+i.qty;}).join(", ");
+        return '<tr><td><b>'+esc(o.customer)+'</b>'+(o.has_invoice?' <span class="pill live">invoiced</span>':'')+'</td><td class="muted hide-sm" style="font-size:12.5px">'+names+'</td><td class="num">'+o.bags+'</td><td class="num">'+money0(o.total)+'</td></tr>';}).join("")+
+      (D.orders.length?'':'<tr><td colspan="4" class="muted" style="padding:24px;text-align:center">No orders yet this cycle.</td></tr>')+'</tbody></table>';
+  } else {
+    content='<pre class="mill" id="millpre">Loading…</pre>';
+    api("/api/admin/mill").then(function(d){ var el=document.getElementById("millpre"); if(el) el.textContent=d.text; });
+  }
+  var actionBar='<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+    '<button class="btn primary sm" onclick="cycleOpen()">Email order link to all customers</button>'+
+    '<button class="btn ghost sm" onclick="genInvoices()">Generate invoices for this cycle</button>'+
+    (dealerTab==="mill"?'<button class="btn ghost sm" onclick="copyMill()">Copy mill order</button>':'')+'</div>';
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2 class="sec" style="margin:0">Dealer dashboard · '+esc(D.settings.dealer_name)+'</h2>'+mailBadge()+'</div>'+k+
+    '<div class="panel"><div class="panel-h"><h3>Cycle delivering '+esc(D.cycle.delivery_label)+'</h3><span class="pill '+(D.window.open?'live':'warn')+'">'+(D.window.open?'● ORDERING OPEN':'ORDERING CLOSED')+'</span></div>'+
+    '<div class="tabs">'+dtab("product","By product")+dtab("customer","By customer")+dtab("mill","Order to mill")+'</div>'+content+
+    '<div class="pad" style="padding-top:0">'+actionBar+'</div></div>';
+}
+function genInvoices(){ api("/api/admin/invoices/generate","POST",{}).then(function(d){ toast(d.made+" invoice(s) generated"+(d.emailed?(", "+d.emailed+" emailed"):"")+"."); refresh(); }); }
+function cycleOpen(){ if(!confirm("Email every customer (with an email on file) their private order link for this cycle?")) return; api("/api/admin/cycle-open","POST",{}).then(function(d){ toast("Order link: "+d.sent+" sent, "+d.captured+" to Outbox, "+d.noEmail+" had no email."); refresh(); }); }
+function copyMill(){ var t=document.getElementById("millpre").textContent; navigator.clipboard.writeText(t).then(function(){toast("Mill order copied.");}); }
+
+/* =================== CUSTOMERS =================== */
+function renderCustomers(){
+  if(custScreen==="add") return renderCustForm();
+  var origin=location.origin;
+  var rows=D.customers.map(function(c){
+    var link=origin+"/o/"+c.link_token;
+    return '<tr><td><b>'+esc(c.name)+'</b>'+(c.email?'<div class="muted" style="font-size:12px">'+esc(c.email)+'</div>':'')+'</td>'+
+      '<td class="hide-sm">'+(esc(c.phone)||'<span class="muted">—</span>')+'</td>'+
+      '<td><span class="pill cat" style="background:#3D8FCE">'+esc(c.payment_method||'—')+'</span></td>'+
+      '<td><div class="linkrow"><button class="btn ghost sm" onclick="copyLink(\''+link+'\')">Copy link</button>'+
+      '<a class="btn ghost sm" href="'+link+'" target="_blank">Open</a>'+
+      '<button class="btn ghost sm" onclick="editCust('+c.id+')">Edit</button></div></td></tr>';
+  }).join("");
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'+
+    '<h2 class="sec" style="margin:0">Customers · '+D.customers.length+' on file</h2>'+
+    '<button class="btn primary sm" onclick="custScreen=\'add\';editId=null;renderCustomers()">+ Add customer</button></div>'+
+    '<div class="panel"><div class="panel-h"><h3>Roster</h3><span class="hint">each customer has a private order link</span></div>'+
+    '<div style="overflow-x:auto"><table><thead><tr><th>Name</th><th class="hide-sm">Phone</th><th>Payment</th><th>Private link</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
+    '<p class="muted" style="font-size:12.5px;margin-top:12px">Text or email a customer their private link. It always opens their own order for the current cycle — no roster browsing, no login.</p>';
+}
+var editId=null;
+function editCust(id){ editId=id; custScreen="add"; renderCustomers(); }
+function renderCustForm(){
+  var c=editId?D.customers.find(function(x){return x.id===editId;}):{name:"",phone:"",email:"",address:"",payment_method:"Check",payment_detail_label:""};
+  function f(label,key,ph){ return '<div class="field"><label>'+label+'</label><input id="f_'+key+'" value="'+esc(c[key]||"")+'" placeholder="'+(ph||"")+'"></div>'; }
+  document.getElementById("view").innerHTML='<h2 class="sec">'+(editId?"Edit customer":"Add a customer")+'</h2>'+
+    '<div class="panel" style="max-width:560px"><div class="pad">'+
+    f("Customer name *","name","Full name")+f("Address","address","Street, City, State ZIP")+f("Phone","phone","(502) 555-0123")+f("Email","email","name@example.com")+
+    '<div class="field"><label>Payment method</label><select id="f_payment_method">'+["Check","Venmo","Cash","ACH"].map(function(o){return '<option'+(c.payment_method===o?' selected':'')+'>'+o+'</option>';}).join("")+'</select></div>'+
+    f("Payment detail (label only — no bank numbers)","payment_detail_label","e.g. @handle · check on file")+
+    '<div style="display:flex;gap:10px;margin-top:8px"><button class="btn ghost" onclick="custScreen=\'list\';renderCustomers()">Cancel</button>'+
+    '<button class="btn primary" onclick="saveCust()">Save</button></div></div></div>';
+}
+function saveCust(){
+  var b={id:editId||undefined};
+  ["name","address","phone","email","payment_method","payment_detail_label"].forEach(function(k){ var el=document.getElementById("f_"+k); if(el) b[k]=el.value.trim(); });
+  if(!b.name){ toast("Name is required."); return; }
+  api("/api/admin/customer","POST",b).then(function(){ custScreen="list"; toast("Saved."); refresh(); });
+}
+function copyLink(l){ navigator.clipboard.writeText(l).then(function(){toast("Link copied.");}); }
+
+/* =================== PRICING =================== */
+function renderPricing(){
+  var s=D.settings, basisSrp=s.pricing_basis==="srp";
+  var rows=D.pricing.map(function(p){
+    return '<tr><td><span class="bag-td">'+bagSvg(p.bag_hex)+esc(p.name)+'</span></td><td class="hide-sm"><span class="pill cat" style="background:'+(D.categoryColors[p.category]||'#888')+'">'+esc(p.category)+'</span></td>'+
+      '<td class="num hide-sm">'+money(p.wholesale)+'</td><td class="num hide-sm">'+money(p.srp)+'</td><td class="num">'+money(p.base)+'</td><td class="num"><b>'+money(p.allIn)+'</b></td><td class="num" style="color:var(--green)">'+money(p.margin)+'</td></tr>';
+  }).join("");
+  var ctl='<div class="panel"><div class="panel-h"><h3>Your pricing rules</h3><span class="hint">save → customer prices update</span></div><div class="pad"><div class="ctlgrid">'+
+    '<div class="field"><label>Pricing basis</label><select id="p_basis"><option value="srp"'+(basisSrp?' selected':'')+'>% off Umbarger SRP</option><option value="cost"'+(!basisSrp?' selected':'')+'>Markup % on cost</option></select></div>'+
+    '<div class="field"><label id="p_marginlbl">'+(basisSrp?'Discount off SRP (%)':'Markup on cost (%)')+'</label><input id="p_margin" type="number" step="0.5" value="'+s.margin_pct+'"></div>'+
+    '<div class="field"><label>Freight ($/bag)</label><input id="p_freight" type="number" step="0.25" value="'+s.freight+'"></div>'+
+    '<div class="field"><label>Sales tax</label><div style="display:flex;gap:10px;align-items:center;height:43px"><label class="checkrow"><input type="checkbox" id="p_taxen" '+(s.tax_enabled?'checked':'')+'> charge</label><input id="p_taxpct" type="number" step="0.25" value="'+s.tax_pct+'" style="width:80px"> %</div></div>'+
+    '</div><button class="btn primary sm" style="margin-top:10px" onclick="savePricing()">Save pricing</button></div></div>';
+  document.getElementById("view").innerHTML='<h2 class="sec">Pricing · '+esc(s.dealer_name)+'</h2>'+
+    '<p class="sub-h">Umbarger maintains wholesale + SRP; you set margin, freight and tax. The system computes every customer price.</p>'+ctl+
+    '<div class="panel"><div class="panel-h"><h3>Master sheet → your prices</h3><span class="hint">'+D.pricing.length+' products</span></div>'+
+    '<div style="max-height:520px;overflow:auto"><table><thead><tr><th>Product</th><th class="hide-sm">Category</th><th class="num hide-sm">Cost</th><th class="num hide-sm">SRP</th><th class="num">Base</th><th class="num">Customer</th><th class="num">Margin</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+function savePricing(){
+  var b={ pricing_basis:document.getElementById("p_basis").value, margin_pct:parseFloat(document.getElementById("p_margin").value)||0,
+    freight:parseFloat(document.getElementById("p_freight").value)||0, tax_enabled:document.getElementById("p_taxen").checked, tax_pct:parseFloat(document.getElementById("p_taxpct").value)||0 };
+  api("/api/admin/settings","POST",b).then(function(){ toast("Pricing saved."); refresh(); });
+}
+
+/* =================== INVOICES =================== */
+function renderInvoices(){
+  var byCust={};
+  D.invoices.forEach(function(v){ (byCust[v.customer_name]=byCust[v.customer_name]||[]).push(v); });
+  var names=Object.keys(byCust).sort();
+  var body=names.length? names.map(function(n){
+    var list=byCust[n].map(function(v){return '<tr><td>'+esc(v.invoice_num)+'</td><td class="hide-sm">'+esc(v.cycle_label)+'</td><td class="hide-sm">'+esc(v.date_issued)+'</td><td class="num">'+money(v.total)+'</td><td><a class="btn ghost sm" href="/invoice/'+v.id+'" target="_blank">View / PDF</a></td></tr>';}).join("");
+    return '<div class="panel"><div class="panel-h"><h3>'+esc(n)+'</h3><span class="hint">'+byCust[n].length+' invoice(s)</span></div><div style="overflow-x:auto"><table><thead><tr><th>Invoice #</th><th class="hide-sm">Cycle</th><th class="hide-sm">Issued</th><th class="num">Total</th><th></th></tr></thead><tbody>'+list+'</tbody></table></div></div>';
+  }).join("") : '<div class="panel"><div class="pad muted">No invoices yet. Generate them from the Dashboard, or per customer below.</div></div>';
+  var custOpts=D.orders.map(function(o){return '<option value="'+o.customer_id+'">'+esc(o.customer)+'</option>';}).join("");
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px"><h2 class="sec" style="margin:0">Invoices</h2>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" onclick="genInvoices()">Generate for whole cycle</button></div></div>'+
+    (custOpts?'<div class="panel"><div class="pad linkrow"><span class="muted" style="font-size:13px">One customer:</span><select id="invcust" style="max-width:220px;padding:8px;border:1px solid var(--border);border-radius:8px">'+custOpts+'</select><button class="btn ghost sm" onclick="genOne()">Generate invoice</button></div></div>':'')+
+    body;
+}
+function genOne(){ var id=Number(document.getElementById("invcust").value); api("/api/admin/invoices/generate","POST",{customer_id:id}).then(function(d){ toast(d.made?("Invoice "+d.list[0].num+" created."):"No order to invoice."); refresh(); }); }
+
+/* =================== PAYMENTS =================== */
+function renderPayments(){
+  var ps=D.payments;
+  var outstanding=ps.filter(function(p){return !p.paid;}).reduce(function(a,p){return a+p.amount;},0);
+  var collected=ps.filter(function(p){return p.paid;}).reduce(function(a,p){return a+p.amount;},0);
+  var k='<div class="kpis">'+kpi(money0(outstanding),"Outstanding",ps.filter(function(p){return !p.paid;}).length+" unpaid")+
+    kpi(money0(collected),"Collected",ps.filter(function(p){return p.paid;}).length+" paid")+kpi(ps.length,"Invoices tracked","")+'</div>';
+  var rows=ps.map(function(p){
+    return '<tr class="'+(p.paid?'paid':'unpaid')+'"><td style="text-align:center"><button class="toggle '+(p.paid?'on':'')+'" onclick="togglePay('+p.id+')" title="Mark paid"></button></td>'+
+      '<td><b>'+esc(p.customer_name)+'</b><div class="muted" style="font-size:11.5px">'+esc(p.invoice_num)+' · '+esc(p.cycle)+'</div></td>'+
+      '<td class="num">'+money(p.amount)+'</td>'+
+      '<td class="hide-sm">'+(p.paid?('<span class="pill live">Paid '+esc(p.date_paid||"")+'</span>'):'<span class="pill warn">Unpaid</span>')+'</td>'+
+      '<td class="hide-sm"><select onchange="setMethod('+p.id+',this.value)" style="padding:6px;border:1px solid var(--border);border-radius:7px">'+["","Venmo","Check","Cash","Other"].map(function(m){return '<option'+(p.method===m?' selected':'')+'>'+(m||"—")+'</option>';}).join("")+'</select></td>'+
+      '<td class="num hide-sm">'+(p.reminders||0)+'</td></tr>';
+  }).join("");
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px"><h2 class="sec" style="margin:0">Payment tracker</h2>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" onclick="sendReminders()">Prepare reminders</button><a class="btn ghost sm" href="/api/admin/export" onclick="event.target.href=\'/api/admin/export\'" id="exportbtn">Export CSV</a></div></div>'+k+
+    '<div class="panel"><div class="panel-h"><h3>Invoices &amp; payment status</h3><span class="hint">tap the toggle to mark paid</span></div>'+
+    '<div style="overflow-x:auto"><table><thead><tr><th>Paid</th><th>Customer</th><th class="num">Amount</th><th class="hide-sm">Status</th><th class="hide-sm">Method</th><th class="num hide-sm">Remind</th></tr></thead><tbody>'+
+    (rows||'<tr><td colspan="6" class="muted" style="padding:24px;text-align:center">No invoices yet — generate some first.</td></tr>')+'</tbody></table></div></div>'+
+    '<p class="muted" style="font-size:12.5px;margin-top:12px">Works on your phone. Tap a toggle to mark paid (date stamps automatically); set how each customer paid; reminders track how many times each unpaid customer has been nudged.</p>';
+}
+function togglePay(id){ api("/api/admin/payment/toggle","POST",{id:id}).then(function(){ refresh(); }); }
+function setMethod(id,v){ api("/api/admin/payment/update","POST",{id:id,method:v}).then(function(){ refresh(); }); }
+function sendReminders(){
+  api("/api/admin/reminders","POST",{}).then(function(d){
+    if(!d.results.length){ toast("No unpaid invoices need a reminder."); refresh(); return; }
+    var sent=d.results.filter(function(r){return r.status==="sent";}).length;
+    var cap=d.results.filter(function(r){return r.status==="captured";}).length;
+    toast(d.results.length+" reminder(s): "+sent+" sent, "+cap+" to Outbox. See the Outbox tab.");
+    go("outbox");
+  });
+}
+
+/* =================== OUTBOX =================== */
+function kindLabel(k){ return {confirmation:"Order confirmation","cycle-open":"Order link",invoice:"Invoice",reminder:"Payment reminder"}[k]||k; }
+function renderOutbox(){
+  var ob=D.outbox||[];
+  var note = D.mail_provider==="outbox"
+    ? '<p class="sub-h">Preview mode — these messages are <b>captured here, not sent</b>. Tap "Open in email" to send one yourself, or set a provider (Setup → instructions) to send automatically.</p>'
+    : '<p class="sub-h">Sending live via <b>'+esc(D.mail_provider)+'</b>. This is your sent log; "captured/failed" rows can be retried.</p>';
+  var rows=ob.map(function(o){
+    var badge = o.status==="sent"?'<span class="pill live">Sent</span>':(o.status==="captured"?'<span class="pill warn">Captured</span>':'<span class="pill" style="background:#fde2e1;color:#a3271f">Failed</span>');
+    var when=(o.created_at||"").slice(0,16).replace("T"," ");
+    return '<tr><td>'+badge+'</td><td><b>'+esc(o.to_name||o.to||"—")+'</b><div class="muted" style="font-size:11.5px">'+esc(kindLabel(o.kind))+' · '+when+'</div>'+(o.error?'<div style="color:var(--red);font-size:11px">'+esc(o.error)+'</div>':'')+'</td>'+
+      '<td class="hide-sm muted" style="font-size:12.5px">'+esc(o.subject)+'</td>'+
+      '<td><button class="btn ghost sm" onclick="viewMail('+o.id+')">View</button></td></tr>';
+  }).join("");
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2 class="sec" style="margin:0">Outbox · '+ob.length+' message(s)</h2>'+mailBadge()+'</div>'+note+
+    '<div class="panel"><div style="overflow-x:auto"><table><thead><tr><th>Status</th><th>To</th><th class="hide-sm">Subject</th><th></th></tr></thead><tbody>'+
+    (rows||'<tr><td colspan="4" class="muted" style="padding:24px;text-align:center">No emails yet. Place an order, generate an invoice, or email the order link.</td></tr>')+'</tbody></table></div></div>';
+}
+function viewMail(id){
+  var o=(D.outbox||[]).find(function(x){return x.id===id;}); if(!o) return;
+  var mailto="mailto:"+encodeURIComponent(o.to)+"?subject="+encodeURIComponent(o.subject)+"&body="+encodeURIComponent(o.text);
+  var actions=(o.to?'<a class="btn primary sm" href="'+mailto+'">Open in email</a> ':'')+
+    (o.status!=="sent"?'<button class="btn ghost sm" onclick="resendMail('+o.id+')">Try send via '+esc(D.mail_provider)+'</button> ':'')+
+    '<button class="btn ghost sm" onclick="closeModal()">Close</button>';
+  showModal('<h3 style="color:var(--navy);margin-bottom:2px">'+esc(kindLabel(o.kind))+'</h3>'+
+    '<div class="muted" style="font-size:12.5px;margin-bottom:10px">To: '+esc(o.to_name)+' &lt;'+esc(o.to||"no email")+'&gt;<br>Subject: '+esc(o.subject)+'</div>'+
+    '<pre style="white-space:pre-wrap;font-size:12.5px;background:#f7f9fc;border-radius:8px;padding:12px;max-height:300px;overflow:auto">'+esc(o.text)+'</pre>'+
+    '<div style="margin-top:12px">'+actions+'</div>');
+}
+function resendMail(id){ api("/api/admin/outbox/resend","POST",{id:id}).then(function(d){ toast("Status: "+d.entry.status+(d.entry.error?(" — "+d.entry.error):"")); closeModal(); refresh(); }); }
+
+/* =================== SETUP =================== */
+function renderSetup(){
+  var s=D.settings;
+  function f(label,key,type){ return '<div class="field"><label>'+label+'</label><input id="s_'+key+'" type="'+(type||"text")+'" value="'+esc(s[key])+'"></div>'; }
+  var days=["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday"];
+  function sel(label,key){ return '<div class="field"><label>'+label+'</label><select id="s_'+key+'">'+days.map(function(d){return '<option'+(s[key]===d?' selected':'')+'>'+d+'</option>';}).join("")+'</select></div>'; }
+  var company='<div class="panel"><div class="panel-h"><h3>Company</h3></div><div class="pad"><div class="formgrid">'+
+    f("Business name","dealer_name")+f("Make checks payable to","payable_to")+f("Address","address")+f("Phone","phone")+f("Email","email")+f("Venmo handle","venmo")+'</div></div></div>';
+  var cycle='<div class="panel"><div class="panel-h"><h3>Cycle &amp; schedule</h3></div><div class="pad"><div class="formgrid">'+
+    f("Cycle anchor date","cycle_anchor","date")+f("Frequency (days)","frequency_days","number")+
+    sel("Order opens","open_day")+f("Open time","open_time")+sel("Order closes","close_day")+f("Close time","close_time")+
+    sel("Mill order sent","mill_day")+f("Mill time","mill_time")+sel("Invoices billed","invoice_day")+f("Invoice time","invoice_time")+
+    f("Mill contact","mill_contact_name")+f("Mill email","mill_contact_email")+
+    '</div><div class="field" style="margin-top:12px"><label>Ordering window</label><select id="s_order_window">'+
+    [["open","Always open (pilot)"],["auto","Auto — use the days/times above"],["closed","Closed"]].map(function(o){return '<option value="'+o[0]+'"'+(s.order_window===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join("")+
+    '</select><p class="muted" style="font-size:12px;margin-top:6px">Keep "Always open" during the pilot so testers can order anytime.</p></div></div></div>';
+  var email='<div class="panel"><div class="panel-h"><h3>Email sending</h3>'+mailBadge()+'</div><div class="pad">'+
+    (D.mail_provider==="outbox"
+      ? '<p class="muted" style="font-size:13px">Right now emails are <b>captured in the Outbox</b> (nothing is sent). To send for real, stop the app and restart it with one of these:</p>'+
+        '<pre style="white-space:pre-wrap;font-size:12px;background:#f7f9fc;border-radius:8px;padding:12px;margin-top:8px">Resend (recommended):\n  RESEND_API_KEY=your_key node server.js\n\nGmail:\n  npm install nodemailer\n  EMAIL_PROVIDER=gmail GMAIL_USER=you@gmail.com GMAIL_APP_PASSWORD=app_pw node server.js</pre>'+
+        '<p class="muted" style="font-size:12px;margin-top:8px">Get a free Resend key at resend.com → API Keys. Until then, everything still works — you just send from the Outbox yourself.</p>'
+      : '<p class="muted" style="font-size:13px">Emails send automatically via <b>'+esc(D.mail_provider)+'</b>. Confirmations go out on order, invoices on generate, reminders on demand, and the order link from the dashboard.</p>')+
+    '</div></div>';
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><h2 class="sec" style="margin:0">Setup · '+esc(s.dealer_name)+'</h2><button class="btn primary sm" onclick="saveSetup()">Save setup</button></div>'+
+    '<p class="sub-h">Everything the order system needs to run this dealer.</p>'+cycle+company+email;
+}
+function saveSetup(){
+  var keys=["dealer_name","payable_to","address","phone","email","venmo","cycle_anchor","frequency_days","open_day","open_time","close_day","close_time","mill_day","mill_time","invoice_day","invoice_time","mill_contact_name","mill_contact_email","order_window"];
+  var b={}; keys.forEach(function(k){ var el=document.getElementById("s_"+k); if(el) b[k]=(k==="frequency_days")?(parseInt(el.value)||14):el.value; });
+  api("/api/admin/settings","POST",b).then(function(){ toast("Setup saved."); refresh(); });
+}
+
+/* =================== UMBARGER NETWORK (Phase 2 prize, seeded) =================== */
+function renderNetwork(){
+  var evansBags=D.tally.reduce(function(a,r){return a+r.bags;},0);
+  var sample=[["Bluegrass Feed Co.","KY","Southeast",142],["C&C Feed Store","TX","South",268],["Lone Star Show Supply","TX","South",201],["Hearne Feed & Supply","TX","South",176],["RR Farm & Feed","OK","South",154],["Prairie View Ag","IL","Midwest",223],["Heartland Show Feeds","IA","Midwest",188],["The Mill","MD","Northeast",131],["Cornerstone Ag","OH","Midwest",97],["Western Slope Feed","CO","West",84]];
+  var dealers=[["Evans Cattle Company","KY","Southeast",evansBags,true]].concat(sample.map(function(d){return d.concat([false]);}));
+  var total=dealers.reduce(function(a,d){return a+d[3];},0);
+  dealers.sort(function(a,b){return b[3]-a[3];});
+  var byReg={}; dealers.forEach(function(d){byReg[d[2]]=(byReg[d[2]]||0)+d[3];});
+  var regArr=Object.keys(byReg).map(function(r){return [r,byReg[r]];}).sort(function(a,b){return b[1]-a[1];});
+  var maxR=regArr[0][1];
+  var prodArr=D.tally.slice(0,8); var maxP=prodArr.length?prodArr[0].bags:1;
+  var banner='<div class="netbanner"><div class="big">UMBARGER · PRODUCTION INTELLIGENCE</div><h2>Network demand — live, before any feed leaves the mill</h2><div class="big">Aggregated across every dealer on DealerCycle. Built now with Evans live + sample dealers; real once dealers join (Phase 2).</div></div>';
+  var k='<div class="kpis" style="margin-top:16px">'+kpi(dealers.length,"Active dealers","incl. sample")+kpi(total.toLocaleString(),"Network bags","this cycle")+kpi(prodArr.length?esc(prodArr[0].name):"—","Top product (Evans)","")+kpi(regArr.length,"Regions","")+'</div>';
+  var regBars=regArr.map(function(r){var w=Math.round(r[1]/maxR*100);return '<div class="bar-row"><div class="lbl">'+esc(r[0])+'</div><div class="bar-track"><div class="bar-fill" style="width:'+w+'%">'+r[1]+'</div></div></div>';}).join("");
+  var prodBars=prodArr.map(function(r){var w=Math.round(r.bags/maxP*100);return '<div class="bar-row"><div class="lbl">'+esc(r.name)+'</div><div class="bar-track"><div class="bar-fill" style="width:'+w+'%">'+r.bags+'</div></div></div>';}).join("")||'<div class="pad muted">Place orders to populate Evans demand.</div>';
+  var dealerRows=dealers.map(function(d){return '<tr><td><b>'+esc(d[0])+'</b>'+(d[4]?' <span class="pill live">YOU</span>':'')+'</td><td>'+d[1]+'</td><td class="muted hide-sm">'+d[2]+'</td><td class="num"><b>'+d[3]+'</b></td></tr>';}).join("");
+  document.getElementById("view").innerHTML='<span class="sampletag amber">Evans live · other dealers sample</span>'+banner+k+
+    '<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Evans demand by product</h3><span class="hint">bags, this cycle</span></div><div style="padding:8px 0 14px">'+prodBars+'</div></div>'+
+    '<div class="panel"><div class="panel-h"><h3>Network demand by region</h3><span class="hint">bags, this cycle</span></div><div style="padding:8px 0 14px">'+regBars+'</div></div>'+
+    '<div class="panel"><div class="panel-h"><h3>Dealers reporting</h3><span class="pill live">● LIVE</span></div><div style="overflow-x:auto"><table><thead><tr><th>Dealer</th><th>State</th><th class="hide-sm">Region</th><th class="num">Bags</th></tr></thead><tbody>'+dealerRows+'</tbody></table></div></div>';
+}
+
+/* ---------- modal ---------- */
+function showModal(html){ document.getElementById("overlay").innerHTML='<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">'+html+'</div></div>'; }
+function closeModal(){ document.getElementById("overlay").innerHTML=""; }
+
+/* ---------- boot ---------- */
+if(!PASS){ promptPass(false); } else { refresh().catch(function(){}); }
+</script>
+</body>
+</html>

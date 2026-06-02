@@ -1,0 +1,25 @@
+# Render Blueprint — deploys DealerCycle as a web service with a persistent disk.
+# In Render: New → Blueprint → point at this repo. It reads this file automatically.
+services:
+  - type: web
+    name: dealercycle
+    runtime: node
+    plan: starter            # Starter ($7/mo) is needed for the persistent disk below.
+    buildCommand: ""         # zero dependencies — nothing to install
+    startCommand: node server.js
+    autoDeploy: true
+    envVars:
+      - key: DATA_DIR
+        value: /var/data     # the mounted disk — keeps orders/invoices across deploys
+      - key: ADMIN_PASSCODE
+        sync: false          # set your own in the Render dashboard
+      - key: BASE_URL
+        sync: false          # e.g. https://dealercycle.onrender.com (or your domain)
+      - key: RESEND_API_KEY
+        sync: false          # optional — add to send real emails
+      - key: EMAIL_FROM
+        sync: false          # optional — e.g. orders@dealercycle.app
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1

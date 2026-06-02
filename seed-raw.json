@@ -1,0 +1,891 @@
+{
+  "MASTER": [
+    [
+      "ca1",
+      "Primer Plus",
+      "Cattle",
+      15.1,
+      17.6,
+      "50 lb"
+    ],
+    [
+      "ca2",
+      "Breeder Grower",
+      "Cattle",
+      15.7,
+      18.2,
+      "50 lb"
+    ],
+    [
+      "ca3",
+      "Cattle Blaster",
+      "Cattle",
+      15.35,
+      17.85,
+      "50 lb"
+    ],
+    [
+      "ca4",
+      "Light'em Up",
+      "Cattle",
+      17.05,
+      19.55,
+      "50 lb"
+    ],
+    [
+      "ca5",
+      "Barley Base",
+      "Cattle",
+      15.48,
+      17.98,
+      "50 lb"
+    ],
+    [
+      "ca6",
+      "Payload",
+      "Cattle",
+      17.13,
+      19.63,
+      "50 lb"
+    ],
+    [
+      "ca7",
+      "Launch",
+      "Cattle",
+      15.95,
+      18.45,
+      "50 lb"
+    ],
+    [
+      "ca8",
+      "Cattlelac",
+      "Cattle",
+      18.93,
+      21.43,
+      "50 lb"
+    ],
+    [
+      "ca9",
+      "Show Ready",
+      "Cattle",
+      16.33,
+      18.83,
+      "50 lb"
+    ],
+    [
+      "ca10",
+      "Synurgy",
+      "Cattle",
+      15.58,
+      18.08,
+      "50 lb"
+    ],
+    [
+      "ca11",
+      "Beef 11%",
+      "Cattle",
+      12.88,
+      15.38,
+      "50 lb"
+    ],
+    [
+      "ca12",
+      "Calf Starter",
+      "Cattle",
+      15.75,
+      18.25,
+      "50 lb"
+    ],
+    [
+      "ca13",
+      "Beef'em Up",
+      "Cattle",
+      13.75,
+      16.25,
+      "50 lb"
+    ],
+    [
+      "la1",
+      "Top Choice Lamb 19%",
+      "Lamb",
+      18,
+      21,
+      "50 lb"
+    ],
+    [
+      "la2",
+      "Top Choice Lamb 17%",
+      "Lamb",
+      17.73,
+      20.73,
+      "50 lb"
+    ],
+    [
+      "la3",
+      "Top Choice Lamb 16%",
+      "Lamb",
+      18.83,
+      21.83,
+      "50 lb"
+    ],
+    [
+      "la4",
+      "Ewe Breeder Ration 12%",
+      "Lamb",
+      14.33,
+      17.33,
+      "50 lb"
+    ],
+    [
+      "la5",
+      "Top Choice Lamb Creep 19%",
+      "Lamb",
+      17.53,
+      20.53,
+      "50 lb"
+    ],
+    [
+      "la6",
+      "Top Choice Lamb Creep 18%",
+      "Lamb",
+      17.9,
+      20.9,
+      "50 lb"
+    ],
+    [
+      "go1",
+      "Meat Goat Grower/R 16%",
+      "Goats",
+      17.83,
+      20.83,
+      "50 lb"
+    ],
+    [
+      "go2",
+      "Meat Goat Fusion",
+      "Goats",
+      17.55,
+      20.55,
+      "50 lb"
+    ],
+    [
+      "go3",
+      "Meat Goat Creep 18%",
+      "Goats",
+      18.2,
+      21.2,
+      "50 lb"
+    ],
+    [
+      "go4",
+      "Commercial Goat 16%",
+      "Goats",
+      14.98,
+      17.98,
+      "50 lb"
+    ],
+    [
+      "go5",
+      "Dairy Goat Ration 16%",
+      "Goats",
+      0,
+      20.55,
+      "50 lb"
+    ],
+    [
+      "go6",
+      "Crossfire",
+      "Goats",
+      12.95,
+      15.95,
+      "50 lb"
+    ],
+    [
+      "go7",
+      "Next Level",
+      "Goats",
+      19.2,
+      22.2,
+      "50 lb"
+    ],
+    [
+      "go8",
+      "Prevail GSP 16%",
+      "Goats",
+      18.58,
+      21.58,
+      "50 lb"
+    ],
+    [
+      "re1",
+      "Dynamic Sheep and Goat Breeder",
+      "Repro",
+      12.52,
+      15.52,
+      "50 lb"
+    ],
+    [
+      "re2",
+      "Maximizer",
+      "Repro",
+      17.48,
+      20.48,
+      "50 lb"
+    ],
+    [
+      "re3",
+      "Customize Balancer 20%",
+      "Repro",
+      36.26,
+      39.25,
+      "50 lb"
+    ],
+    [
+      "re4",
+      "Foundation Sheep 50#",
+      "Repro",
+      43,
+      43,
+      "50 lb"
+    ],
+    [
+      "re5",
+      "Foundation Goat 50#",
+      "Repro",
+      45,
+      45,
+      "50 lb"
+    ],
+    [
+      "sw1",
+      "Clutch Denagard",
+      "Swine",
+      29.1,
+      32.13,
+      "50 lb"
+    ],
+    [
+      "sw2",
+      "Clutch CTC Denagard",
+      "Swine",
+      29.61,
+      32.63,
+      "50 lb"
+    ],
+    [
+      "sw3",
+      "Umbarger Pedal Down 19%",
+      "Swine",
+      19.85,
+      22.85,
+      "50 lb"
+    ],
+    [
+      "sw4",
+      "Umbarger Spot Light 17%",
+      "Swine",
+      19.08,
+      22.08,
+      "50 lb"
+    ],
+    [
+      "sw5",
+      "Umbarger Massive 16%",
+      "Swine",
+      19.03,
+      22.03,
+      "50 lb"
+    ],
+    [
+      "sw6",
+      "Swine Gestation 14%",
+      "Swine",
+      12.2,
+      15.2,
+      "50 lb"
+    ],
+    [
+      "sw7",
+      "Swine Lactation 18%",
+      "Swine",
+      14.1,
+      17.1,
+      "50 lb"
+    ],
+    [
+      "sw8",
+      "Xcel 18%",
+      "Swine",
+      20.03,
+      23.03,
+      "50 lb"
+    ],
+    [
+      "sw9",
+      "Cool Down 13.5",
+      "Swine",
+      17.22,
+      20.22,
+      "50 lb"
+    ],
+    [
+      "sw10",
+      "Umbarger Ultraboost RTU 2.5#",
+      "Swine",
+      45,
+      65,
+      "2.5 lb"
+    ],
+    [
+      "sw11",
+      "Umbarger Hi Energy Supplement 35#",
+      "Swine",
+      73.5,
+      89,
+      "35 lb"
+    ],
+    [
+      "sw12",
+      "Freedom Base Plus 50#",
+      "Swine",
+      46.9,
+      52.9,
+      "50 lb"
+    ],
+    [
+      "sw13",
+      "Umbarger Sow Base 90 45#",
+      "Swine",
+      41.75,
+      47.75,
+      "45 lb"
+    ],
+    [
+      "ho1",
+      "Textured Horse 12%",
+      "Horse",
+      13.67,
+      15.58,
+      "50 lb"
+    ],
+    [
+      "ho2",
+      "Endurance No Corn 12%",
+      "Horse",
+      17.43,
+      19.6,
+      "50 lb"
+    ],
+    [
+      "ho3",
+      "Top Class 14%",
+      "Horse",
+      15.13,
+      17.48,
+      "50 lb"
+    ],
+    [
+      "po1",
+      "Layer 16% Premium Poultry",
+      "Poultry",
+      13.67,
+      16.51,
+      "50 lb"
+    ],
+    [
+      "vf1",
+      "Sure Champ",
+      "Vita Ferm",
+      0,
+      45,
+      "50 lb"
+    ],
+    [
+      "vf2",
+      "Sure Champ Extreme W/clarifly 40#",
+      "Vita Ferm",
+      0,
+      72,
+      "40 lb"
+    ],
+    [
+      "vf3",
+      "Sure Champ Extreme Bucket Sheep and Goats",
+      "Vita Ferm",
+      0,
+      44.71,
+      "50 lb"
+    ],
+    [
+      "vf4",
+      "Dura Ferm Goat Concept Aid heat",
+      "Vita Ferm",
+      0,
+      48,
+      "50 lb"
+    ],
+    [
+      "vf5",
+      "Dura Ferm Goat Concept Aid Tub 50lb",
+      "Vita Ferm",
+      0,
+      80,
+      "50 lb"
+    ],
+    [
+      "vf6",
+      "DuraFerm Sheep Concept Aid 50# bag",
+      "Vita Ferm",
+      0,
+      44.5,
+      "50 lb"
+    ],
+    [
+      "vf7",
+      "Dura Ferm Sheep Con Aid Heat",
+      "Vita Ferm",
+      0,
+      45,
+      "50 lb"
+    ],
+    [
+      "vf8",
+      "Dura Ferm Sheep Con Aid Tub 125#",
+      "Vita Ferm",
+      0,
+      132,
+      "125 lb"
+    ],
+    [
+      "vf9",
+      "VitaCharge Stress Tub w heat  #50",
+      "Vita Ferm",
+      0,
+      88,
+      "50 lb"
+    ],
+    [
+      "vf10",
+      "VitaCharge Stress MOS Tub #50",
+      "Vita Ferm",
+      0,
+      75,
+      "50 lb"
+    ],
+    [
+      "vf11",
+      "VitaCharge Drench 5L",
+      "Vita Ferm",
+      0,
+      215,
+      "5 l"
+    ],
+    [
+      "vf12",
+      "VitaCharge Liquid Boost 32oz",
+      "Vita Ferm",
+      0,
+      36,
+      "32 oz"
+    ],
+    [
+      "vf13",
+      "Concept Aid protein tub #200",
+      "Vita Ferm",
+      0,
+      170,
+      "50 lb"
+    ],
+    [
+      "vf14",
+      "Cattlemens blend #50",
+      "Vita Ferm",
+      0,
+      41.5,
+      "50 lb"
+    ],
+    [
+      "vf15",
+      "Concept Aid 5/S #50",
+      "Vita Ferm",
+      0,
+      45,
+      "50 lb"
+    ],
+    [
+      "vf16",
+      "Concept Aid 5/S Heat W/Clarifly",
+      "Vita Ferm",
+      0,
+      55.25,
+      "50 lb"
+    ],
+    [
+      "vf17",
+      "Concept Aid 8/S #50",
+      "Vita Ferm",
+      0,
+      39.9,
+      "50 lb"
+    ],
+    [
+      "vf18",
+      "Sure Champ Spark 25lb",
+      "Vita Ferm",
+      0,
+      60,
+      "25 lb"
+    ],
+    [
+      "vf19",
+      "VitaFerm Heat W/ Clarifly",
+      "Vita Ferm",
+      0,
+      50,
+      "50 lb"
+    ],
+    [
+      "vf20",
+      "Joint Juice 1 gallon",
+      "Vita Ferm",
+      0,
+      160,
+      "gallon"
+    ],
+    [
+      "vf21",
+      "Vitaferm Concept Aid Protein 200#",
+      "Vita Ferm",
+      0,
+      140,
+      "200 lb"
+    ],
+    [
+      "vf22",
+      "Gainsmart Stocker",
+      "Vita Ferm",
+      0,
+      28,
+      "50 lb"
+    ],
+    [
+      "vf23",
+      "Sea Salt #50",
+      "Vita Ferm",
+      0,
+      16,
+      "50 lb"
+    ],
+    [
+      "vf24",
+      "VitaCharge Hydraboost",
+      "Vita Ferm",
+      0,
+      95,
+      "50 lb"
+    ],
+    [
+      "ex1",
+      "Bullet Proof Sheep and Goat 30#",
+      "Extras",
+      105,
+      125,
+      "30 lb"
+    ],
+    [
+      "ex2",
+      "Champion Choice 50# bag",
+      "Extras",
+      0,
+      16.25,
+      "50 lb"
+    ],
+    [
+      "ex3",
+      "Change Up 40# bag",
+      "Extras",
+      18.75,
+      21.5,
+      "40 lb"
+    ],
+    [
+      "ex4",
+      "Cobboom 40# bag",
+      "Extras",
+      12.52,
+      16.52,
+      "40 lb"
+    ],
+    [
+      "ex5",
+      "Cotton Seed Hulls 45#",
+      "Extras",
+      0,
+      13,
+      "45 lb"
+    ],
+    [
+      "ex6",
+      "FullBack Swine 25#",
+      "Extras",
+      110.5,
+      130,
+      "25 lb"
+    ],
+    [
+      "ex7",
+      "Frosting XL",
+      "Extras",
+      0,
+      45,
+      "50 lb"
+    ],
+    [
+      "ex8",
+      "Loaded  40# bag",
+      "Extras",
+      24.38,
+      29.48,
+      "40 lb"
+    ],
+    [
+      "ex9",
+      "Apex 40# bag",
+      "Extras",
+      22,
+      25,
+      "40 lb"
+    ],
+    [
+      "ex10",
+      "Pine River Shavings",
+      "Extras",
+      0,
+      10.5,
+      "50 lb"
+    ],
+    [
+      "ex11",
+      "Cedar Fiber Bedding",
+      "Extras",
+      0,
+      11,
+      "50 lb"
+    ],
+    [
+      "ex12",
+      "Rolled Barley",
+      "Extras",
+      0,
+      22,
+      "50 lb"
+    ],
+    [
+      "ex13",
+      "Rolled Oats",
+      "Extras",
+      0,
+      35,
+      "50 lb"
+    ],
+    [
+      "ex14",
+      "Show Shake 3LB",
+      "Extras",
+      0,
+      43,
+      "3 lb"
+    ],
+    [
+      "ex15",
+      "Show Shake 25LB",
+      "Extras",
+      0,
+      260,
+      "25 lb"
+    ],
+    [
+      "ex16",
+      "Dyne Gallon",
+      "Extras",
+      0,
+      61,
+      "gallon"
+    ],
+    [
+      "ex17",
+      "Millennium 5LB",
+      "Extras",
+      0,
+      58,
+      "5 lb"
+    ],
+    [
+      "ex18",
+      "Final Force 10lb",
+      "Extras",
+      0,
+      83,
+      "10 lb"
+    ],
+    [
+      "ex19",
+      "Star Glo",
+      "Extras",
+      0,
+      65,
+      "50 lb"
+    ],
+    [
+      "ex20",
+      "Hydrator X 5#",
+      "Extras",
+      0,
+      48,
+      "5 lb"
+    ],
+    [
+      "ex21",
+      "Two Step 10lb",
+      "Extras",
+      0,
+      82,
+      "10 lb"
+    ],
+    [
+      "ex22",
+      "Show Bloom",
+      "Extras",
+      0,
+      62,
+      "50 lb"
+    ]
+  ],
+  "BAG_HEX": {
+    "ca1": "D9D9D9",
+    "ca2": "0070C0",
+    "ca3": "FF0000",
+    "ca4": "92D050",
+    "ca5": "FFFF00",
+    "ca6": "7030A0",
+    "ca7": "00B0F0",
+    "ca8": "E7B7E4",
+    "ca9": "00B050",
+    "ca10": "000000",
+    "ca11": "FFFFFF",
+    "ca12": "FFFFFF",
+    "ca13": "8B4513",
+    "la1": "FF66CC",
+    "la2": "FF66CC",
+    "la3": "FF66CC",
+    "la4": "FF66CC",
+    "la5": "FF66CC",
+    "la6": "FF66CC",
+    "go1": "ED7D31",
+    "go2": "ED7D31",
+    "go3": "ED7D31",
+    "go4": "ED7D31",
+    "go5": "ED7D31",
+    "go6": "ED7D31",
+    "go7": "ED7D31",
+    "go8": "ED7D31",
+    "re1": "ED7D31",
+    "re2": "ED7D31",
+    "re3": "ED7D31",
+    "re4": "FF66CC",
+    "re5": "ED7D31",
+    "sw1": "92D050",
+    "sw2": "92D050",
+    "sw3": "92D050",
+    "sw4": "92D050",
+    "sw5": "92D050",
+    "sw6": "92D050",
+    "sw7": "92D050",
+    "sw8": "92D050",
+    "sw9": "92D050",
+    "sw10": "92D050",
+    "sw11": "92D050",
+    "sw12": "92D050",
+    "sw13": "92D050",
+    "ho1": "BFBFBF",
+    "ho2": "BFBFBF",
+    "ho3": "BFBFBF",
+    "po1": "FFE699",
+    "vf1": "FFC000",
+    "vf2": "FFC000",
+    "vf3": "FFC000",
+    "vf4": "FFC000",
+    "vf5": "FFC000",
+    "vf6": "FFC000",
+    "vf7": "FFC000",
+    "vf8": "FFC000",
+    "vf9": "FFC000",
+    "vf10": "FFC000",
+    "vf11": "FFC000",
+    "vf12": "FFC000",
+    "vf13": "FFC000",
+    "vf14": "FFC000",
+    "vf15": "FFC000",
+    "vf16": "FFC000",
+    "vf17": "FFC000",
+    "vf18": "FFC000",
+    "vf19": "FFC000",
+    "vf20": "FFC000",
+    "vf21": "FFC000",
+    "vf22": "FFC000",
+    "vf23": "FFC000",
+    "vf24": "FFFFFF",
+    "ex1": "FFFF00",
+    "ex2": "FFFF00",
+    "ex3": "FFFF00",
+    "ex4": "FFFF00",
+    "ex5": "FFFF00",
+    "ex6": "FFFF00",
+    "ex7": "FFFF00",
+    "ex8": "FFFF00",
+    "ex9": "FFFF00",
+    "ex10": "FFFF00",
+    "ex11": "FFFF00",
+    "ex12": "FFFF00",
+    "ex13": "FFFF00",
+    "ex14": "FFFF00",
+    "ex15": "FFFF00",
+    "ex16": "FFFF00",
+    "ex17": "FFFF00",
+    "ex18": "FFFF00",
+    "ex19": "FFFF00",
+    "ex20": "FFFF00",
+    "ex21": "FFFF00",
+    "ex22": "FFFF00"
+  },
+  "HEXNAME": {
+    "D9D9D9": "Gray",
+    "0070C0": "Blue",
+    "FF0000": "Red",
+    "92D050": "Green",
+    "FFFF00": "Yellow",
+    "7030A0": "Purple",
+    "00B0F0": "Sky Blue",
+    "E7B7E4": "Pink",
+    "00B050": "Green",
+    "000000": "Black",
+    "8B4513": "Brown",
+    "FF66CC": "Pink",
+    "ED7D31": "Orange",
+    "BFBFBF": "Gray",
+    "FFE699": "Cream",
+    "FFC000": "Gold",
+    "FFFFFF": "—"
+  },
+  "CATEGORIES": {
+    "Cattle": "#1F3864",
+    "Lamb": "#8E44AD",
+    "Goats": "#C0392B",
+    "Repro": "#16A085",
+    "Swine": "#D35400",
+    "Horse": "#7F8C8D",
+    "Poultry": "#B7950B",
+    "Vita Ferm": "#27AE60",
+    "Extras": "#2980B9"
+  }
+}
