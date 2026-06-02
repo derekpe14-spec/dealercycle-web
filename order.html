@@ -49,8 +49,8 @@ function render(){
       var q=cart[p.id]||0;
       return '<div class="prod"><div class="pinfo">'+bagSvg(p.bag_hex)+'<div><div class="pn">'+esc(p.name)+'</div>'+
         '<div class="pp"><b>'+money(p.allIn)+'</b>/bag <span class="muted">· '+esc(p.size)+(p.bag_color_name?' · '+esc(p.bag_color_name)+' bag':'')+'</span></div></div></div>'+
-        '<div class="step"><button onclick="bump(\''+p.id+'\',-1)" '+(q===0?'disabled':'')+(win?'':' disabled')+'>&minus;</button>'+
-        '<span class="q">'+q+'</span><button onclick="bump(\''+p.id+'\',1)" '+(win?'':'disabled')+'>+</button></div></div>';
+        '<div class="step"><button id="m_'+p.id+'" onclick="bump(\''+p.id+'\',-1)" '+(q===0?'disabled':'')+(win?'':' disabled')+'>&minus;</button>'+
+        '<span class="q" id="q_'+p.id+'">'+q+'</span><button onclick="bump(\''+p.id+'\',1)" '+(win?'':'disabled')+'>+</button></div></div>';
     }).join("");
     cats+='<div class="cat'+(open?' open':'')+'"><div class="cat-h" onclick="toggleCat(\''+esc(name)+'\')">'+
       '<div class="l"><span class="swatch" style="background:'+(B.categoryColors[name]||'#888')+'"></span>'+esc(name)+'</div>'+
@@ -59,12 +59,23 @@ function render(){
   });
   var bags=totalBags();
   var html='<div class="phone">'+head+'<div class="pbody">'+note+cats+'</div>'+
-    '<div class="cartbar"><div class="ct">'+bags+' bag'+(bags===1?'':'s')+'<b>'+money(cartTotal())+'</b></div>'+
-    '<button class="btn primary" '+(bags>0&&win?'':'disabled')+' onclick="goReview()">Review &rarr;</button></div></div>';
+    '<div class="cartbar"><div class="ct" id="cartCt">'+bags+' bag'+(bags===1?'':'s')+'<b>'+money(cartTotal())+'</b></div>'+
+    '<button class="btn primary" id="reviewBtn" '+(bags>0&&win?'':'disabled')+' onclick="goReview()">Review &rarr;</button></div></div>';
   document.getElementById("app").innerHTML=html;
 }
 function toggleCat(n){ openCat=(openCat===n?"":n); render(); }
-function bump(id,d){ var q=(cart[id]||0)+d; if(q<=0) delete cart[id]; else cart[id]=q; render(); }
+function bump(id,d){
+  if(!B.window.open) return;
+  var q=(cart[id]||0)+d; if(q<=0){ q=0; delete cart[id]; } else cart[id]=q;
+  var qs=document.getElementById('q_'+id); if(qs) qs.textContent=q;          // update just this product's count
+  var mb=document.getElementById('m_'+id); if(mb) mb.disabled=(q===0);       // enable/disable its minus button
+  updateCartBar();                                                          // no full re-render -> no scroll jump
+}
+function updateCartBar(){
+  var bags=totalBags();
+  var ct=document.getElementById('cartCt'); if(ct) ct.innerHTML=bags+' bag'+(bags===1?'':'s')+'<b>'+money(cartTotal())+'</b>';
+  var rb=document.getElementById('reviewBtn'); if(rb) rb.disabled=!(bags>0 && B.window.open);
+}
 function goReview(){ step="review"; render(); }
 function backShop(){ step="shop"; render(); }
 
