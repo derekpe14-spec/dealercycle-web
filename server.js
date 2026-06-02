@@ -421,6 +421,29 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, { ok: true, bags, email: mail ? mail.status : "no-email" });
     }
 
+    // ----- customer's own invoice history + per-year totals (via their link token) -----
+    if (req.method === "GET" && p === "/api/my-history") {
+      const cust = findCustomerByToken(u.searchParams.get("token"));
+      if (!cust) return json(res, 404, { error: "Invalid link." });
+      const payByInv = {}; db().payments.forEach(pp => { payByInv[pp.invoice_id] = pp; });
+      const invs = db().invoices.filter(v => v.customer_id === cust.id);
+      const invoices = invs.map(v => {
+        const pay = payByInv[v.id];
+        return { id: v.id, invoice_num: v.invoice_num, cycle_label: v.cycle_label, date_issued: v.date_issued, total: v.total, paid: pay ? !!pay.paid : false, date_paid: pay ? pay.date_paid : null };
+      }).sort((a, b) => (a.date_issued < b.date_issued ? 1 : -1));
+      const byYear = {};
+      invs.forEach(v => {
+        const y = String(v.date_issued || "").slice(0, 4); if (!y) return;
+        byYear[y] = byYear[y] || { year: y, total: 0, count: 0, paid: 0, unpaid: 0 };
+        byYear[y].total += v.total; byYear[y].count++;
+        const pay = payByInv[v.id];
+        if (pay && pay.paid) byYear[y].paid += v.total; else byYear[y].unpaid += v.total;
+      });
+      const years = Object.values(byYear).sort((a, b) => b.year.localeCompare(a.year))
+        .map(y => ({ year: y.year, count: y.count, total: round2(y.total), paid: round2(y.paid), unpaid: round2(y.unpaid) }));
+      return json(res, 200, { dealer: db().settings.dealer_name, customer: { name: cust.name }, invoices, years });
+    }
+
     // ----- invoice view (public link, by invoice id) -----
     if (req.method === "GET" && p.startsWith("/invoice/")) {
       const inv = db().invoices.find(v => v.id === Number(p.split("/")[2]));

@@ -16,6 +16,8 @@ var cart = {};           // product_id -> qty
 var step = "shop";       // shop | review | conf
 var openCat = null;
 var lastBags = 0;
+var screen = "order";    // order | history
+var history = null;      // customer's invoice history
 
 function money(n){ return "$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
@@ -33,11 +35,41 @@ function load(){
   }).catch(function(){ document.getElementById("app").innerHTML='<div class="bigerr"><h2>Connection problem</h2><p class="muted">Please try again.</p></div>'; });
 }
 
+function goHistory(){
+  screen="history";
+  document.getElementById("app").innerHTML='<div class="phone"><div class="conf"><p class="muted" style="padding:30px">Loading your invoices…</p></div></div>';
+  fetch("/api/my-history?token="+encodeURIComponent(TOKEN)).then(function(r){return r.json();}).then(function(d){
+    if(screen!=="history") return;
+    history=d; renderHistory();
+  }).catch(function(){ document.getElementById("app").innerHTML='<div class="bigerr"><h2>Couldn\'t load invoices</h2><p class="muted">Please try again.</p></div>'; });
+}
+function backToOrder(){ screen="order"; render(); }
+function renderHistory(){
+  var d=history||{years:[],invoices:[],customer:B?B.customer:{name:""},dealer:B?B.dealer:""};
+  var years=(d.years||[]).map(function(y){
+    return '<div class="selbar" style="display:block;text-align:left;margin-bottom:8px"><div><b>'+esc(y.year)+'</b> — '+money(y.total)+' total · '+y.count+' order'+(y.count===1?'':'s')+'</div>'+
+      '<div class="muted" style="font-size:12px;margin-top:2px">Paid '+money(y.paid)+' · Outstanding '+money(y.unpaid)+'</div></div>';
+  }).join("") || '<p class="muted" style="font-size:13px">No invoices yet.</p>';
+  var rows=(d.invoices||[]).map(function(v){
+    var status=v.paid?'<span style="color:var(--green)">Paid'+(v.date_paid?' '+esc(v.date_paid):'')+'</span>':'<span style="color:var(--amber)">Unpaid</span>';
+    return '<div class="ri"><div><b>'+esc(v.invoice_num)+'</b><div class="q">'+esc(v.cycle_label)+' · '+esc(v.date_issued)+' · '+status+'</div></div>'+
+      '<div style="text-align:right">'+money(v.total)+'<div><a href="/invoice/'+v.id+'" target="_blank" style="font-size:12px;color:var(--blue);text-decoration:underline">View / PDF</a></div></div></div>';
+  }).join("");
+  var html='<div class="phone"><div class="phead"><h1>Your invoices</h1><div class="sub">'+esc(d.customer.name)+' · '+esc(d.dealer)+'</div></div>'+
+    '<div class="pbody">'+
+    '<h2 class="sec" style="margin-top:0">Year totals (for taxes)</h2>'+years+
+    '<h2 class="sec" style="margin-top:16px">All invoices</h2>'+(rows||'<p class="muted" style="font-size:13px">No invoices yet.</p>')+
+    '<p class="muted" style="font-size:12px;margin-top:12px">Open any invoice to print it or save it as a PDF for your records.</p>'+
+    '</div>'+
+    '<div class="cartbar"><button class="btn ghost" onclick="backToOrder()">&larr; Back to order</button></div></div>';
+  document.getElementById("app").innerHTML=html;
+}
 function render(){
+  if(screen==="history") return renderHistory();
   if(step==="conf") return renderConf();
   if(step==="review") return renderReview();
   var win=B.window.open;
-  var head='<div class="phead"><h1>'+esc(B.dealer)+'</h1><div class="sub">Ordering as '+esc(B.customer.name)+'</div>'+
+  var head='<div class="phead"><h1>'+esc(B.dealer)+'</h1><div class="sub">Ordering as '+esc(B.customer.name)+' · <span style="text-decoration:underline;cursor:pointer" onclick="goHistory()">My invoices</span></div>'+
     '<div class="cyclebar '+(win?'':'closed')+'"><span class="pulse"></span> '+(win?('Cycle <b style="margin:0 4px">OPEN</b> · delivers '+esc(B.cycle.label)+' · closes '+esc(B.cycle.close_day)+' '+esc(B.cycle.close_time)):'Ordering is <b style="margin:0 4px">CLOSED</b> right now')+'</div></div>';
   var note = B.submitted ? '<div class="selbar"><div>You have an order on this cycle — edit it below and re-submit.</div></div>' : '';
   var cats="";
