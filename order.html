@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DealerCycle — Order</title>
+<link rel="icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@600;700&display=swap">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -69,7 +72,9 @@ function render(){
   if(step==="conf") return renderConf();
   if(step==="review") return renderReview();
   var win=B.window.open;
-  var head='<div class="phead"><h1>'+esc(B.dealer)+'</h1><div class="sub">Ordering as '+esc(B.customer.name)+' · <span style="text-decoration:underline;cursor:pointer" onclick="goHistory()">My invoices</span></div>'+
+  var head='<div class="phead">'+
+    '<div class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F5EEDD" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg><span class="brandmark" style="font-size:18px;color:#fff">DealerCycle</span></div>'+
+    '<h1 style="margin-top:9px">'+esc(B.dealer)+'</h1><div class="sub">Ordering as '+esc(B.customer.name)+' · <span style="text-decoration:underline;cursor:pointer" onclick="goHistory()">My invoices</span></div>'+
     '<div class="cyclebar '+(win?'':'closed')+'"><span class="pulse"></span> '+(win?('Cycle <b style="margin:0 4px">OPEN</b> · delivers '+esc(B.cycle.label)+' · closes '+esc(B.cycle.close_day)+' '+esc(B.cycle.close_time)):'Ordering is <b style="margin:0 4px">CLOSED</b> right now')+'</div></div>';
   var note = B.submitted ? '<div class="selbar"><div>You have an order on this cycle — edit it below and re-submit.</div></div>' : '';
   var cats="";

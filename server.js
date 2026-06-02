@@ -17,7 +17,7 @@ const BASE_URL = process.env.BASE_URL || ("http://localhost:" + PORT);
 // Front-end files live alongside the server (flat, single folder). Only these are
 // ever served as static assets — server code/data are never exposed.
 const PUBLIC = __dirname;
-const STATIC_ALLOW = new Set(["order.html", "admin.html", "styles.css"]);
+const STATIC_ALLOW = new Set(["order.html", "admin.html", "styles.css", "favicon.svg"]);
 
 // First-run: if there's no database yet, build it automatically (no separate seed step).
 const DATA_DIR = process.env.DATA_DIR || __dirname;
@@ -180,16 +180,17 @@ function invoiceHtml(inv) {
   const s = db().settings;
   const rows = inv.lines.map((l, i) => `<tr class="${i % 2 ? "alt" : ""}"><td>${i + 1}</td><td>${esc(l.description)}</td><td class="num">${l.qty}</td><td class="num">${money(l.unitPrice)}</td><td class="num">${money(l.freight)}</td><td class="num">${money(l.total)}</td></tr>`).join("");
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Invoice ${inv.invoice_num}</title>
-<style>body{font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:720px;margin:0 auto;padding:24px}
-h1{color:#1F3A5F;font-size:22px;margin:0} .muted{color:#666;font-size:13px} hr{border:0;border-top:1px solid #ddd;margin:14px 0}
-.banner{color:#1F3A5F;font-size:18px;font-weight:bold;margin:6px 0} .meta{display:flex;justify-content:space-between;flex-wrap:wrap;font-size:13px;margin:10px 0}
-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px} th{background:#1F3A5F;color:#fff;text-align:left;padding:7px 9px} td{padding:7px 9px;border-bottom:1px solid #eee}
-tr.alt td{background:#E8EAED} .num{text-align:right} .totals{margin-top:10px;width:100%;max-width:320px;margin-left:auto;font-size:13px}
-.totals td{padding:5px 9px;border:0} .totals .due td{background:#D6DCE8;font-weight:bold;color:#1F3A5F;font-size:15px}
-.pay{font-size:13px;margin-top:16px} .terms{font-size:11px;color:#777;font-style:italic;margin-top:12px}
+<style>body{font-family:Arial,Helvetica,sans-serif;color:#3B2F1E;max-width:720px;margin:0 auto;padding:24px}
+h1{color:#2F6B3A;font-size:22px;margin:0;font-family:'Zilla Slab',Georgia,serif} .muted{color:#7a6f5a;font-size:13px} hr{border:0;border-top:1px solid #e7ddc9;margin:14px 0}
+.hdr{display:flex;align-items:center;gap:14px} .badge{width:50px;height:50px;flex-shrink:0}
+.banner{color:#2F6B3A;font-size:18px;font-weight:bold;margin:6px 0} .meta{display:flex;justify-content:space-between;flex-wrap:wrap;font-size:13px;margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px} th{background:#2F6B3A;color:#fff;text-align:left;padding:7px 9px} td{padding:7px 9px;border-bottom:1px solid #efe7d6}
+tr.alt td{background:#F3EFE3} .num{text-align:right} .totals{margin-top:10px;width:100%;max-width:320px;margin-left:auto;font-size:13px}
+.totals td{padding:5px 9px;border:0} .totals .due td{background:#EAF1E5;font-weight:bold;color:#2F6B3A;font-size:15px}
+.pay{font-size:13px;margin-top:16px} .terms{font-size:11px;color:#8a7f6a;font-style:italic;margin-top:12px}
 @media print{.noprint{display:none}} .noprint{margin-top:18px}
-.btn{background:#1F3864;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer}</style></head><body>
-<h1>${esc(s.dealer_name)}</h1><div class="muted">${esc(s.address)}<br>${esc(s.phone)} • ${esc(s.email)}</div><hr>
+.btn{background:#2F6B3A;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-size:14px;cursor:pointer}</style></head><body>
+<div class="hdr"><svg class="badge" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="23" fill="#2F6B3A"/><circle cx="24" cy="24" r="20.6" fill="none" stroke="#D9A441" stroke-width="1.4"/><circle cx="24" cy="24" r="18" fill="none" stroke="#D9A441" stroke-width="0.9"/><g transform="translate(12,11)" stroke="#F5EEDD" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></g></svg><div><h1>${esc(s.dealer_name)}</h1><div class="muted">${esc(s.address)}<br>${esc(s.phone)} • ${esc(s.email)}</div></div></div><hr>
 <div class="banner">INVOICE</div>
 <div class="meta"><div><b>Bill To:</b> ${esc(inv.customer_name)}</div><div><b>Invoice #:</b> ${inv.invoice_num}</div></div>
 <div class="meta"><div><b>Cycle:</b> ${esc(inv.cycle_label)}</div><div><b>Invoice Date:</b> ${inv.date_issued}</div></div>
@@ -207,7 +208,7 @@ tr.alt td{background:#E8EAED} .num{text-align:right} .totals{margin-top:10px;wid
 // ---------------------------------------------------------------------------
 // Email content builders — each returns { subject, text, html }
 // ---------------------------------------------------------------------------
-const NAVY = "#1F3864";
+const NAVY = "#2F6B3A";
 function wrapHtml(inner) {
   return `<div style="font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto">${inner}</div>`;
 }
@@ -548,8 +549,8 @@ const server = http.createServer(async (req, res) => {
       return json(res, 404, { error: "Unknown admin route" });
     }
 
-    // static assets (only styles.css; HTML is served by the routes above)
-    if (req.method === "GET" && p === "/styles.css") return serveStatic(res, "styles.css");
+    // static assets (styles + favicon; HTML is served by the routes above)
+    if (req.method === "GET" && (p === "/styles.css" || p === "/favicon.svg")) return serveStatic(res, p.replace(/^\//, ""));
 
     return send(res, 404, "Not found", "text/plain");
   } catch (err) {
