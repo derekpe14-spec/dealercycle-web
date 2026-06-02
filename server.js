@@ -475,6 +475,20 @@ const server = http.createServer(async (req, res) => {
         save();
         return json(res, 200, { ok: true, customer: c });
       }
+      if (req.method === "POST" && p === "/api/admin/customer/delete") {
+        const id = body.id;
+        const cust = findCustomerById(id);
+        if (!cust) return json(res, 404, { error: "not found" });
+        const orderIds = db().orders.filter(o => o.customer_id === id).map(o => o.id);
+        const invIds = db().invoices.filter(v => v.customer_id === id).map(v => v.id);
+        db().order_items = db().order_items.filter(i => !orderIds.includes(i.order_id));
+        db().orders = db().orders.filter(o => o.customer_id !== id);
+        db().payments = db().payments.filter(pp => !invIds.includes(pp.invoice_id));
+        db().invoices = db().invoices.filter(v => v.customer_id !== id);
+        db().customers = db().customers.filter(c => c.id !== id);
+        save();
+        return json(res, 200, { ok: true });
+      }
       if (req.method === "POST" && p === "/api/admin/settings") {
         Object.assign(db().settings, body); save();
         return json(res, 200, { ok: true, settings: db().settings });

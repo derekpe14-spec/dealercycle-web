@@ -121,7 +121,8 @@ function copyMill(){ var t=document.getElementById("millpre").textContent; navig
 function renderCustomers(){
   if(custScreen==="add") return renderCustForm();
   var origin=location.origin;
-  var rows=D.customers.map(function(c){
+  var sorted=D.customers.slice().sort(function(a,b){ return String(a.name||"").localeCompare(String(b.name||""),"en",{sensitivity:"base"}); });
+  var rows=sorted.map(function(c){
     var link=origin+"/o/"+c.link_token;
     return '<tr><td><b>'+esc(c.name)+'</b>'+(c.email?'<div class="muted" style="font-size:12px">'+esc(c.email)+'</div>':'')+'</td>'+
       '<td class="hide-sm">'+(esc(c.phone)||'<span class="muted">—</span>')+'</td>'+
@@ -147,8 +148,17 @@ function renderCustForm(){
     f("Customer name *","name","Full name")+f("Address","address","Street, City, State ZIP")+f("Phone","phone","(502) 555-0123")+f("Email","email","name@example.com")+
     '<div class="field"><label>Payment method</label><select id="f_payment_method">'+["Check","Venmo","Cash","ACH"].map(function(o){return '<option'+(c.payment_method===o?' selected':'')+'>'+o+'</option>';}).join("")+'</select></div>'+
     f("Payment detail (label only — no bank numbers)","payment_detail_label","e.g. @handle · check on file")+
-    '<div style="display:flex;gap:10px;margin-top:8px"><button class="btn ghost" onclick="custScreen=\'list\';renderCustomers()">Cancel</button>'+
-    '<button class="btn primary" onclick="saveCust()">Save</button></div></div></div>';
+    '<div style="display:flex;gap:10px;margin-top:8px;align-items:center"><button class="btn ghost" onclick="custScreen=\'list\';renderCustomers()">Cancel</button>'+
+    '<button class="btn primary" onclick="saveCust()">Save</button>'+
+    (editId?'<button class="btn ghost sm" style="margin-left:auto;color:var(--red);border-color:#e6c9c2" onclick="deleteCust('+editId+',\''+esc(c.name).replace(/'/g,"\\'")+'\')">Delete customer</button>':'')+
+    '</div></div></div>';
+}
+function deleteCust(id,name){
+  if(!confirm("Delete "+name+"? This also removes their orders, invoices, and payments. Their private link will stop working. This cannot be undone.")) return;
+  api("/api/admin/customer/delete","POST",{id:id}).then(function(r){
+    if(r&&r.error){ toast("Could not delete."); return; }
+    custScreen="list"; editId=null; toast("Customer deleted."); refresh();
+  });
 }
 function saveCust(){
   var b={id:editId||undefined};
