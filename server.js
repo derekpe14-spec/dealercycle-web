@@ -479,6 +479,14 @@ const server = http.createServer(async (req, res) => {
         }
         return json(res, 200, { ok: true, sent, captured, noEmail });
       }
+      if (req.method === "POST" && p === "/api/admin/reset") {
+        // Clear test activity but KEEP catalog, customers (and their link tokens), and settings.
+        const d = db();
+        d.orders = []; d.order_items = []; d.invoices = []; d.payments = []; d.outbox = []; d.cycles = [];
+        d.settings.invoice_counter = 0;
+        save();
+        return json(res, 200, { ok: true });
+      }
       if (req.method === "POST" && p === "/api/admin/outbox/resend") {
         ensureOutbox();
         const entry = db().outbox.find(x => x.id === body.id);
