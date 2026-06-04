@@ -139,3 +139,5 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;op
 .lc-go:hover{border-bottom-color:#E0A93E}
 .lc-foot{font-size:clamp(10px,2.1vw,12px);color:rgba(245,238,221,.62);margin-top:13px;max-width:74%;line-height:1.5}
 .lc-err{color:#FFD8CF;font-weight:600;margin-top:10px;font-size:13px}
+.pinfo-link{display:inline-block;margin-top:4px;font-size:12px;font-weight:600;color:var(--green);text-decoration:none}
+.pinfo-link:hover{text-decoration:underline}

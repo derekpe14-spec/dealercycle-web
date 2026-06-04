@@ -27,6 +27,8 @@ function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,
 function bagSvg(hex,sz){ sz=sz||1; var w=24*sz,h=28*sz;
   return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 24 28" style="flex-shrink:0"><path d="M4 6 Q12 1 20 6 L20 24 Q20 26.5 17.5 26.5 L6.5 26.5 Q4 26.5 4 24 Z" fill="'+hex+'" stroke="rgba(0,0,0,.28)" stroke-width="1"/><rect x="8" y="10" width="8" height="7" rx="1.5" fill="rgba(255,255,255,.85)" stroke="rgba(0,0,0,.12)" stroke-width=".5"/></svg>'; }
 function prod(id){ return B.products.find(function(p){return p.id===id;}); }
+function slugify(s){ return String(s||"").toLowerCase().replace(/['’]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
+function umbargerUrl(p){ return p.info_url || ("https://umbargershowfeeds.com/"+slugify(p.name)+"/"); }
 function totalBags(){ var s=0; for(var k in cart) s+=cart[k]; return s; }
 function cartTotal(){ var t=0; for(var k in cart){ t+=cart[k]*prod(k).allIn; } return t; }
 
@@ -85,7 +87,8 @@ function render(){
     var rows=items.map(function(p){
       var q=cart[p.id]||0;
       return '<div class="prod"><div class="pinfo">'+bagSvg(p.bag_hex)+'<div><div class="pn">'+esc(p.name)+'</div>'+
-        '<div class="pp"><b>'+money(p.allIn)+'</b>/bag <span class="muted">· '+esc(p.size)+(p.bag_color_name?' · '+esc(p.bag_color_name)+' bag':'')+'</span></div></div></div>'+
+        '<div class="pp"><b>'+money(p.allIn)+'</b>/bag <span class="muted">· '+esc(p.size)+(p.bag_color_name?' · '+esc(p.bag_color_name)+' bag':'')+'</span></div>'+
+        '<a class="pinfo-link" href="'+umbargerUrl(p)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Product info &#8599;</a></div></div>'+
         '<div class="step"><button id="m_'+p.id+'" onclick="bump(\''+p.id+'\',-1)" '+(q===0?'disabled':'')+(win?'':' disabled')+'>&minus;</button>'+
         '<span class="q" id="q_'+p.id+'">'+q+'</span><button onclick="bump(\''+p.id+'\',1)" '+(win?'':'disabled')+'>+</button></div></div>';
     }).join("");
