@@ -27,8 +27,31 @@ function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,
 function bagSvg(hex,sz){ sz=sz||1; var w=24*sz,h=28*sz;
   return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 24 28" style="flex-shrink:0"><path d="M4 6 Q12 1 20 6 L20 24 Q20 26.5 17.5 26.5 L6.5 26.5 Q4 26.5 4 24 Z" fill="'+hex+'" stroke="rgba(0,0,0,.28)" stroke-width="1"/><rect x="8" y="10" width="8" height="7" rx="1.5" fill="rgba(255,255,255,.85)" stroke="rgba(0,0,0,.12)" stroke-width=".5"/></svg>'; }
 function prod(id){ return B.products.find(function(p){return p.id===id;}); }
-function slugify(s){ return String(s||"").toLowerCase().replace(/['’]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
-function umbargerUrl(p){ return p.info_url || ("https://umbargershowfeeds.com/"+slugify(p.name)+"/"); }
+/* Verified Umbarger product-page slugs (from umbargershowfeeds.com sitemap), keyed by product id.
+   Products not listed (VitaFerm minerals, bedding, commodities, items with no Umbarger page) show no link. */
+var UMB_SLUG={
+  ca1:"primer-plus",ca2:"breeder-grower",ca3:"cattle-blaster",ca4:"light-em-up",ca5:"barley-base",ca6:"payload",ca7:"launch",ca8:"cattlelac",ca9:"show-ready",ca10:"synurgy",ca11:"beef-grower-11",ca12:"calf-starter",ca13:"dairy-beef-em-up",
+  la1:"lamb-19",la2:"lamb-17-with-barley",la3:"lamb-16-hi-energy",la5:"lamb-creep-19",la6:"lamb-creep-18",
+  go1:"meat-goat-grower-16",go2:"fusion",go3:"meat-goat-creep-18",go4:"commercial-goat-16",go6:"crossfire",go7:"next-level",go8:"prevail",
+  re1:"dynamic",
+  sw1:"clutch",sw2:"clutch",sw3:"pedal-down",sw4:"spotlight",sw5:"massive",sw6:"sow-gestation",sw7:"sow-lactation",sw8:"xcel",sw9:"cool-down",sw11:"umbarger-hi-energy-fat-supplement",sw12:"freedom-base-plus",sw13:"sow-base",
+  ho1:"textured-12",ho2:"endurance-no-corn",ho3:"top-class",
+  po1:"layer-16",
+  ex1:"bulletproof",ex3:"change-up",ex4:"cobboom",ex6:"fullback",ex8:"loaded",ex9:"apex",ex19:"star-glo"
+};
+/* BioZyme family (VitaFerm / DuraFerm / Sure Champ) — verified product-line pages (no per-SKU pages exist). */
+var EXTRA_URL={
+  vf1:"https://surechamp.com/",vf2:"https://surechamp.com/",vf3:"https://surechamp.com/",vf18:"https://surechamp.com/",vf20:"https://surechamp.com/",
+  vf4:"https://duraferm.com/products/goat-products/",vf5:"https://duraferm.com/products/goat-products/",
+  vf6:"https://duraferm.com/products/sheep-products/",vf7:"https://duraferm.com/products/sheep-products/",vf8:"https://duraferm.com/products/sheep-products/",
+  vf9:"https://vitaferm.com/product-categories/vita-charge-products/",vf10:"https://vitaferm.com/product-categories/vita-charge-products/",vf11:"https://vitaferm.com/product-categories/vita-charge-products/",vf12:"https://vitaferm.com/product-categories/vita-charge-products/",vf24:"https://vitaferm.com/product-categories/vita-charge-products/",
+  vf13:"https://vitaferm.com/product-categories/concept-aid-products-protein/",vf21:"https://vitaferm.com/product-categories/concept-aid-products-protein/",
+  vf14:"https://vitaferm.com/product-categories/cattlemans-blend-products/",
+  vf15:"https://vitaferm.com/product-categories/concept-aid-products/",vf16:"https://vitaferm.com/product-categories/concept-aid-products/",vf17:"https://vitaferm.com/product-categories/concept-aid-products/",
+  vf19:"https://vitaferm.com/product-categories/vitaferm-heat-products/",
+  vf22:"https://vitaferm.com/product-categories/gain-smart-products/"
+};
+function umbargerUrl(p){ if(p.info_url) return p.info_url; if(EXTRA_URL[p.id]) return EXTRA_URL[p.id]; var s=UMB_SLUG[p.id]; return s?("https://umbargershowfeeds.com/"+s+"/"):""; }
 function totalBags(){ var s=0; for(var k in cart) s+=cart[k]; return s; }
 function cartTotal(){ var t=0; for(var k in cart){ t+=cart[k]*prod(k).allIn; } return t; }
 
@@ -85,10 +108,10 @@ function render(){
     if(!items.length) return;
     var open=openCat===name;
     var rows=items.map(function(p){
-      var q=cart[p.id]||0;
+      var q=cart[p.id]||0; var iu=umbargerUrl(p);
       return '<div class="prod"><div class="pinfo">'+bagSvg(p.bag_hex)+'<div><div class="pn">'+esc(p.name)+'</div>'+
         '<div class="pp"><b>'+money(p.allIn)+'</b>/bag <span class="muted">· '+esc(p.size)+(p.bag_color_name?' · '+esc(p.bag_color_name)+' bag':'')+'</span></div>'+
-        '<a class="pinfo-link" href="'+umbargerUrl(p)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Product info &#8599;</a></div></div>'+
+        (iu?'<a class="pinfo-link" href="'+iu+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Product info &#8599;</a>':'')+'</div></div>'+
         '<div class="step"><button id="m_'+p.id+'" onclick="bump(\''+p.id+'\',-1)" '+(q===0?'disabled':'')+(win?'':' disabled')+'>&minus;</button>'+
         '<span class="q" id="q_'+p.id+'">'+q+'</span><button onclick="bump(\''+p.id+'\',1)" '+(win?'':'disabled')+'>+</button></div></div>';
     }).join("");
