@@ -17,7 +17,7 @@ const BASE_URL = process.env.BASE_URL || ("http://localhost:" + PORT);
 // Front-end files live alongside the server (flat, single folder). Only these are
 // ever served as static assets — server code/data are never exposed.
 const PUBLIC = __dirname;
-const STATIC_ALLOW = new Set(["order.html", "admin.html", "styles.css", "favicon.svg", "manifest.webmanifest", "dc-icon-192.png", "dc-icon-512.png", "dc-icon-180.png"]);
+const STATIC_ALLOW = new Set(["order.html", "admin.html", "start.html", "styles.css", "favicon.svg", "manifest.webmanifest", "dc-icon-192.png", "dc-icon-512.png", "dc-icon-180.png"]);
 
 // First-run: if there's no database yet, build it automatically (no separate seed step).
 const DATA_DIR = process.env.DATA_DIR || __dirname;
@@ -424,6 +424,21 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && p.startsWith("/o/")) {
       return serveStatic(res, "order.html");
     }
+    // ----- public self-signup (gated by settings.public_signup; used by the demo) -----
+    if (req.method === "GET" && p === "/start") {
+      if (!db().settings.public_signup) return send(res, 404, "Not found", "text/plain");
+      return serveStatic(res, "start.html");
+    }
+    if (req.method === "POST" && p === "/api/start") {
+      if (!db().settings.public_signup) return json(res, 403, { error: "Sign-up is not open." });
+      const body = await readBody(req);
+      const name = (body.name || "").trim();
+      if (!name) return json(res, 400, { error: "Please enter your name." });
+      const c = { id: nextId("customers"), link_token: crypto.randomBytes(16).toString("hex"), source: "self", active: 1,
+        name: name, email: (body.email || "").trim(), phone: (body.phone || "").trim(), payment_method: "Check", payment_detail_label: "" };
+      db().customers.push(c); save();
+      return json(res, 200, { ok: true, token: c.link_token });
+    }
     if (req.method === "GET" && p === "/api/bootstrap") {
       const cust = findCustomerByToken(u.searchParams.get("token"));
       if (!cust) return json(res, 404, { error: "Invalid link." });
@@ -450,6 +465,16 @@ const server = http.createServer(async (req, res) => {
       // confirmation email (sends if a provider is set, else captured to the Outbox)
       let mail = null;
       if (cust.email) { try { mail = await queueMail("confirmation", cust.email, cust.name, emailOrderConfirmation(cust, order)); } catch (e) {} }
+      // Optional: auto-generate + email the invoice a set number of minutes after the order
+      // (gated by settings.auto_invoice_minutes; used by the demo to email the invoice ~1 min later).
+      const aim = Number(db().settings.auto_invoice_minutes) || 0;
+      if (aim > 0 && cust.email) {
+        const cid = cust.id, cyid = cyc.id, em = cust.email, nm = cust.name;
+        setTimeout(async () => {
+          try { const inv = buildInvoiceForCustomer(cid, cyid); if (inv) await queueMail("invoice", em, nm, emailInvoice(inv)); }
+          catch (e) { console.error("auto-invoice failed:", e); }
+        }, aim * 60000);
+      }
       return json(res, 200, { ok: true, bags, email: mail ? mail.status : "no-email" });
     }
 
