@@ -540,6 +540,25 @@ const server = http.createServer(async (req, res) => {
           let cyc = d.cycles.find(c => c.delivery_label === r.cycle_label);
           if (!cyc) { cyc = { id: nextId("cycles"), delivery_key: r.cycle_label, delivery_label: r.cycle_label, status: "closed" }; d.cycles.push(cyc); }
           const amt = round2(Number(r.amount) || 0);
+          let lines, order = null;
+          if (Array.isArray(r.items) && r.items.length) {
+            lines = r.items.map(it => ({
+              description: it.name,
+              qty: Number(it.qty) || 0,
+              unitPrice: round2(Number(it.unitPrice) || 0),
+              freight: round2(Number(it.freight) || 0),
+              total: round2(Number(it.total) || 0)
+            }));
+            // create an order + order_items so the cycle's order detail exists too
+            order = { id: nextId("orders"), customer_id: cust.id, cycle_id: cyc.id, status: "submitted", created_at: (r.date_issued ? r.date_issued + "T12:00:00.000Z" : new Date().toISOString()), updated_at: new Date().toISOString(), imported: true };
+            d.orders.push(order);
+            r.items.forEach(it => {
+              const prod = d.products.find(pp => String(pp.name).trim().toLowerCase() === String(it.name).trim().toLowerCase());
+              if (prod) d.order_items.push({ id: nextId("order_items"), order_id: order.id, product_id: prod.id, qty: Number(it.qty) || 0 });
+            });
+          } else {
+            lines = [{ description: "Prior order system invoice " + r.invoice_num + " (" + cyc.delivery_label + " cycle)", qty: 1, unitPrice: amt, freight: 0, total: amt }];
+          }
           const inv = {
             id: nextId("invoices"),
             invoice_num: r.invoice_num,
@@ -548,7 +567,8 @@ const server = http.createServer(async (req, res) => {
             cycle_id: cyc.id,
             cycle_label: cyc.delivery_label,
             date_issued: r.date_issued || "",
-            lines: [{ description: "Prior order system invoice " + r.invoice_num + " (" + cyc.delivery_label + " cycle)", qty: 1, unitPrice: amt, freight: 0, total: amt }],
+            order_id: order ? order.id : undefined,
+            lines,
             subtotal: amt, tax_rate: 0, tax: 0, total: amt, freight_rate: d.settings.freight,
             imported: true
           };
