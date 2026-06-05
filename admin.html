@@ -24,7 +24,7 @@ var view = "dashboard";
 var dealerTab = "product";
 var custScreen = "list";
 
-var TABS = [["dashboard","Dashboard"],["customers","Customers"],["pricing","Pricing"],["invoices","Invoices"],["payments","Payments"],["outbox","Outbox"],["setup","Setup"],["network","Umbarger"]];
+var TABS = [["dashboard","Dashboard"],["customers","Customers"],["pricing","Pricing"],["invoices","Invoices"],["payments","Payments"],["check","Cycle check"],["outbox","Outbox"],["setup","Setup"],["network","Umbarger"]];
 
 function money(n){ return "$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function money0(n){ return "$"+Math.round(n).toLocaleString("en-US"); }
@@ -70,6 +70,7 @@ function render(){
   if(view==="pricing") return renderPricing();
   if(view==="invoices") return renderInvoices();
   if(view==="payments") return renderPayments();
+  if(view==="check") return renderCheck();
   if(view==="outbox") return renderOutbox();
   if(view==="setup") return renderSetup();
   if(view==="network") return renderNetwork();
@@ -90,6 +91,8 @@ function renderDash(){
   var k='<div class="kpis">'+kpi(D.orders.length,"Customers ordered","of "+D.customers.length+" on file")+
     kpi(bags,"Total bags","live cycle")+kpi(D.tally.length,"Line items","distinct products")+
     kpi(money0(rev),"Cycle revenue","all-in")+kpi(money0(profit),"Est. gross profit","product margin")+'</div>';
+  var ckb=computeCheck();
+  var checkBanner=ckb.needsInvoice.length?'<div class="panel" style="border-left:4px solid var(--red)"><div class="pad" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span><b style="color:var(--red)">⚠ '+ckb.needsInvoice.length+' order(s) need an invoice</b> — don’t let anyone be missed.</span><button class="btn primary sm" onclick="go(\'check\')">Open cycle check</button></div></div>':'';
   var content="";
   if(dealerTab==="product"){
     content='<table><thead><tr><th>Product</th><th class="hide-sm">Category</th><th class="num">Bags</th><th class="num">Revenue</th></tr></thead><tbody>'+
@@ -108,7 +111,7 @@ function renderDash(){
     '<button class="btn primary sm" onclick="cycleOpen()">Email order link to all customers</button>'+
     '<button class="btn ghost sm" onclick="genInvoices()">Generate invoices for this cycle</button>'+
     (dealerTab==="mill"?'<button class="btn ghost sm" onclick="copyMill()">Copy mill order</button>':'')+'</div>';
-  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2 class="sec" style="margin:0">Dealer dashboard · '+esc(D.settings.dealer_name)+'</h2>'+mailBadge()+'</div>'+k+
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2 class="sec" style="margin:0">Dealer dashboard · '+esc(D.settings.dealer_name)+'</h2>'+mailBadge()+'</div>'+k+checkBanner+
     '<div class="panel"><div class="panel-h"><h3>Cycle delivering '+esc(D.cycle.delivery_label)+'</h3><span class="pill '+(D.window.open?'live':'warn')+'">'+(D.window.open?'● ORDERING OPEN':'ORDERING CLOSED')+'</span></div>'+
     '<div class="tabs">'+dtab("product","By product")+dtab("customer","By customer")+dtab("mill","Order to mill")+'</div>'+content+
     '<div class="pad" style="padding-top:0">'+actionBar+'</div></div>';
@@ -347,6 +350,39 @@ function renderNetwork(){
     '<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Evans demand by product</h3><span class="hint">bags, this cycle</span></div><div style="padding:8px 0 14px">'+prodBars+'</div></div>'+
     '<div class="panel"><div class="panel-h"><h3>Network demand by region</h3><span class="hint">bags, this cycle</span></div><div style="padding:8px 0 14px">'+regBars+'</div></div>'+
     '<div class="panel"><div class="panel-h"><h3>Dealers reporting</h3><span class="pill live">● LIVE</span></div><div style="overflow-x:auto"><table><thead><tr><th>Dealer</th><th>State</th><th class="hide-sm">Region</th><th class="num">Bags</th></tr></thead><tbody>'+dealerRows+'</tbody></table></div></div>';
+}
+
+/* =================== CYCLE CHECK (safeguard) =================== */
+function computeCheck(){
+  var cyc=D.cycle.delivery_label;
+  var ordered=D.orders;                                   // submitted orders, current cycle
+  var needsInvoice=ordered.filter(function(o){return !o.has_invoice;});
+  var unpaid=(D.payments||[]).filter(function(p){return p.cycle===cyc && !p.paid;});
+  var orderedIds={}; ordered.forEach(function(o){orderedIds[o.customer_id]=true;});
+  var notOrdered=D.customers.filter(function(c){return !orderedIds[c.id];});
+  return {cyc:cyc, ordered:ordered, needsInvoice:needsInvoice, unpaid:unpaid, notOrdered:notOrdered};
+}
+function renderCheck(){
+  var ck=computeCheck();
+  var clear=ck.needsInvoice.length===0;
+  var banner=clear
+    ? '<div class="panel" style="border-left:4px solid var(--green)"><div class="pad"><b style="color:var(--green)">✓ All clear</b> — every order in the '+esc(ck.cyc)+' cycle has an invoice. Nobody has been missed.</div></div>'
+    : '<div class="panel" style="border-left:4px solid var(--red)"><div class="pad"><b style="color:var(--red)">⚠ '+ck.needsInvoice.length+' order(s) still need an invoice</b> for the '+esc(ck.cyc)+' cycle.<div style="margin-top:10px"><button class="btn primary sm" onclick="genInvoices()">Generate invoices now</button></div></div></div>';
+  var s1='<div class="panel"><div class="panel-h"><h3>Ordered — needs an invoice</h3><span class="hint">'+ck.needsInvoice.length+'</span></div>'+
+    (ck.needsInvoice.length?'<div style="overflow-x:auto"><table><thead><tr><th>Customer</th><th class="num">Bags</th><th class="num">Total</th></tr></thead><tbody>'+
+      ck.needsInvoice.map(function(o){return '<tr class="unpaid"><td><b>'+esc(o.customer)+'</b></td><td class="num">'+o.bags+'</td><td class="num">'+money0(o.total)+'</td></tr>';}).join("")+'</tbody></table></div>'
+      :'<div class="pad muted">None — every order is invoiced. ✓</div>')+'</div>';
+  var s2='<div class="panel"><div class="panel-h"><h3>Invoiced — awaiting payment ('+esc(ck.cyc)+')</h3><span class="hint">'+ck.unpaid.length+'</span></div>'+
+    (ck.unpaid.length?'<div style="overflow-x:auto"><table><thead><tr><th>Customer</th><th class="hide-sm">Invoice</th><th class="num">Amount</th></tr></thead><tbody>'+
+      ck.unpaid.map(function(p){return '<tr><td><b>'+esc(p.customer_name)+'</b></td><td class="hide-sm muted">'+esc(p.invoice_num)+'</td><td class="num">'+money(p.amount)+'</td></tr>';}).join("")+'</tbody></table></div>'+
+      '<div class="pad" style="padding-top:8px"><button class="btn ghost sm" onclick="go(\'payments\')">Open payment tracker</button></div>'
+      :'<div class="pad muted">None outstanding for this cycle. ✓</div>')+'</div>';
+  var s3='<div class="panel"><div class="panel-h"><h3>Hasn’t ordered yet</h3><span class="hint">'+ck.notOrdered.length+' of '+D.customers.length+'</span></div>'+
+    (ck.notOrdered.length?'<div class="pad" style="font-size:13px;line-height:1.7">'+ck.notOrdered.map(function(c){return esc(c.name);}).join(" · ")+'</div>'
+      :'<div class="pad muted">Everyone on file has ordered this cycle. ✓</div>')+'</div>';
+  document.getElementById("view").innerHTML='<h2 class="sec" style="margin:0 0 4px">Cycle check · '+esc(ck.cyc)+'</h2>'+
+    '<p class="sub-h">One glance to confirm nobody slips through: every order becomes an invoice, every invoice lands in the tracker.</p>'+
+    banner+s1+s2+s3;
 }
 
 /* ---------- modal ---------- */
