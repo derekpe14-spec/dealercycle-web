@@ -129,50 +129,79 @@ function buildInvoiceForCustomer(custId, cycleId) {
   if (!items.length) return null;
   const cyc = db().cycles.find(c => c.id === cycleId);
 
-  const lines = items.map(i => {
+  if (!db().credits) db().credits = [];
+
+  const baseLines = items.map(i => {
     const p = product(i.product_id);
     const unit = round2(basePrice(p, s));
     const freight = round2(i.qty * s.freight);
     const total = round2(i.qty * unit + freight);
     return { description: p.name, qty: i.qty, unitPrice: unit, freight, total };
   });
-  const subtotal = round2(lines.reduce((a, l) => a + l.total, 0));
+  const subtotal = round2(baseLines.reduce((a, l) => a + l.total, 0));
   const taxRate = s.tax_enabled ? s.tax_pct / 100 : 0;
   const tax = round2(subtotal * taxRate);
-  const total = round2(subtotal + tax);
+  const grossTotal = round2(subtotal + tax);   // before any credits
+  const today = new Date().toISOString().slice(0, 10);
 
   // idempotent per (customer, cycle): reuse existing invoice if present
   let inv = db().invoices.find(x => x.customer_id === custId && x.cycle_id === cycleId);
-  if (inv) {
-    Object.assign(inv, { lines, subtotal, tax_rate: taxRate, tax, total, freight_rate: s.freight });
-    const pay = db().payments.find(p => p.invoice_id === inv.id);
-    if (pay && !pay.paid) pay.amount = total;
-    save();
-    return inv;
+  const isNew = !inv;
+  if (isNew) {
+    inv = {
+      id: nextId("invoices"),
+      invoice_num: nextInvoiceNum(),
+      customer_id: custId,
+      customer_name: cust.name,
+      cycle_id: cycleId,
+      cycle_label: cyc ? cyc.delivery_label : "",
+      date_issued: today
+    };
+    db().invoices.push(inv);
   }
-  inv = {
-    id: nextId("invoices"),
-    invoice_num: nextInvoiceNum(),
-    customer_id: custId,
-    customer_name: cust.name,
-    cycle_id: cycleId,
-    cycle_label: cyc ? cyc.delivery_label : "",
-    date_issued: new Date().toISOString().slice(0, 10),
-    lines, subtotal, tax_rate: taxRate, tax, total, freight_rate: s.freight
-  };
-  db().invoices.push(inv);
-  // register a payment-tracker row
-  db().payments.push({
-    id: nextId("payments"),
-    invoice_id: inv.id,
-    invoice_num: inv.invoice_num,
-    customer_id: custId,
-    customer_name: cust.name,
-    amount: total,
-    cycle: inv.cycle_label,
-    date_issued: inv.date_issued,
-    paid: false, date_paid: null, method: "", notes: "", reminders: 0
+
+  // ----- apply customer credits (e.g. out-of-stock refunds) -----
+  let creditTotal = 0;
+  if (isNew) {
+    // consume open credits oldest-first, up to the gross total
+    let remaining = grossTotal;
+    db().credits.filter(c => c.customer_id === custId && c.status === "open")
+      .forEach(c => {
+        if (remaining <= 0) return;
+        const avail = round2(c.amount - (c.used || 0));
+        if (avail <= 0) return;
+        const applyAmt = round2(Math.min(avail, remaining));
+        c.used = round2((c.used || 0) + applyAmt);
+        c.applications = c.applications || [];
+        c.applications.push({ invoice_id: inv.id, invoice_num: inv.invoice_num, amount: applyAmt, date: today });
+        if (round2(c.amount - c.used) <= 0) { c.status = "applied"; c.applied_date = today; }
+        creditTotal = round2(creditTotal + applyAmt);
+        remaining = round2(remaining - applyAmt);
+      });
+  } else {
+    // re-generate: keep whatever credits were already tied to this invoice (stable totals)
+    db().credits.forEach(c => (c.applications || []).forEach(a => {
+      if (a.invoice_id === inv.id) creditTotal = round2(creditTotal + a.amount);
+    }));
+  }
+  const total = round2(grossTotal - creditTotal);
+  Object.assign(inv, {
+    lines: baseLines, subtotal, tax_rate: taxRate, tax,
+    credit_total: creditTotal, total, freight_rate: s.freight
   });
+
+  // payment-tracker row (created with the invoice; kept in sync if unpaid)
+  let pay = db().payments.find(p => p.invoice_id === inv.id);
+  if (!pay) {
+    db().payments.push({
+      id: nextId("payments"), invoice_id: inv.id, invoice_num: inv.invoice_num,
+      customer_id: custId, customer_name: cust.name, amount: total,
+      cycle: inv.cycle_label, date_issued: inv.date_issued,
+      paid: false, date_paid: null, method: "", notes: "", reminders: 0
+    });
+  } else if (!pay.paid) {
+    pay.amount = total;
+  }
   save();
   return inv;
 }
@@ -198,6 +227,7 @@ tr.alt td{background:#F3EFE3} .num{text-align:right} .totals{margin-top:10px;wid
 <table class="totals"><tr><td>Freight / bag</td><td class="num">${money(inv.freight_rate)}</td></tr>
 <tr><td>Subtotal</td><td class="num">${money(inv.subtotal)}</td></tr>
 <tr><td>Tax (${(inv.tax_rate * 100).toFixed(1)}%)</td><td class="num">${money(inv.tax)}</td></tr>
+${inv.credit_total ? `<tr><td>Credit applied</td><td class="num">&minus;${money(inv.credit_total)}</td></tr>` : ""}
 <tr class="due"><td>TOTAL DUE</td><td class="num">${money(inv.total)}</td></tr></table>
 <div class="pay"><b>Payment options</b><br>• Check — payable to ${esc(s.payable_to)}<br>• Venmo — ${esc(s.venmo)}</div>
 <div class="terms">${esc(s.invoice_terms)}</div>
@@ -361,6 +391,7 @@ function adminData() {
     pricing,
     invoices: db().invoices.map(v => ({ id: v.id, invoice_num: v.invoice_num, customer_id: v.customer_id, customer_name: v.customer_name, cycle_label: v.cycle_label, date_issued: v.date_issued, total: v.total })).sort((a, b) => b.id - a.id),
     payments: db().payments.map(p => ({ ...p })).sort((a, b) => Number(a.paid) - Number(b.paid) || b.id - a.id),
+    credits: (db().credits || []).map(c => ({ ...c })).sort((a, b) => b.id - a.id),
     mail_provider: mailer.providerName(),
     outbox: (db().outbox || []).map(o => ({ id: o.id, kind: o.kind, to: o.to, to_name: o.to_name, subject: o.subject, text: o.text, created_at: o.created_at, status: o.status, provider: o.provider, error: o.error })).sort((a, b) => b.id - a.id)
   };
@@ -520,7 +551,7 @@ const server = http.createServer(async (req, res) => {
       if (req.method === "POST" && p === "/api/admin/reset") {
         // Clear test activity but KEEP catalog, customers (and their link tokens), and settings.
         const d = db();
-        d.orders = []; d.order_items = []; d.invoices = []; d.payments = []; d.outbox = []; d.cycles = [];
+        d.orders = []; d.order_items = []; d.invoices = []; d.payments = []; d.outbox = []; d.cycles = []; d.credits = [];
         d.settings.invoice_counter = 0;
         save();
         return json(res, 200, { ok: true });
@@ -619,6 +650,31 @@ const server = http.createServer(async (req, res) => {
         if (body.method !== undefined) pay.method = body.method;
         if (body.notes !== undefined) pay.notes = body.notes;
         save(); return json(res, 200, { ok: true, payment: pay });
+      }
+      // Issue a customer credit (e.g. out-of-stock refund). It auto-applies to
+      // the customer's next generated invoice.
+      if (req.method === "POST" && p === "/api/admin/credit/add") {
+        if (!db().credits) db().credits = [];
+        const cust = findCustomerById(body.customer_id);
+        if (!cust) return json(res, 404, { error: "Customer not found" });
+        const amt = round2(Number(body.amount) || 0);
+        if (amt <= 0) return json(res, 400, { error: "Amount must be greater than 0" });
+        const c = {
+          id: nextId("credits"), customer_id: cust.id, customer_name: cust.name,
+          amount: amt, used: 0, reason: (body.reason || "").trim(),
+          source_invoice_num: body.source_invoice_num || "", status: "open",
+          created_at: new Date().toISOString().slice(0, 10), applications: []
+        };
+        db().credits.push(c); save();
+        return json(res, 200, { ok: true, credit: c });
+      }
+      if (req.method === "POST" && p === "/api/admin/credit/void") {
+        if (!db().credits) db().credits = [];
+        const c = db().credits.find(x => x.id === body.id);
+        if (!c) return json(res, 404, { error: "Not found" });
+        if (c.status === "applied") return json(res, 400, { error: "Already applied to an invoice" });
+        c.status = "void"; save();
+        return json(res, 200, { ok: true });
       }
       if (req.method === "POST" && p === "/api/admin/reminders") {
         // Send a reminder for each unpaid invoice (max 4 each); records to the Outbox.

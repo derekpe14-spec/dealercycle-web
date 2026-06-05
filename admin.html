@@ -234,15 +234,30 @@ function renderPayments(){
       '<td class="hide-sm"><select onchange="setMethod('+p.id+',this.value)" style="padding:6px;border:1px solid var(--border);border-radius:7px">'+["","Venmo","Check","Cash","Other"].map(function(m){return '<option'+(p.method===m?' selected':'')+'>'+(m||"—")+'</option>';}).join("")+'</select></td>'+
       '<td class="num hide-sm">'+(p.reminders||0)+'</td></tr>';
   }).join("");
+  var creds=(D.credits||[]);
+  var openC=creds.filter(function(c){return c.status==='open';});
+  var custOptsC=D.customers.slice().sort(function(a,b){return String(a.name||"").localeCompare(String(b.name||""),"en",{sensitivity:"base"});}).map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>';}).join("");
+  var credRows=openC.length?openC.map(function(c){var rem=Math.round((c.amount-(c.used||0))*100)/100;return '<tr><td><b>'+esc(c.customer_name)+'</b>'+(c.reason?'<div class="muted" style="font-size:11.5px">'+esc(c.reason)+'</div>':'')+'</td><td class="num">'+money(rem)+'</td><td><button class="btn ghost sm" onclick="voidCredit('+c.id+')">Void</button></td></tr>';}).join(""):'<tr><td colspan="3" class="muted" style="padding:18px;text-align:center">No open credits.</td></tr>';
+  var credPanel='<div class="panel"><div class="panel-h"><h3>Customer credits</h3><span class="hint">auto-applied to the next invoice</span></div>'+
+    '<div class="pad"><p class="muted" style="font-size:12.5px;margin-top:0">Issue a credit (for example, an item that was out of stock and paid for but not received). DealerCycle automatically subtracts it from that customer&#39;s next invoice.</p>'+
+    '<div class="ctlgrid">'+
+    '<div class="field"><label>Customer</label><select id="cr_cust">'+custOptsC+'</select></div>'+
+    '<div class="field"><label>Credit amount ($)</label><input id="cr_amt" type="number" step="0.01" placeholder="24.53"></div>'+
+    '<div class="field"><label>Reason</label><input id="cr_reason" placeholder="Rolled Barley out of stock"></div>'+
+    '</div><button class="btn primary sm" style="margin-top:8px" onclick="issueCredit()">Issue credit</button></div>'+
+    '<div style="overflow-x:auto"><table><thead><tr><th>Customer</th><th class="num">Open credit</th><th></th></tr></thead><tbody>'+credRows+'</tbody></table></div></div>';
   document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px"><h2 class="sec" style="margin:0">Payment tracker</h2>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" onclick="sendReminders()">Prepare reminders</button><a class="btn ghost sm" href="/api/admin/export" onclick="event.target.href=\'/api/admin/export\'" id="exportbtn">Export CSV</a></div></div>'+k+
     '<div class="panel"><div class="panel-h"><h3>Invoices &amp; payment status</h3><span class="hint">tap the toggle to mark paid</span></div>'+
     '<div style="overflow-x:auto"><table><thead><tr><th>Paid</th><th>Customer</th><th class="num">Amount</th><th class="hide-sm">Status</th><th class="hide-sm">Method</th><th class="num hide-sm">Remind</th></tr></thead><tbody>'+
     (rows||'<tr><td colspan="6" class="muted" style="padding:24px;text-align:center">No invoices yet — generate some first.</td></tr>')+'</tbody></table></div></div>'+
+    credPanel+
     '<p class="muted" style="font-size:12.5px;margin-top:12px">Works on your phone. Tap a toggle to mark paid (date stamps automatically); set how each customer paid; reminders track how many times each unpaid customer has been nudged.</p>';
 }
 function togglePay(id){ api("/api/admin/payment/toggle","POST",{id:id}).then(function(){ refresh(); }); }
 function setMethod(id,v){ api("/api/admin/payment/update","POST",{id:id,method:v}).then(function(){ refresh(); }); }
+function issueCredit(){ var b={customer_id:Number(document.getElementById('cr_cust').value),amount:parseFloat(document.getElementById('cr_amt').value),reason:(document.getElementById('cr_reason').value||'').trim()}; if(!b.amount||b.amount<=0){toast('Enter a credit amount.');return;} api('/api/admin/credit/add','POST',b).then(function(d){ if(d&&d.ok){toast('Credit issued — it applies to the next invoice.');refresh();} else {toast((d&&d.error)||'Could not issue credit.');} }); }
+function voidCredit(id){ if(!confirm('Void this credit? It will no longer apply to any invoice.'))return; api('/api/admin/credit/void','POST',{id:id}).then(function(d){ if(d&&d.ok){toast('Credit voided.');refresh();} else {toast((d&&d.error)||'Could not void.');} }); }
 function sendReminders(){
   api("/api/admin/reminders","POST",{}).then(function(d){
     if(!d.results.length){ toast("No unpaid invoices need a reminder."); refresh(); return; }
