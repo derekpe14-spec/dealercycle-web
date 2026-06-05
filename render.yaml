@@ -1,31 +1,29 @@
 # Render Blueprint — deploys DealerCycle as a web service with a persistent disk.
 # In Render: New → Blueprint → point at this repo. It reads this file automatically.
+# NOTE: every secret/config below is `sync: false`, so the values you set in the
+# Render dashboard are the source of truth and are never overwritten by a deploy.
 services:
   - type: web
     name: dealercycle
     runtime: node
     plan: starter            # Starter ($7/mo) is needed for the persistent disk below.
-    buildCommand: npm install # installs nodemailer (used for Workspace/Gmail/SMTP email)
+    buildCommand: npm install
     startCommand: node server.js
     autoDeploy: true
     envVars:
       - key: DATA_DIR
         value: /var/data     # the mounted disk — keeps orders/invoices across deploys
       - key: ADMIN_PASSCODE
-        sync: false          # set your own in the Render dashboard
+        sync: false          # dealer back-office passcode (set in the dashboard)
       - key: BASE_URL
-        sync: false          # e.g. https://dealercycle.onrender.com (or https://dealercycle.app)
-      # ---- Email (set these when Google Workspace is active) ----
+        sync: false          # https://dealercycle.app
+      # ---- Email — sent via Resend (resend.com) ----
       - key: EMAIL_PROVIDER
-        sync: false          # set to: workspace
-      - key: GMAIL_USER
-        sync: false          # orders@dealercycle.app
-      - key: GMAIL_APP_PASSWORD
-        sync: false          # 16-char app password from the Google account
-      - key: EMAIL_FROM
-        sync: false          # e.g. DealerCycle — Evans Cattle <orders@dealercycle.app>
+        sync: false          # set to: resend
       - key: RESEND_API_KEY
-        sync: false          # optional alternative to Workspace
+        sync: false          # API key from the orders@dealercycle.app Resend account
+      - key: EMAIL_FROM
+        sync: false          # DealerCycle <orders@dealercycle.app>
     disk:
       name: data
       mountPath: /var/data
