@@ -17,7 +17,7 @@ const BASE_URL = process.env.BASE_URL || ("http://localhost:" + PORT);
 // Front-end files live alongside the server (flat, single folder). Only these are
 // ever served as static assets — server code/data are never exposed.
 const PUBLIC = __dirname;
-const STATIC_ALLOW = new Set(["order.html", "admin.html", "styles.css", "favicon.svg"]);
+const STATIC_ALLOW = new Set(["order.html", "admin.html", "styles.css", "favicon.svg", "manifest.webmanifest", "dc-icon-192.png", "dc-icon-512.png", "dc-icon-180.png"]);
 
 // First-run: if there's no database yet, build it automatically (no separate seed step).
 const DATA_DIR = process.env.DATA_DIR || __dirname;
@@ -298,7 +298,7 @@ function isAdmin(req) {
   const pass = req.headers["x-dc-pass"] || "";
   return pass === ADMIN_PASSCODE;
 }
-const MIME = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml" };
+const MIME = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".webmanifest": "application/manifest+json" };
 function serveStatic(res, file) {
   if (!STATIC_ALLOW.has(file)) return send(res, 404, "Not found", "text/plain");
   const full = path.join(PUBLIC, file);
@@ -636,7 +636,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // static assets (styles + favicon; HTML is served by the routes above)
-    if (req.method === "GET" && (p === "/styles.css" || p === "/favicon.svg")) return serveStatic(res, p.replace(/^\//, ""));
+    if (req.method === "GET" && (p === "/styles.css" || p === "/favicon.svg" || p === "/manifest.webmanifest" || p === "/dc-icon-192.png" || p === "/dc-icon-512.png" || p === "/dc-icon-180.png")) return serveStatic(res, p.replace(/^\//, ""));
 
     return send(res, 404, "Not found", "text/plain");
   } catch (err) {

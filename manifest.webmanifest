@@ -1,0 +1,15 @@
+{
+  "name": "DealerCycle",
+  "short_name": "DealerCycle",
+  "description": "Dealer back office — feed ordering, invoicing & payments.",
+  "start_url": "/admin",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF6EC",
+  "theme_color": "#2F6B3A",
+  "icons": [
+    { "src": "/dc-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/dc-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
