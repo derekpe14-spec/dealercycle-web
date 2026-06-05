@@ -525,6 +525,58 @@ const server = http.createServer(async (req, res) => {
         save();
         return json(res, 200, { ok: true });
       }
+      // One-time historical import: loads prior-system invoices + payment status as
+      // native records (matched to customers by name). Idempotent on invoice_num.
+      if (req.method === "POST" && p === "/api/admin/import-history") {
+        const d = db();
+        const recs = Array.isArray(body.records) ? body.records : [];
+        let made = 0, skipped = 0, maxNum = d.settings.invoice_counter || 0;
+        const unmatched = [];
+        for (const r of recs) {
+          if (d.invoices.find(v => v.invoice_num === r.invoice_num)) { skipped++; continue; }
+          const nm = String(r.customer_name || "").trim().toLowerCase();
+          const cust = d.customers.find(c => String(c.name).trim().toLowerCase() === nm);
+          if (!cust) { unmatched.push(r.customer_name); continue; }
+          let cyc = d.cycles.find(c => c.delivery_label === r.cycle_label);
+          if (!cyc) { cyc = { id: nextId("cycles"), delivery_key: r.cycle_label, delivery_label: r.cycle_label, status: "closed" }; d.cycles.push(cyc); }
+          const amt = round2(Number(r.amount) || 0);
+          const inv = {
+            id: nextId("invoices"),
+            invoice_num: r.invoice_num,
+            customer_id: cust.id,
+            customer_name: cust.name,
+            cycle_id: cyc.id,
+            cycle_label: cyc.delivery_label,
+            date_issued: r.date_issued || "",
+            lines: [{ description: "Prior order system invoice " + r.invoice_num + " (" + cyc.delivery_label + " cycle)", qty: 1, unitPrice: amt, freight: 0, total: amt }],
+            subtotal: amt, tax_rate: 0, tax: 0, total: amt, freight_rate: d.settings.freight,
+            imported: true
+          };
+          d.invoices.push(inv);
+          d.payments.push({
+            id: nextId("payments"),
+            invoice_id: inv.id,
+            invoice_num: inv.invoice_num,
+            customer_id: cust.id,
+            customer_name: cust.name,
+            amount: amt,
+            cycle: cyc.delivery_label,
+            date_issued: inv.date_issued,
+            paid: !!r.paid,
+            date_paid: r.date_paid || null,
+            method: r.method || "",
+            notes: r.notes || "",
+            reminders: Number(r.reminders) || 0,
+            imported: true
+          });
+          const m = /(\d+)\s*$/.exec(String(r.invoice_num));
+          if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
+          made++;
+        }
+        d.settings.invoice_counter = Math.max(d.settings.invoice_counter || 0, maxNum);
+        save();
+        return json(res, 200, { ok: true, made, skipped, unmatched });
+      }
       if (req.method === "POST" && p === "/api/admin/outbox/resend") {
         ensureOutbox();
         const entry = db().outbox.find(x => x.id === body.id);
