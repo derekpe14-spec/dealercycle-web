@@ -211,10 +211,56 @@ function renderPricing(){
     '<div class="field"><label>Freight ($/bag)</label><input id="p_freight" type="number" step="0.25" value="'+s.freight+'"></div>'+
     '<div class="field"><label>Sales tax</label><div style="display:flex;gap:10px;align-items:center;height:43px"><label class="checkrow"><input type="checkbox" id="p_taxen" '+(s.tax_enabled?'checked':'')+'> charge</label><input id="p_taxpct" type="number" step="0.25" value="'+s.tax_pct+'" style="width:80px"> %</div></div>'+
     '</div><button class="btn primary sm" style="margin-top:10px" onclick="savePricing()">Save pricing</button></div></div>';
+  var imp='<div class="panel"><div class="panel-h"><h3>Update prices from Umbarger sheet</h3><span class="hint">paste → preview → apply</span></div><div class="pad">'+
+    '<p class="muted" style="font-size:13px;margin:0 0 8px">When Umbarger sends a new price sheet, paste three columns here — <b>Product name</b>, <b>Cost $/bag</b>, <b>Suggested Retail $/bag</b> — one product per line (copy straight from their spreadsheet, or type them). Tabs or commas both work. I&#39;ll match them to your catalog and show exactly what changes before anything is saved.</p>'+
+    '<textarea id="imp_text" rows="6" style="width:100%;font-family:Menlo,Consolas,monospace;font-size:12.5px" placeholder="Primer Plus, 15.15, 17.65&#10;Barley Base, 15.53, 18.03&#10;Cattlelac, 18.95, 21.45"></textarea>'+
+    '<div style="margin-top:8px"><button class="btn primary sm" onclick="previewSheet()">Preview changes</button> <span class="muted" id="imp_status" style="font-size:12.5px"></span></div>'+
+    '<div id="imp_result" style="margin-top:10px"></div></div></div>';
   document.getElementById("view").innerHTML='<h2 class="sec">Pricing · '+esc(s.dealer_name)+'</h2>'+
-    '<p class="sub-h">Umbarger maintains wholesale + SRP; you set margin, freight and tax. The system computes every customer price.</p>'+ctl+
+    '<p class="sub-h">Umbarger maintains wholesale + SRP; you set margin, freight and tax. The system computes every customer price.</p>'+ctl+imp+
     '<div class="panel"><div class="panel-h"><h3>Master sheet → your prices</h3><span class="hint">'+D.pricing.length+' products · tap a division</span></div>'+
     '<div class="pad">'+cats+'</div></div>';
+}
+function parsePriceSheet(txt){
+  var rows=[];
+  (txt||"").split(/\r?\n/).forEach(function(line){
+    if(!line.trim()) return;
+    var parts = line.indexOf("\t")>=0 ? line.split("\t") : line.split(",");
+    parts = parts.map(function(x){return x.replace(/[$]/g,"").replace(/,/g,"").trim();});
+    if(parts.length<2) return;
+    var name=parts[0]; var nums=parts.slice(1).filter(function(x){return x!==""&&!isNaN(parseFloat(x));});
+    if(!name||nums.length<1) return;
+    // last two numbers = cost, srp (if only one, treat as srp)
+    var srp = nums.length>=2 ? parseFloat(nums[nums.length-1]) : parseFloat(nums[0]);
+    var cost = nums.length>=2 ? parseFloat(nums[nums.length-2]) : "";
+    rows.push({name:name, wholesale:cost, srp:srp});
+  });
+  return rows;
+}
+function previewSheet(){
+  var rows=parsePriceSheet(document.getElementById("imp_text").value);
+  if(!rows.length){ document.getElementById("imp_status").textContent="Nothing to read — paste some rows first."; return; }
+  document.getElementById("imp_status").textContent="Matching "+rows.length+" rows…";
+  api("/api/admin/prices/preview","POST",{rows:rows}).then(function(d){ renderPreview(d); });
+}
+function renderPreview(d){
+  var m=d.matched||[], un=d.unmatched||[];
+  var changed=m.filter(function(x){ return (x.new_wholesale!=null&&x.new_wholesale!==x.old_wholesale)||(x.new_srp!=null&&x.new_srp!==x.old_srp); });
+  document.getElementById("imp_status").textContent=m.length+" matched · "+changed.length+" changing · "+un.length+" not found";
+  var rowsHtml=m.map(function(x){
+    var whCh=(x.new_wholesale!=null&&x.new_wholesale!==x.old_wholesale), srpCh=(x.new_srp!=null&&x.new_srp!==x.old_srp);
+    var c=(whCh||srpCh)?'#9C0006':'#888';
+    return '<tr><td>'+esc(x.name)+'</td><td class="num">'+money(x.old_wholesale)+(whCh?(' → <b style="color:'+c+'">'+money(x.new_wholesale)+'</b>'):'')+'</td><td class="num">'+money(x.old_srp)+(srpCh?(' → <b style="color:'+c+'">'+money(x.new_srp)+'</b>'):'')+'</td></tr>';
+  }).join("");
+  var unHtml=un.length?('<p class="muted" style="font-size:12.5px;margin-top:8px"><b>Not matched ('+un.length+'):</b> '+un.map(function(u){return esc(u.sheet_name);}).join(", ")+'. These were skipped — rename to match your catalog or update them by hand.</p>'):"";
+  var btn=changed.length?('<button class="btn primary sm" style="margin-top:10px" onclick="applySheet()">Apply '+changed.length+' price change'+(changed.length>1?'s':'')+'</button>'):'<p class="muted" style="font-size:12.5px;margin-top:8px">No changes to apply.</p>';
+  window._impUpdates=changed.map(function(x){return {id:x.id, wholesale:x.new_wholesale, srp:x.new_srp};});
+  document.getElementById("imp_result").innerHTML='<table class="tbl" style="width:100%;font-size:12.5px"><thead><tr><th>Product</th><th class="num">Cost</th><th class="num">SRP</th></tr></thead><tbody>'+rowsHtml+'</tbody></table>'+unHtml+btn;
+}
+function applySheet(){
+  var u=window._impUpdates||[]; if(!u.length) return;
+  if(!confirm("Apply "+u.length+" price change"+(u.length>1?"s":"")+" to your catalog? Customer prices will update.")) return;
+  api("/api/admin/prices/apply","POST",{updates:u}).then(function(d){ toast("Applied "+d.applied+" price update"+(d.applied===1?"":"s")+"."); refresh(); });
 }
 function togglePriceCat(n){ priceOpenCat=(priceOpenCat===n?"":n); renderPricing(); }
 function savePricing(){
@@ -408,7 +454,7 @@ function renderOutbox(){
   var rows=ob.map(function(o){
     var badge = o.status==="sent"?'<span class="pill live">Sent</span>':(o.status==="captured"?'<span class="pill warn">Captured</span>':'<span class="pill" style="background:#fde2e1;color:#a3271f">Failed</span>');
     var when=(o.created_at||"").slice(0,16).replace("T"," ");
-    return '<tr><td>'+badge+'</td><td><b>'+esc(o.to_name||o.to||"—")+'</b><div class="muted" style="font-size:11.5px">'+esc(kindLabel(o.kind))+' · '+when+'</div>'+(o.error?'<div style="color:var(--red);font-size:11px">'+esc(o.error)+'</div>':'')+'</td>'+
+    return '<tr><td>'+badge+'</td><td><b>'+esc(o.to_name||o.to||"—")+'</b><div class="muted" style="font-size:11.5px">'+esc(kindLabel(o.kind))+' · '+when+'</div>'+(o.cc?'<div class="muted" style="font-size:11px">cc: '+esc(o.cc)+'</div>':'')+(o.error?'<div style="color:var(--red);font-size:11px">'+esc(o.error)+'</div>':'')+'</td>'+
       '<td class="hide-sm muted" style="font-size:12.5px">'+esc(o.subject)+'</td>'+
       '<td><button class="btn ghost sm" onclick="viewMail('+o.id+')">View</button></td></tr>';
   }).join("");
@@ -423,7 +469,7 @@ function viewMail(id){
     (o.status!=="sent"?'<button class="btn ghost sm" onclick="resendMail('+o.id+')">Try send via '+esc(D.mail_provider)+'</button> ':'')+
     '<button class="btn ghost sm" onclick="closeModal()">Close</button>';
   showModal('<h3 style="color:var(--navy);margin-bottom:2px">'+esc(kindLabel(o.kind))+'</h3>'+
-    '<div class="muted" style="font-size:12.5px;margin-bottom:10px">To: '+esc(o.to_name)+' &lt;'+esc(o.to||"no email")+'&gt;<br>Subject: '+esc(o.subject)+'</div>'+
+    '<div class="muted" style="font-size:12.5px;margin-bottom:10px">To: '+esc(o.to_name)+' &lt;'+esc(o.to||"no email")+'&gt;'+(o.cc?'<br>CC: '+esc(o.cc):'')+'<br>Subject: '+esc(o.subject)+'</div>'+
     '<pre style="white-space:pre-wrap;font-size:12.5px;background:#f7f9fc;border-radius:8px;padding:12px;max-height:300px;overflow:auto">'+esc(o.text)+'</pre>'+
     '<div style="margin-top:12px">'+actions+'</div>');
 }
