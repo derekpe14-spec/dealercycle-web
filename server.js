@@ -211,6 +211,13 @@ function buildInvoiceForCustomer(custId, cycleId) {
 function invoiceHtml(inv) {
   const s = db().settings;
   const rows = inv.lines.map((l, i) => `<tr class="${i % 2 ? "alt" : ""}"><td>${i + 1}</td><td>${esc(l.description)}</td><td class="num">${l.qty}</td><td class="num">${money(l.unitPrice)}</td><td class="num">${money(l.freight)}</td><td class="num">${money(l.total)}</td></tr>`).join("");
+  const appliedCredits = (db().credits || []).reduce((arr, c) => {
+    (c.applications || []).forEach(a => { if (a.invoice_id === inv.id) arr.push({ reason: c.reason || "Account credit", amount: a.amount }); });
+    return arr;
+  }, []);
+  const creditRows = appliedCredits.length
+    ? appliedCredits.map(c => `<tr><td style="color:#7a1f1f">Credit — ${esc(c.reason)}</td><td class="num" style="color:#7a1f1f">&minus;${money(c.amount)}</td></tr>`).join("")
+    : (inv.credit_total ? `<tr><td>Credit applied</td><td class="num">&minus;${money(inv.credit_total)}</td></tr>` : "");
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Invoice ${inv.invoice_num}</title>
 <style>body{font-family:Arial,Helvetica,sans-serif;color:#3B2F1E;max-width:720px;margin:0 auto;padding:24px}
 h1{color:#2F6B3A;font-size:22px;margin:0;font-family:'Zilla Slab',Georgia,serif} .muted{color:#7a6f5a;font-size:13px} hr{border:0;border-top:1px solid #e7ddc9;margin:14px 0}
@@ -230,7 +237,7 @@ tr.alt td{background:#F3EFE3} .num{text-align:right} .totals{margin-top:10px;wid
 <table class="totals"><tr><td>Freight / bag</td><td class="num">${money(inv.freight_rate)}</td></tr>
 <tr><td>Subtotal</td><td class="num">${money(inv.subtotal)}</td></tr>
 <tr><td>Tax (${(inv.tax_rate * 100).toFixed(1)}%)</td><td class="num">${money(inv.tax)}</td></tr>
-${inv.credit_total ? `<tr><td>Credit applied</td><td class="num">&minus;${money(inv.credit_total)}</td></tr>` : ""}
+${creditRows}
 <tr class="due"><td>TOTAL DUE</td><td class="num">${money(inv.total)}</td></tr></table>
 ${(function(){
   const pay = (db().payments || []).find(pp => pp.invoice_id === inv.id);
@@ -435,12 +442,42 @@ function emailInvoice(inv) {
   const s = db().settings;
   const link = BASE_URL + "/invoice/" + inv.id;
   const subject = "Invoice " + inv.invoice_num + " — " + s.payable_to;
+  const th = `style="background:${NAVY};color:#fff;padding:6px 10px;text-align:right;font-size:12px"`;
+  const thL = `style="background:${NAVY};color:#fff;padding:6px 10px;text-align:left;font-size:12px"`;
+  const td = `style="padding:6px 10px;border-bottom:1px solid #efe7d6;text-align:right"`;
+  const tdL = `style="padding:6px 10px;border-bottom:1px solid #efe7d6;text-align:left"`;
+  const lineRows = (inv.lines || []).map(l =>
+    `<tr><td ${tdL}>${esc(l.description)}</td><td ${td}>${l.qty}</td><td ${td}>${money(l.unitPrice)}</td><td ${td}>${money(l.freight)}</td><td ${td}>${money(l.total)}</td></tr>`).join("");
+  const itemsTable =
+    `<table style="border-collapse:collapse;width:100%;font-size:13px;margin:12px 0">` +
+    `<thead><tr><th ${thL}>Item</th><th ${th}>Qty</th><th ${th}>Unit</th><th ${th}>Freight</th><th ${th}>Line Total</th></tr></thead>` +
+    `<tbody>${lineRows}</tbody></table>`;
+  const appliedCredits = (db().credits || []).reduce((arr, c) => {
+    (c.applications || []).forEach(a => { if (a.invoice_id === inv.id) arr.push({ reason: c.reason || "Account credit", amount: a.amount }); });
+    return arr;
+  }, []);
+  const creditRowsHtml = appliedCredits.length
+    ? appliedCredits.map(c => `<tr><td style="padding:4px 10px;color:#7a1f1f">Credit — ${esc(c.reason)}</td><td style="padding:4px 10px;text-align:right;color:#7a1f1f">&minus;${money(c.amount)}</td></tr>`).join("")
+    : (inv.credit_total ? `<tr><td style="padding:4px 10px">Credit applied</td><td style="padding:4px 10px;text-align:right">&minus;${money(inv.credit_total)}</td></tr>` : "");
+  const totals =
+    `<table style="border-collapse:collapse;font-size:13px;margin:6px 0 6px auto">` +
+    `<tr><td style="padding:4px 10px">Subtotal</td><td style="padding:4px 10px;text-align:right">${money(inv.subtotal)}</td></tr>` +
+    (inv.tax ? `<tr><td style="padding:4px 10px">Tax</td><td style="padding:4px 10px;text-align:right">${money(inv.tax)}</td></tr>` : "") +
+    creditRowsHtml +
+    `<tr><td style="padding:7px 10px;font-weight:bold;color:${NAVY};background:#EAF1E5">Total Due</td><td style="padding:7px 10px;text-align:right;font-weight:bold;color:${NAVY};background:#EAF1E5">${money(inv.total)}</td></tr></table>`;
   const html = wrapHtml(
     `<h2 style="color:${NAVY};margin:0 0 6px">Your invoice</h2><p style="color:#555">Hi ${esc(inv.customer_name)}, here is your invoice for the ${esc(inv.cycle_label)} feed cycle.</p>` +
-    `<table style="border-collapse:collapse;margin:12px 0;font-size:14px"><tr><td style="padding:6px 12px;border:1px solid #ddd"><b>Invoice #</b></td><td style="padding:6px 12px;border:1px solid #ddd">${inv.invoice_num}</td></tr><tr><td style="padding:6px 12px;border:1px solid #ddd"><b>Total Due</b></td><td style="padding:6px 12px;border:1px solid #ddd">${money(inv.total)}</td></tr></table>` +
+    `<p style="font-size:13px;color:#555;margin:0"><b>Invoice #:</b> ${inv.invoice_num} &nbsp;·&nbsp; <b>Date:</b> ${inv.date_issued} &nbsp;·&nbsp; <b>Cycle:</b> ${esc(inv.cycle_label)}</p>` +
+    itemsTable + totals +
     `<p style="margin:16px 0"><a href="${link}" style="background:${NAVY};color:#fff;text-decoration:none;padding:11px 20px;border-radius:8px;font-weight:bold">View / print invoice</a></p>` +
     `<p style="color:#777;font-size:12px">Payment options: Check payable to ${esc(s.payable_to)} · Venmo ${esc(s.venmo)}. ${esc(s.invoice_terms)}</p>`);
-  const text = `Hi ${inv.customer_name}, invoice ${inv.invoice_num} for the ${inv.cycle_label} cycle — Total Due ${money(inv.total)}. View: ${link}. Pay by check to ${s.payable_to} or Venmo ${s.venmo}.`;
+  const itemsText = (inv.lines || []).map(l => `  ${l.qty} x ${l.description} @ ${money(l.unitPrice)} (+${money(l.freight)} frt) = ${money(l.total)}`).join("\n");
+  const creditsText = appliedCredits.length
+    ? "\n" + appliedCredits.map(c => `Credit — ${c.reason}: -${money(c.amount)}`).join("\n")
+    : (inv.credit_total ? `\nCredit applied -${money(inv.credit_total)}` : "");
+  const text = `Hi ${inv.customer_name},\nInvoice ${inv.invoice_num} — ${inv.cycle_label} cycle\n\n${itemsText}\n\nSubtotal ${money(inv.subtotal)}` +
+    creditsText +
+    `\nTotal Due ${money(inv.total)}\n\nView / print: ${link}\nPay by check to ${s.payable_to} or Venmo ${s.venmo}. ${s.invoice_terms}`;
   return { subject, text, html };
 }
 function emailReminder(pay) {
