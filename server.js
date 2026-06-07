@@ -463,9 +463,17 @@ function ensureOutbox() { if (!db().outbox) { db().outbox = []; save(); } }
 async function queueMail(kind, to, toName, msg) {
   ensureOutbox();
   const s = db().settings;
-  const result = await mailer.send({ to, subject: msg.subject, text: msg.text, html: msg.html }, { dealerEmail: s.email, dealerName: s.dealer_name });
+  // CC the dealer on the mill order and on customer invoices, so they get a copy
+  // the moment it goes out and can catch a bad address or wrong total early.
+  // Controlled by settings.dealer_cc_email (falls back to the dealer's own email).
+  let cc = msg.cc;
+  if (!cc && (kind === "mill" || kind === "invoice")) {
+    const ccRaw = ((s.dealer_cc_email !== undefined ? s.dealer_cc_email : s.email) || "").trim();
+    if (ccRaw && ccRaw.toLowerCase() !== String(to || "").toLowerCase()) cc = ccRaw;
+  }
+  const result = await mailer.send({ to, cc, subject: msg.subject, text: msg.text, html: msg.html }, { dealerEmail: s.email, dealerName: s.dealer_name });
   const entry = {
-    id: nextId("outbox"), kind, to: to || "", to_name: toName || "",
+    id: nextId("outbox"), kind, to: to || "", to_name: toName || "", cc: cc || "",
     subject: msg.subject, text: msg.text, html: msg.html,
     created_at: new Date().toISOString(), status: result.status, provider: result.provider, error: result.error || ""
   };
@@ -1266,7 +1274,7 @@ async function emailMillOrder(keyIso) {
   const text = millOrderText(cyc);
   const msg = { subject: "Umbarger Order — " + s.dealer_name + " (" + cyc.delivery_label + ")", text, html: "<pre style=\"font-family:Menlo,Consolas,monospace;font-size:13px;white-space:pre-wrap\">" + esc(text) + "</pre>" };
   const e = await queueMail("mill", to, s.mill_contact_name || "Mill", msg);
-  return { ok: true, to, status: e.status };
+  return { ok: true, to, cc: e.cc || null, status: e.status };
 }
 async function genAndSendInvoices(keyIso) {
   const cyc = db().cycles.find(c => c.delivery_key === keyIso); if (!cyc) return { made: 0 };

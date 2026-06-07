@@ -1102,7 +1102,8 @@
 "automation_enabled": true,
 "automation_mode": "review",
 "timezone": "America/New_York",
-"schedule_state": {}
+"schedule_state": {},
+"dealer_cc_email": "derekpe14@gmail.com"
 },
 "customers": [
 {

@@ -43,7 +43,7 @@ async function sendViaResend(msg, from) {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": "Bearer " + process.env.RESEND_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: [msg.to], subject: msg.subject, html: msg.html, text: msg.text })
+      body: JSON.stringify(Object.assign({ from, to: [msg.to], subject: msg.subject, html: msg.html, text: msg.text }, msg.cc ? { cc: Array.isArray(msg.cc) ? msg.cc : [msg.cc] } : {}))
     });
     if (!res.ok) { const t = await res.text(); return { status: "failed", provider: "resend", error: "Resend " + res.status + ": " + t.slice(0, 200) }; }
     const data = await res.json();
@@ -70,7 +70,7 @@ async function sendViaSmtp(msg, from, provider) {
       transport = { service: "gmail", auth: { user, pass } };
     }
     const t = nodemailer.createTransport(transport);
-    const info = await t.sendMail({ from, to: msg.to, subject: msg.subject, text: msg.text, html: msg.html });
+    const info = await t.sendMail(Object.assign({ from, to: msg.to, subject: msg.subject, text: msg.text, html: msg.html }, msg.cc ? { cc: msg.cc } : {}));
     return { status: "sent", provider, id: info.messageId };
   } catch (e) {
     return { status: "failed", provider, error: String(e) };
