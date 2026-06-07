@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DealerCycle — Start your order</title>
+<link rel="icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@600;700&display=swap">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div id="app" style="padding:14px 0"></div>
+<script>
+"use strict";
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+function render(){
+  document.getElementById("app").innerHTML='<div class="phone">'+
+    '<div class="phead">'+
+      '<div class="logo"><span class="emblem"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#F5EEDD" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg></span><span class="brandmark" style="font-size:18px;color:#fff">DealerCycle</span></div>'+
+      '<h1 style="margin-top:9px">Start your feed order</h1>'+
+      '<div class="sub">New here? Tell us who you are and we&#39;ll set you up — takes 10 seconds.</div>'+
+    '</div>'+
+    '<div class="pbody">'+
+      '<div class="field"><label>Your name *</label><input id="f_name" placeholder="First and last name" autocomplete="name"></div>'+
+      '<div class="field"><label>Email *</label><input id="f_email" type="email" placeholder="name@example.com" autocomplete="email"></div>'+
+      '<div class="field"><label>Mobile phone</label><input id="f_phone" type="tel" placeholder="(555) 123-4567" autocomplete="tel"></div>'+
+      '<p class="muted" style="font-size:12.5px;margin-top:6px">We&#39;ll email your itemized invoice here after you submit.</p>'+
+      '<div id="err" style="color:var(--red);font-size:13px;margin-top:8px"></div>'+
+    '</div>'+
+    '<div class="cartbar"><button class="btn primary" id="goBtn" style="width:100%" onclick="start()">Continue to my order &rarr;</button></div>'+
+  '</div>';
+}
+function start(){
+  var name=(document.getElementById("f_name").value||"").trim();
+  var email=(document.getElementById("f_email").value||"").trim();
+  var phone=(document.getElementById("f_phone").value||"").trim();
+  var err=document.getElementById("err");
+  if(!name){ err.textContent="Please enter your name."; return; }
+  if(!email){ err.textContent="Please enter your email so we can send your invoice."; return; }
+  var btn=document.getElementById("goBtn"); btn.disabled=true; btn.textContent="Setting you up…";
+  fetch("/api/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:name,email:email,phone:phone})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d.ok && d.token){ location.href="/o/"+d.token; }
+      else { err.textContent=d.error||"Something went wrong — please try again."; btn.disabled=false; btn.textContent="Continue to my order →"; }
+    }).catch(function(){ err.textContent="Connection problem — please try again."; btn.disabled=false; btn.textContent="Continue to my order →"; });
+}
+render();
+</script>
+</body>
+</html>
