@@ -454,7 +454,7 @@ function renderOutbox(){
   var rows=ob.map(function(o){
     var badge = o.status==="sent"?'<span class="pill live">Sent</span>':(o.status==="captured"?'<span class="pill warn">Captured</span>':'<span class="pill" style="background:#fde2e1;color:#a3271f">Failed</span>');
     var when=(o.created_at||"").slice(0,16).replace("T"," ");
-    return '<tr><td>'+badge+'</td><td><b>'+esc(o.to_name||o.to||"—")+'</b><div class="muted" style="font-size:11.5px">'+esc(kindLabel(o.kind))+' · '+when+'</div>'+(o.error?'<div style="color:var(--red);font-size:11px">'+esc(o.error)+'</div>':'')+'</td>'+
+    return '<tr><td>'+badge+'</td><td><b>'+esc(o.to_name||o.to||"—")+'</b><div class="muted" style="font-size:11.5px">'+esc(kindLabel(o.kind))+' · '+when+'</div>'+(o.cc?'<div class="muted" style="font-size:11px">cc: '+esc(o.cc)+'</div>':'')+(o.error?'<div style="color:var(--red);font-size:11px">'+esc(o.error)+'</div>':'')+'</td>'+
       '<td class="hide-sm muted" style="font-size:12.5px">'+esc(o.subject)+'</td>'+
       '<td><button class="btn ghost sm" onclick="viewMail('+o.id+')">View</button></td></tr>';
   }).join("");
@@ -469,7 +469,7 @@ function viewMail(id){
     (o.status!=="sent"?'<button class="btn ghost sm" onclick="resendMail('+o.id+')">Try send via '+esc(D.mail_provider)+'</button> ':'')+
     '<button class="btn ghost sm" onclick="closeModal()">Close</button>';
   showModal('<h3 style="color:var(--navy);margin-bottom:2px">'+esc(kindLabel(o.kind))+'</h3>'+
-    '<div class="muted" style="font-size:12.5px;margin-bottom:10px">To: '+esc(o.to_name)+' &lt;'+esc(o.to||"no email")+'&gt;<br>Subject: '+esc(o.subject)+'</div>'+
+    '<div class="muted" style="font-size:12.5px;margin-bottom:10px">To: '+esc(o.to_name)+' &lt;'+esc(o.to||"no email")+'&gt;'+(o.cc?'<br>CC: '+esc(o.cc):'')+'<br>Subject: '+esc(o.subject)+'</div>'+
     '<pre style="white-space:pre-wrap;font-size:12.5px;background:#f7f9fc;border-radius:8px;padding:12px;max-height:300px;overflow:auto">'+esc(o.text)+'</pre>'+
     '<div style="margin-top:12px">'+actions+'</div>');
 }

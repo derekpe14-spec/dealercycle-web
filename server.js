@@ -355,28 +355,86 @@ function activateSubscription(method, ids) {
   return db().subscription;
 }
 
-// Minimal hosted-checkout look-alike used in SIMULATED mode (no Stripe key), so
-// the whole pay flow is clickable in a demo. `lines` may contain nulls.
+// Stripe-style hosted-checkout look-alike for SIMULATED mode (no Stripe key) —
+// real-looking card + US bank (ACH) entry with a live toggle, so the demo shows
+// exactly what a payer fills in. opts: { mode:"invoice"|"subscription", merchant,
+// invoiceNum, amount, surchargePct, introMonths, listPrice, action, payload, done, defaultMethod }
 function simCheckoutPage(o) {
-  const rows = (o.lines || []).filter(Boolean).map(l =>
-    `<div class="row"><span>${esc(l[0])}</span><span>${esc(l[1])}</span></div>`).join("");
-  const payload = JSON.stringify(o.payload || {});
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(o.title)}</title>
-<style>body{font-family:Arial,Helvetica,sans-serif;background:#F3EFE3;color:#3B2F1E;margin:0;padding:24px}
-.card{max-width:420px;margin:6vh auto;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.12);overflow:hidden}
-.hd{background:#2F6B3A;color:#fff;padding:16px 20px;font-weight:bold;font-size:16px}
-.bd{padding:20px} .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}
-.tot{display:flex;justify-content:space-between;padding:12px 0 4px;font-weight:bold;font-size:17px;color:#2F6B3A}
-.note{color:#7a6f5a;font-size:12px;margin:6px 0 16px} .sim{background:#FFF6E6;color:#8a6d1f;font-size:11.5px;padding:6px 10px;border-radius:8px;margin-bottom:14px;text-align:center}
-.btn{display:block;width:100%;background:#2F6B3A;color:#fff;border:0;border-radius:10px;padding:13px;font-size:15px;font-weight:bold;cursor:pointer}
-.btn:disabled{opacity:.6}</style></head><body>
-<div class="card"><div class="hd">${esc(o.title)}</div><div class="bd">
-<div class="sim">Simulated checkout — no real card is charged (set STRIPE_SECRET_KEY to go live).</div>
-${rows}<div class="tot"><span>Total</span><span>${money(o.total)}</span></div>
-${o.note ? `<div class="note">${esc(o.note)}</div>` : ""}
-<button class="btn" id="go" onclick="pay()">${esc(o.payLabel)}</button>
+  const data = {
+    mode: o.mode || "invoice", amount: round2(Number(o.amount) || 0),
+    pct: Number(o.surchargePct) || 0, introMonths: o.introMonths || 6,
+    listPrice: round2(Number(o.listPrice) || 99), action: o.action, done: o.done,
+    payload: o.payload || {}, def: o.defaultMethod === "ach" ? "ach" : "card",
+    invoiceNum: o.invoiceNum || "", merchant: o.merchant || "DealerCycle"
+  };
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Checkout</title>
+<style>body{font-family:Arial,Helvetica,sans-serif;background:#F3EFE3;color:#30313d;margin:0;padding:20px}
+.co{max-width:400px;margin:4vh auto;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.12);overflow:hidden}
+.hd{padding:16px 20px 6px}.merch{font-size:13px;color:#6a7383}.amt{font-size:26px;font-weight:bold;margin:2px 0 0}.subln{font-size:12px;color:#8a909c}
+.bd{padding:8px 20px 18px}.sim{background:#FFF6E6;color:#8a6d1f;font-size:11px;padding:6px 10px;border-radius:8px;margin:6px 0 12px;text-align:center}
+.lbl{font-size:12px;color:#6a7383;margin:10px 0 4px}.fld{border:1px solid #e6e6ea;border-radius:8px;height:42px;display:flex;align-items:center;padding:0 12px;font-size:14px}
+.fld input{border:0;outline:0;font-size:14px;width:100%;font-family:inherit;color:#30313d}
+.two{display:flex;gap:10px}.two>div{flex:1}
+.seg{display:flex;gap:8px;margin:10px 0 6px}.seg button{flex:1;background:#fff;border:1px solid #e6e6ea;border-radius:8px;padding:9px;font-size:12.5px;color:#30313d;cursor:pointer}
+.seg button.on{border-color:#2F6B3A;box-shadow:0 0 0 1px #2F6B3A;color:#2F6B3A;font-weight:bold}
+.brands{margin-left:auto;font-size:9px;color:#888}
+.linkbox{border:1px solid #e6e6ea;border-radius:8px;padding:12px;margin-top:6px}.bankrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.bankrow span{font-size:11px;background:#f1f1f4;border-radius:6px;padding:5px 8px;color:#555}
+.divider{display:flex;align-items:center;gap:10px;color:#9aa0ab;font-size:11px;margin:14px 0 4px}.divider:before,.divider:after{content:"";flex:1;height:1px;background:#ededf0}
+.mandate{font-size:10.5px;line-height:1.5;color:#8a909c;margin-top:12px;background:#f7f7f9;border-radius:8px;padding:10px}
+.btn{display:block;width:100%;background:#2F6B3A;color:#fff;border:0;border-radius:8px;height:44px;font-size:15px;font-weight:bold;cursor:pointer;margin-top:16px}.btn:disabled{opacity:.6}
+.foot{text-align:center;font-size:11px;color:#8a909c;margin-top:12px}.hide{display:none}</style></head><body>
+<div class="co"><div class="hd"><div class="merch" id="merch"></div><div class="amt" id="amt"></div><div class="subln" id="subln"></div></div>
+<div class="bd">
+<div class="sim">Simulated checkout — no real card is charged (add a Stripe key to go live).</div>
+<div class="lbl">Email</div><div class="fld"><input placeholder="you@example.com"></div>
+<div class="seg"><button id="mCard" onclick="setM('card')">Card</button><button id="mBank" onclick="setM('ach')">US bank account</button></div>
+<div id="cardFields">
+  <div class="lbl">Card number</div><div class="fld"><input placeholder="1234 1234 1234 1234"><span class="brands">VISA · MC · AMEX</span></div>
+  <div class="two"><div><div class="lbl">Expiry</div><div class="fld"><input placeholder="MM / YY"></div></div><div><div class="lbl">CVC</div><div class="fld"><input placeholder="CVC"></div></div></div>
+  <div class="lbl">Name on card</div><div class="fld"><input placeholder="Full name"></div>
+  <div class="two"><div><div class="lbl">Country</div><div class="fld"><input value="United States"></div></div><div><div class="lbl">ZIP</div><div class="fld"><input placeholder="40011"></div></div></div>
+</div>
+<div id="bankFields" class="hide">
+  <div class="linkbox"><div style="font-size:13px;font-weight:bold">⚡ Link your bank instantly</div><div style="font-size:12px;color:#6a7383;margin-top:3px">Log in to your bank to connect securely — recommended.</div><div class="bankrow"><span>Chase</span><span>Bank of America</span><span>Wells Fargo</span><span>US Bank</span><span>Search…</span></div></div>
+  <div class="divider">or enter bank details manually</div>
+  <div class="lbl">Account holder name</div><div class="fld"><input placeholder="Name on the account"></div>
+  <div class="lbl">Routing number</div><div class="fld"><input placeholder="9 digits"></div>
+  <div class="lbl">Account number</div><div class="fld"><input placeholder="Account number"></div>
+  <div class="lbl">Account type</div><div class="fld"><input value="Checking"></div>
+  <div class="mandate" id="mandate"></div>
+</div>
+<button class="btn" id="go" onclick="pay()">Pay</button>
+<div class="foot">🔒 Powered by Stripe (simulated)</div>
 </div></div>
-<script>function pay(){var b=document.getElementById("go");b.disabled=true;b.textContent="Processing\\u2026";fetch("${o.action}",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(${payload})}).then(function(r){return r.json();}).then(function(d){if(d&&d.ok){window.location="${o.done}";}else{b.disabled=false;b.textContent="Try again";alert((d&&d.error)||"Could not complete.");}}).catch(function(){b.disabled=false;});}</script>
+<script>
+var D=${JSON.stringify(data)};
+function fmt(n){return "$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+var method=D.def;
+function sc(){ return method==="card"? Math.round(D.amount*D.pct/100*100)/100 : 0; }
+function total(){ return Math.round((D.amount+sc())*100)/100; }
+function render(){
+  var sub=D.mode==="subscription";
+  document.getElementById("merch").textContent=D.merchant;
+  document.getElementById("amt").textContent=fmt(total())+(sub?"/mo":"");
+  var sl;
+  if(sub){ sl="Intro "+D.introMonths+" months, then "+fmt(D.listPrice)+"/mo — you save "+fmt(Math.round((D.listPrice-D.amount)*100)/100)+"/mo"; }
+  else { sl="Invoice "+D.invoiceNum+(method==="card"&&D.pct>0?" · includes "+fmt(sc())+" card fee ("+D.pct+"%)":(method==="ach"?" · bank/ACH — no fee":"")); }
+  document.getElementById("subln").textContent=sl;
+  document.getElementById("mCard").className=method==="card"?"on":"";
+  document.getElementById("mBank").className=method==="ach"?"on":"";
+  document.getElementById("cardFields").className=method==="card"?"":"hide";
+  document.getElementById("bankFields").className=method==="ach"?"":"hide";
+  document.getElementById("mandate").textContent="By providing your bank account details and confirming, you authorize "+D.merchant+" and Stripe to debit your account for this"+(sub?" and future payments":"")+" per the displayed terms. You can cancel anytime.";
+  document.getElementById("go").textContent=(sub?"Start subscription · "+fmt(total())+"/mo":"Pay "+fmt(total()))+(method==="ach"?" by bank":" by card");
+}
+function setM(m){ method=m; render(); }
+function pay(){ var b=document.getElementById("go"); b.disabled=true; b.textContent="Processing…";
+  var pl=Object.assign({},D.payload,{method:method,surcharge:sc()});
+  fetch(D.action,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(pl)})
+    .then(function(r){return r.json();}).then(function(d){ if(d&&d.ok){window.location=D.done;} else {b.disabled=false;render();alert((d&&d.error)||"Could not complete.");} })
+    .catch(function(){b.disabled=false;render();}); }
+render();
+</script>
 </body></html>`;
 }
 function simResultPage(title, msg) {
@@ -615,7 +673,7 @@ function adminData() {
     payments: db().payments.map(p => ({ ...p })).sort((a, b) => Number(a.paid) - Number(b.paid) || b.id - a.id),
     credits: (db().credits || []).map(c => ({ ...c })).sort((a, b) => b.id - a.id),
     mail_provider: mailer.providerName(),
-    outbox: (db().outbox || []).map(o => ({ id: o.id, kind: o.kind, to: o.to, to_name: o.to_name, subject: o.subject, text: o.text, created_at: o.created_at, status: o.status, provider: o.provider, error: o.error })).sort((a, b) => b.id - a.id),
+    outbox: (db().outbox || []).map(o => ({ id: o.id, kind: o.kind, to: o.to, to_name: o.to_name, cc: o.cc || "", subject: o.subject, text: o.text, created_at: o.created_at, status: o.status, provider: o.provider, error: o.error })).sort((a, b) => b.id - a.id),
     inventory_enabled: !!s.inventory_enabled,
     inventory: inventoryView(),
     bills: (db().bills || []).map(b => ({ ...b })).sort((a, b) => Number(a.status === "paid") - Number(b.status === "paid") || (a.due_date < b.due_date ? -1 : 1)),
@@ -813,48 +871,34 @@ const server = http.createServer(async (req, res) => {
         return json(res, 200, { url: r.url, provider: r.provider, surcharge: sc, card_total: round2(inv.total + sc) });
       } catch (e) { return json(res, 502, { error: "Payment setup failed: " + String(e.message || e) }); }
     }
-    // Simulated card-checkout page for an invoice (only used when no Stripe key).
+    // Simulated card / ACH checkout page for an invoice (only used when no Stripe key).
     if (req.method === "GET" && p === "/pay/sim") {
       const id = Number(u.searchParams.get("invoice"));
       const inv = db().invoices.find(v => v.id === id);
       if (!inv) return send(res, 404, "Invoice not found", "text/plain");
-      const amount = Number(u.searchParams.get("amount")) || inv.total;
-      const sc = Number(u.searchParams.get("surcharge")) || 0;
-      const total = round2(amount + sc);
+      const s = db().settings;
       return send(res, 200, simCheckoutPage({
-        title: "Pay invoice " + inv.invoice_num, lines: [
-          ["Invoice " + inv.invoice_num, money(amount)],
-          (sc > 0 ? [(db().settings.surcharge_label || "Card processing fee"), money(sc)] : null)
-        ], total: total, payLabel: "Pay " + money(total) + " by card",
-        action: "/api/pay/sim/complete", payload: { invoice_id: inv.id, surcharge: sc },
-        done: "/pay/success?invoice=" + inv.id
+        mode: "invoice", merchant: s.dealer_name, invoiceNum: inv.invoice_num,
+        amount: inv.total, surchargePct: payments.effectiveSurchargePct(s, s.dealer_state),
+        action: "/api/pay/sim/complete", payload: { invoice_id: inv.id },
+        done: "/pay/success?invoice=" + inv.id, defaultMethod: "card"
       }), "text/html");
     }
     if (req.method === "POST" && p === "/api/pay/sim/complete") {
       if (payments.isLive()) return json(res, 400, { error: "Live mode — use real Stripe." });
       const body = await readBody(req);
-      markInvoicePaid(Number(body.invoice_id), "Card", Number(body.surcharge || 0));
+      markInvoicePaid(Number(body.invoice_id), body.method === "ach" ? "ACH" : "Card", Number(body.surcharge || 0));
       return json(res, 200, { ok: true });
     }
-    // Simulated subscription-checkout page (only used when no Stripe key).
+    // Simulated subscription checkout page (only used when no Stripe key).
     if (req.method === "GET" && p === "/pay/sim-sub") {
       const s = db().settings;
       const method = u.searchParams.get("method") === "card" ? "card" : "ach";
-      const intro = Number(s.sub_intro_price) || 59.99;
-      const pct = method === "card" ? payments.effectiveSurchargePct(s, s.dealer_state) : 0;
-      const sc = payments.surchargeAmount(intro, pct);
-      const total = round2(intro + sc);
       return send(res, 200, simCheckoutPage({
-        title: "Start your DealerCycle subscription",
-        lines: [
-          ["DealerCycle — intro (months 1–6)", money(intro)],
-          (sc > 0 ? ["Card processing fee (" + pct + "%)", money(sc)] : null),
-          [method === "card" ? "Paying by credit card" : "Paying by bank (ACH) — no fee", ""]
-        ],
-        total: total, payLabel: (method === "card" ? "Subscribe — " + money(total) + "/mo by card" : "Subscribe — " + money(intro) + "/mo by ACH"),
-        note: "Then " + money(Number(s.sub_list_price) || 99) + "/mo after " + (Number(s.sub_intro_months) || 6) + " months.",
-        action: "/api/sub/sim/complete", payload: { method: method },
-        done: "/admin"
+        mode: "subscription", merchant: "DealerCycle subscription",
+        amount: Number(s.sub_intro_price) || 59.99, surchargePct: payments.effectiveSurchargePct(s, s.dealer_state),
+        introMonths: Number(s.sub_intro_months) || 6, listPrice: Number(s.sub_list_price) || 99,
+        action: "/api/sub/sim/complete", payload: {}, done: "/admin", defaultMethod: method
       }), "text/html");
     }
     if (req.method === "POST" && p === "/api/sub/sim/complete") {
