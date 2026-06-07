@@ -415,16 +415,29 @@ function emailOrderConfirmation(cust, order) {
   const cyc = db().cycles.find(c => c.id === order.cycle_id);
   const items = orderItems(order.id).filter(i => i.qty > 0);
   let total = 0; let bags = 0;
+  const th = `style="background:${NAVY};color:#fff;padding:6px 10px;text-align:right;font-size:12px"`;
+  const thL = `style="background:${NAVY};color:#fff;padding:6px 10px;text-align:left;font-size:12px"`;
+  const td = `style="padding:6px 10px;border-bottom:1px solid #efe7d6;text-align:right"`;
+  const tdL = `style="padding:6px 10px;border-bottom:1px solid #efe7d6;text-align:left"`;
   const rows = items.map(i => {
-    const p = product(i.product_id); const line = i.qty * allIn(p, s); total += line; bags += i.qty;
-    return `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee">${esc(p.name)}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center">${i.qty}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right">${money(line)}</td></tr>`;
+    const p = product(i.product_id);
+    const unit = round2(basePrice(p, s));
+    const freight = round2(i.qty * s.freight);
+    const lt = round2(i.qty * unit + freight);
+    total = round2(total + lt); bags += i.qty;
+    return `<tr><td ${tdL}>${esc(p.name)}</td><td ${td}>${i.qty}</td><td ${td}>${money(unit)}</td><td ${td}>${money(freight)}</td><td ${td}>${money(lt)}</td></tr>`;
   }).join("");
   const subject = "Order received — " + s.payable_to + " (" + (cyc ? cyc.delivery_label : "") + ")";
   const html = wrapHtml(
-    `<h2 style="color:${NAVY};margin:0 0 4px">Order received</h2><p style="color:#555;margin:0 0 14px">Thanks, ${esc(cust.name)}. Here is your order with ${esc(s.dealer_name)} for the ${esc(cyc ? cyc.delivery_label : "")} cycle.</p>` +
-    `<table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:6px 10px;border-bottom:2px solid ${NAVY}">Product</th><th style="text-align:center;padding:6px 10px;border-bottom:2px solid ${NAVY}">Bags</th><th style="text-align:right;padding:6px 10px;border-bottom:2px solid ${NAVY}">Total</th></tr></thead><tbody>${rows}<tr><td colspan="2" style="padding:8px 10px;text-align:right;font-weight:bold">Total (${bags} bags)</td><td style="padding:8px 10px;text-align:right;font-weight:bold">${money(total)}</td></tr></tbody></table>` +
-    `<p style="color:#777;font-size:12px;margin-top:14px">Prices include $${s.freight.toFixed(2)}/bag freight. Need to change something before ${esc(s.close_day)} ${esc(s.close_time)}? Open your order link or reply to this email.</p>`);
-  const text = `Thanks, ${cust.name}. Order received for the ${cyc ? cyc.delivery_label : ""} cycle — ${bags} bags, total ${money(total)} (incl. $${s.freight.toFixed(2)}/bag freight). Reply to change anything.`;
+    `<h2 style="color:${NAVY};margin:0 0 4px">Order received</h2><p style="color:#555;margin:0 0 6px">Thanks, ${esc(cust.name)}. Here is your order with ${esc(s.dealer_name)} for the ${esc(cyc ? cyc.delivery_label : "")} cycle.</p>` +
+    `<table style="width:100%;border-collapse:collapse;font-size:13px;margin:12px 0"><thead><tr><th ${thL}>Item</th><th ${th}>Qty</th><th ${th}>Unit</th><th ${th}>Freight</th><th ${th}>Line Total</th></tr></thead><tbody>${rows}` +
+    `<tr><td colspan="4" style="padding:7px 10px;text-align:right;font-weight:bold;color:${NAVY};background:#EAF1E5">Estimated Total (${bags} bags)</td><td style="padding:7px 10px;text-align:right;font-weight:bold;color:${NAVY};background:#EAF1E5">${money(total)}</td></tr></tbody></table>` +
+    `<p style="color:#777;font-size:12px;margin-top:8px">Prices include $${s.freight.toFixed(2)}/bag freight. Your itemized invoice follows after the cycle closes. Need to change something before ${esc(s.close_day)} ${esc(s.close_time)}? Open your order link or reply to this email.</p>`);
+  const itemsText = items.map(i => {
+    const p = product(i.product_id); const unit = round2(basePrice(p, s)); const freight = round2(i.qty * s.freight); const lt = round2(i.qty * unit + freight);
+    return `  ${i.qty} x ${p.name} @ ${money(unit)} (+${money(freight)} frt) = ${money(lt)}`;
+  }).join("\n");
+  const text = `Thanks, ${cust.name}. Order received for the ${cyc ? cyc.delivery_label : ""} cycle.\n\n${itemsText}\n\nEstimated Total (${bags} bags): ${money(total)} (incl. $${s.freight.toFixed(2)}/bag freight)\n\nReply to change anything before ${s.close_day} ${s.close_time}.`;
   return { subject, text, html };
 }
 function emailCycleOpen(cust) {
