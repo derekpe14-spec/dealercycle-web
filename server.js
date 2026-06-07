@@ -911,6 +911,39 @@ const server = http.createServer(async (req, res) => {
         Object.assign(db().settings, body); save();
         return json(res, 200, { ok: true, settings: db().settings });
       }
+      // ----- price-sheet import: preview (match by name) and apply (by id) -----
+      if (req.method === "POST" && p === "/api/admin/prices/preview") {
+        const norm = (x) => String(x || "").toLowerCase()
+          .replace(/[®™•]/g, "").replace(/\b\d+(\.\d+)?\s*(%|lb|lbs|#|oz|gal|qt|g)\b/gi, " ")
+          .replace(/\bw\/|\bwith\b|\bper\b|\bbag\b|\bcase\b|\bbucket\b|\bjug\b|\bmedicated\b/gi, " ")
+          .replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+        const prods = db().products.map(p2 => ({ p: p2, n: norm(p2.name) }));
+        const matched = [], unmatched = [];
+        (body.rows || []).forEach(r => {
+          const rn = norm(r.name);
+          if (!rn) return;
+          let hit = prods.find(x => x.n === rn);
+          if (!hit) hit = prods.find(x => x.n && (x.n.includes(rn) || rn.includes(x.n)) && Math.min(x.n.length, rn.length) >= 4);
+          const wh = r.wholesale === undefined || r.wholesale === "" ? null : round2(Number(r.wholesale));
+          const srp = r.srp === undefined || r.srp === "" ? null : round2(Number(r.srp));
+          if (hit) matched.push({ id: hit.p.id, name: hit.p.name, category: hit.p.category, sheet_name: r.name, old_wholesale: hit.p.wholesale, old_srp: hit.p.srp, new_wholesale: wh, new_srp: srp });
+          else unmatched.push({ sheet_name: r.name, wholesale: wh, srp: srp });
+        });
+        return json(res, 200, { ok: true, matched, unmatched });
+      }
+      if (req.method === "POST" && p === "/api/admin/prices/apply") {
+        let applied = 0; const list = [];
+        (body.updates || []).forEach(u => {
+          const prod = db().products.find(x => x.id === u.id);
+          if (!prod) return;
+          const before = { wholesale: prod.wholesale, srp: prod.srp };
+          if (u.wholesale !== undefined && u.wholesale !== null && u.wholesale !== "") prod.wholesale = round2(Number(u.wholesale));
+          if (u.srp !== undefined && u.srp !== null && u.srp !== "") prod.srp = round2(Number(u.srp));
+          if (prod.wholesale !== before.wholesale || prod.srp !== before.srp) { applied++; list.push({ id: prod.id, name: prod.name, wholesale: prod.wholesale, srp: prod.srp }); }
+        });
+        if (applied) save();
+        return json(res, 200, { ok: true, applied, list });
+      }
       if (req.method === "POST" && p === "/api/admin/invoices/generate") {
         const s = db().settings; const cyc = getOrCreateCycle(s);
         let made = 0; let emailed = 0; const list = [];
