@@ -10,6 +10,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { db, save, nextId, reload } = require("./db");
 const mailer = require("./mailer");
+const payments = require("./payments");
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || "evans";
@@ -17,7 +18,7 @@ const BASE_URL = process.env.BASE_URL || ("http://localhost:" + PORT);
 // Front-end files live alongside the server (flat, single folder). Only these are
 // ever served as static assets — server code/data are never exposed.
 const PUBLIC = __dirname;
-const STATIC_ALLOW = new Set(["order.html", "admin.html", "start.html", "styles.css", "favicon.svg", "manifest.webmanifest", "dc-icon-192.png", "dc-icon-512.png", "dc-icon-180.png"]);
+const STATIC_ALLOW = new Set(["order.html", "admin.html", "start.html", "phone.html", "styles.css", "favicon.svg", "manifest.webmanifest", "dc-icon-192.png", "dc-icon-512.png", "dc-icon-180.png"]);
 
 // First-run: if there's no database yet, build it automatically (no separate seed step).
 const DATA_DIR = process.env.DATA_DIR || __dirname;
@@ -84,7 +85,7 @@ function windowState(s) {
   return { open, reason: open ? "open" : "outside window" };
 }
 function getOrCreateCycle(s) {
-  const sat = nextCycleSaturday(s);
+  const sat = cycleSaturdayForNow(s);   // stable across the whole Sat→Mon order window
   const key = cycleKey(sat);
   let c = db().cycles.find(x => x.delivery_key === key);
   if (!c) {
@@ -202,6 +203,8 @@ function buildInvoiceForCustomer(custId, cycleId) {
   } else if (!pay.paid) {
     pay.amount = total;
   }
+  // Inventory: when the invoice is first created, the stocked bags leave on_hand.
+  if (isNew) fulfillInvoiceStock(inv, items.map(i => ({ product_id: i.product_id, qty: i.qty })));
   save();
   return inv;
 }
@@ -229,10 +232,168 @@ tr.alt td{background:#F3EFE3} .num{text-align:right} .totals{margin-top:10px;wid
 <tr><td>Tax (${(inv.tax_rate * 100).toFixed(1)}%)</td><td class="num">${money(inv.tax)}</td></tr>
 ${inv.credit_total ? `<tr><td>Credit applied</td><td class="num">&minus;${money(inv.credit_total)}</td></tr>` : ""}
 <tr class="due"><td>TOTAL DUE</td><td class="num">${money(inv.total)}</td></tr></table>
-<div class="pay"><b>Payment options</b><br>• Check — payable to ${esc(s.payable_to)}<br>• Venmo — ${esc(s.venmo)}</div>
+${(function(){
+  const pay = (db().payments || []).find(pp => pp.invoice_id === inv.id);
+  const paid = pay && pay.paid;
+  const pct = payments.effectiveSurchargePct(s, s.dealer_state);
+  const sc = payments.surchargeAmount(inv.total, pct);
+  const cardTotal = round2(inv.total + sc);
+  const canPay = !inv.cancelled && !paid && inv.total > 0;
+  if (paid) return '<div class="pay"><b>Paid</b> — thank you!' + (pay.method ? ' (' + esc(pay.method) + ')' : '') + '</div>';
+  let h = '<div class="pay"><b>Payment options</b><br>&bull; Check — payable to ' + esc(s.payable_to) + '<br>&bull; Venmo — ' + esc(s.venmo);
+  h += (pct > 0)
+    ? '<br>&bull; Credit card — adds a ' + pct + '% ' + esc(s.surcharge_label || 'card processing fee') + ' (' + money(sc) + '); card total <b>' + money(cardTotal) + '</b>. ACH/check has no fee.'
+    : '<br>&bull; Credit card accepted';
+  h += '</div>';
+  if (canPay) {
+    h += '<div class="noprint" style="margin-top:12px"><button class="btn" id="cardbtn" onclick="payCard()">Pay by card' + (pct > 0 ? ' — ' + money(cardTotal) : '') + '</button></div>';
+    h += '<script>function payCard(){var b=document.getElementById("cardbtn");b.disabled=true;b.textContent="Starting secure checkout\\u2026";fetch("/api/pay",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({invoice_id:' + inv.id + '})}).then(function(r){return r.json();}).then(function(d){if(d&&d.url){window.location=d.url;}else{b.disabled=false;b.textContent="Pay by card";alert((d&&d.error)||"Could not start checkout.");}}).catch(function(){b.disabled=false;b.textContent="Pay by card";});}</script>';
+  }
+  return h;
+})()}
 <div class="terms">${esc(s.invoice_terms)}</div>
 <div class="noprint"><button class="btn" onclick="window.print()">Print / Save PDF</button></div>
 </body></html>`;
+}
+
+// ---------------------------------------------------------------------------
+// Inventory (prototype) — DealerCycle OWNS the stock; QuickBooks would receive
+// only the money. Optional per dealer via settings.inventory_enabled.
+//   inventory_items : one row per product a dealer stocks
+//   stock_movements : append-only ledger (receive/fulfill/return/adjust/write_off)
+//   qbo_log         : preview of the transaction that WOULD post to QuickBooks
+// Live numbers: available = on_hand - committed; committed = submitted orders
+// this cycle that are not yet invoiced (once invoiced, stock leaves on_hand).
+// ---------------------------------------------------------------------------
+function ensureInventory() {
+  const d = db();
+  if (!d.inventory_items) d.inventory_items = [];
+  if (!d.stock_movements) d.stock_movements = [];
+  if (!d.receipts) d.receipts = [];
+  if (!d.qbo_log) d.qbo_log = [];
+}
+function invItem(productId) { ensureInventory(); return db().inventory_items.find(i => i.product_id === productId); }
+function committedQty(productId) {
+  const s = db().settings; const cyc = getOrCreateCycle(s);
+  let q = 0;
+  db().orders.filter(o => o.cycle_id === cyc.id && o.status === "submitted").forEach(o => {
+    const invoiced = db().invoices.find(v => v.customer_id === o.customer_id && v.cycle_id === cyc.id && !v.cancelled);
+    if (invoiced) return; // invoiced => already pulled from on_hand, no longer "committed"
+    orderItems(o.id).forEach(i => { if (i.product_id === productId) q += i.qty; });
+  });
+  return q;
+}
+function availableQty(productId) {
+  const it = invItem(productId); if (!it) return 0;
+  return Math.max(0, round2((it.on_hand || 0) - committedQty(productId)));
+}
+function logQbo(txn, detail, amount) {
+  ensureInventory();
+  db().qbo_log.push({ id: nextId("qbo_log"), txn, detail, amount: amount == null ? null : round2(amount), at: new Date().toISOString() });
+}
+// Apply a signed quantity change to on_hand and append a ledger row.
+function recordMovement(productId, type, qtyDelta, opts) {
+  ensureInventory();
+  const it = invItem(productId);
+  if (!it) return null;
+  opts = opts || {};
+  // weighted-average cost on stock-in
+  if (qtyDelta > 0 && opts.unit_cost != null) {
+    const prevQty = Math.max(0, it.on_hand || 0), prevVal = prevQty * (it.avg_cost || 0);
+    const newVal = prevVal + qtyDelta * opts.unit_cost;
+    const newQty = prevQty + qtyDelta;
+    it.avg_cost = round2(newQty > 0 ? newVal / newQty : opts.unit_cost);
+  }
+  it.on_hand = round2((it.on_hand || 0) + qtyDelta);
+  const mv = {
+    id: nextId("stock_movements"), product_id: productId,
+    product_name: (product(productId) || {}).name || productId,
+    type, qty: round2(qtyDelta), balance_after: it.on_hand,
+    reason: opts.reason || "", ref: opts.ref || "",
+    unit_cost: opts.unit_cost != null ? round2(opts.unit_cost) : null,
+    at: new Date().toISOString()
+  };
+  db().stock_movements.push(mv);
+  return mv;
+}
+// On invoice creation, pull stocked products out of on_hand (the bags leave the
+// shelf). Records what each invoice removed so a cancel can put it back exactly.
+function fulfillInvoiceStock(inv, items) {
+  if (!db().settings.inventory_enabled) return;
+  ensureInventory();
+  const fulfilled = [];
+  items.forEach(i => {
+    if (!invItem(i.product_id)) return;
+    recordMovement(i.product_id, "fulfill", -i.qty, { reason: "Invoice " + inv.invoice_num, ref: "INV:" + inv.id });
+    fulfilled.push({ product_id: i.product_id, qty: i.qty });
+  });
+  if (fulfilled.length) { inv.fulfilled_items = fulfilled; logQbo("Invoice", inv.invoice_num + " · " + inv.customer_name + " (income + A/R)", inv.total); }
+}
+
+// Record the dealer's own DealerCycle subscription (how this dealer pays us).
+// This is OUR revenue, not the dealer's books, so it is NOT written to qbo_log.
+function activateSubscription(method, ids) {
+  const s = db().settings;
+  db().subscription = {
+    status: "active",
+    method: method === "card" ? "card" : "ach",
+    intro_price: Number(s.sub_intro_price) || 59.99,
+    list_price: Number(s.sub_list_price) || 99,
+    intro_months: Number(s.sub_intro_months) || 6,
+    started_at: new Date().toISOString().slice(0, 10),
+    stripe_customer_id: (ids && ids.stripe_customer_id) || null,
+    stripe_subscription_id: (ids && ids.stripe_subscription_id) || null
+  };
+  save();
+  return db().subscription;
+}
+
+// Minimal hosted-checkout look-alike used in SIMULATED mode (no Stripe key), so
+// the whole pay flow is clickable in a demo. `lines` may contain nulls.
+function simCheckoutPage(o) {
+  const rows = (o.lines || []).filter(Boolean).map(l =>
+    `<div class="row"><span>${esc(l[0])}</span><span>${esc(l[1])}</span></div>`).join("");
+  const payload = JSON.stringify(o.payload || {});
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(o.title)}</title>
+<style>body{font-family:Arial,Helvetica,sans-serif;background:#F3EFE3;color:#3B2F1E;margin:0;padding:24px}
+.card{max-width:420px;margin:6vh auto;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.12);overflow:hidden}
+.hd{background:#2F6B3A;color:#fff;padding:16px 20px;font-weight:bold;font-size:16px}
+.bd{padding:20px} .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}
+.tot{display:flex;justify-content:space-between;padding:12px 0 4px;font-weight:bold;font-size:17px;color:#2F6B3A}
+.note{color:#7a6f5a;font-size:12px;margin:6px 0 16px} .sim{background:#FFF6E6;color:#8a6d1f;font-size:11.5px;padding:6px 10px;border-radius:8px;margin-bottom:14px;text-align:center}
+.btn{display:block;width:100%;background:#2F6B3A;color:#fff;border:0;border-radius:10px;padding:13px;font-size:15px;font-weight:bold;cursor:pointer}
+.btn:disabled{opacity:.6}</style></head><body>
+<div class="card"><div class="hd">${esc(o.title)}</div><div class="bd">
+<div class="sim">Simulated checkout — no real card is charged (set STRIPE_SECRET_KEY to go live).</div>
+${rows}<div class="tot"><span>Total</span><span>${money(o.total)}</span></div>
+${o.note ? `<div class="note">${esc(o.note)}</div>` : ""}
+<button class="btn" id="go" onclick="pay()">${esc(o.payLabel)}</button>
+</div></div>
+<script>function pay(){var b=document.getElementById("go");b.disabled=true;b.textContent="Processing\\u2026";fetch("${o.action}",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(${payload})}).then(function(r){return r.json();}).then(function(d){if(d&&d.ok){window.location="${o.done}";}else{b.disabled=false;b.textContent="Try again";alert((d&&d.error)||"Could not complete.");}}).catch(function(){b.disabled=false;});}</script>
+</body></html>`;
+}
+function simResultPage(title, msg) {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
+<style>body{font-family:Arial,Helvetica,sans-serif;background:#F3EFE3;color:#3B2F1E;margin:0;padding:24px;text-align:center}
+.card{max-width:420px;margin:12vh auto;background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.12);padding:32px 24px}
+h1{color:#2F6B3A;font-size:22px;margin:0 0 10px} p{color:#555;font-size:14px}</style></head><body>
+<div class="card"><div style="font-size:40px">&#10003;</div><h1>${esc(title)}</h1><p>${esc(msg)}</p></div></body></html>`;
+}
+
+// Mark an invoice paid from an online card payment (Stripe webhook or simulated
+// completion). Idempotent. `surcharge` is the card fee the customer paid on top.
+function markInvoicePaid(invoiceId, method, surcharge) {
+  const pay = (db().payments || []).find(pp => pp.invoice_id === invoiceId);
+  if (!pay) return false;
+  if (pay.paid) return true;
+  pay.paid = true;
+  pay.date_paid = new Date().toISOString().slice(0, 10);
+  pay.method = method || "Card";
+  if (surcharge != null) pay.surcharge = round2(surcharge);
+  const inv = db().invoices.find(v => v.id === invoiceId);
+  logQbo("Payment", (pay.invoice_num || "") + " · " + (pay.customer_name || "") + " (" + pay.method + (surcharge ? ", incl. " + money(surcharge) + " card fee" : "") + ")", round2((pay.amount || 0) + (surcharge || 0)));
+  save();
+  return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -324,6 +485,9 @@ function json(res, code, obj) { send(res, code, JSON.stringify(obj), "applicatio
 function readBody(req) {
   return new Promise(resolve => { let b = ""; req.on("data", c => b += c); req.on("end", () => { try { resolve(b ? JSON.parse(b) : {}); } catch { resolve({}); } }); });
 }
+function readRaw(req) { // unparsed body string — Stripe webhook signature needs this
+  return new Promise(resolve => { let b = ""; req.on("data", c => b += c); req.on("end", () => resolve(b)); });
+}
 function isAdmin(req) {
   const pass = req.headers["x-dc-pass"] || "";
   return pass === ADMIN_PASSCODE;
@@ -389,17 +553,57 @@ function adminData() {
     orders,
     tally: Object.keys(tally).map(pid => ({ id: pid, name: product(pid).name, category: product(pid).category, bags: tally[pid], revenue: round2(tally[pid] * allIn(product(pid), s)), bag_hex: product(pid).bag_hex })).sort((a, b) => b.bags - a.bags),
     pricing,
-    invoices: db().invoices.map(v => ({ id: v.id, invoice_num: v.invoice_num, customer_id: v.customer_id, customer_name: v.customer_name, cycle_label: v.cycle_label, date_issued: v.date_issued, total: v.total })).sort((a, b) => b.id - a.id),
+    invoices: db().invoices.map(v => ({ id: v.id, invoice_num: v.invoice_num, customer_id: v.customer_id, customer_name: v.customer_name, cycle_label: v.cycle_label, date_issued: v.date_issued, total: v.total, cancelled: !!v.cancelled, cancel_reason: v.cancel_reason || "", walk_in: !!v.walk_in, fulfilled: !!(v.fulfilled_items && v.fulfilled_items.length) })).sort((a, b) => b.id - a.id),
     payments: db().payments.map(p => ({ ...p })).sort((a, b) => Number(a.paid) - Number(b.paid) || b.id - a.id),
     credits: (db().credits || []).map(c => ({ ...c })).sort((a, b) => b.id - a.id),
     mail_provider: mailer.providerName(),
-    outbox: (db().outbox || []).map(o => ({ id: o.id, kind: o.kind, to: o.to, to_name: o.to_name, subject: o.subject, text: o.text, created_at: o.created_at, status: o.status, provider: o.provider, error: o.error })).sort((a, b) => b.id - a.id)
+    outbox: (db().outbox || []).map(o => ({ id: o.id, kind: o.kind, to: o.to, to_name: o.to_name, subject: o.subject, text: o.text, created_at: o.created_at, status: o.status, provider: o.provider, error: o.error })).sort((a, b) => b.id - a.id),
+    inventory_enabled: !!s.inventory_enabled,
+    inventory: inventoryView(),
+    bills: (db().bills || []).map(b => ({ ...b })).sort((a, b) => Number(a.status === "paid") - Number(b.status === "paid") || (a.due_date < b.due_date ? -1 : 1)),
+    money: moneyPosition(),
+    stock_movements: (db().stock_movements || []).slice().sort((a, b) => b.id - a.id).slice(0, 60),
+    qbo_log: (db().qbo_log || []).slice().sort((a, b) => b.id - a.id).slice(0, 40),
+    payments_provider: payments.providerName(),
+    subscription: db().subscription || null
   };
 }
 
-function millOrderText() {
+// Money position for dealers without QuickBooks: A/R (customers owe you) vs
+// A/P (you owe the mill/vendors). Simple cash tracker — not real accounting.
+function moneyPosition() {
+  const pays = db().payments || [];
+  const bills = db().bills || [];
+  const ar_out = round2(pays.filter(p => !p.paid).reduce((a, p) => a + (p.amount || 0), 0));
+  const ar_in = round2(pays.filter(p => p.paid).reduce((a, p) => a + (p.amount || 0), 0));
+  const ap_out = round2(bills.filter(b => b.status !== "paid").reduce((a, b) => a + (b.amount || 0), 0));
+  const ap_paid = round2(bills.filter(b => b.status === "paid").reduce((a, b) => a + (b.amount || 0), 0));
+  return { ar_out, ar_in, ap_out, ap_paid, net: round2(ar_out - ap_out) };
+}
+
+// Per-product live inventory for the dashboard (only carried products).
+function inventoryView() {
+  ensureInventory();
   const s = db().settings;
-  const cyc = getOrCreateCycle(s);
+  return db().inventory_items.map(it => {
+    const p = product(it.product_id) || {};
+    const committed = committedQty(it.product_id);
+    const onHand = round2(it.on_hand || 0);
+    const available = Math.max(0, round2(onHand - committed));
+    return {
+      product_id: it.product_id, name: p.name || it.product_id, category: p.category || "",
+      bag_hex: p.bag_hex || "#999", size: p.size || "",
+      on_hand: onHand, committed, available,
+      reorder_point: it.reorder_point || 0, reorder_qty: it.reorder_qty || 0,
+      avg_cost: round2(it.avg_cost || 0), value: round2(onHand * (it.avg_cost || 0)),
+      low: available <= (it.reorder_point || 0)
+    };
+  }).sort((a, b) => (a.low === b.low ? a.name.localeCompare(b.name) : (a.low ? -1 : 1)));
+}
+
+function millOrderText(cycArg) {
+  const s = db().settings;
+  const cyc = cycArg || getOrCreateCycle(s);
   const tally = tallyCycle(cyc.id);
   const order = db().categoryOrder;
   const rows = Object.keys(tally).map(pid => [product(pid), tally[pid]])
@@ -508,8 +712,108 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, invoiceHtml(inv), "text/html");
     }
 
+    // ===================== PAYMENTS (Stripe + simulated) =====================
+    // Stripe webhook — must read the RAW body for signature verification, and is
+    // NOT behind the admin passcode (Stripe calls it directly).
+    if (req.method === "POST" && p === "/api/stripe/webhook") {
+      const raw = await readRaw(req);
+      const evt = payments.verifyWebhook(raw, req.headers["stripe-signature"]);
+      if (!evt) return send(res, 400, "bad signature", "text/plain");
+      try {
+        if (evt.type === "checkout.session.completed") {
+          const sess = evt.data.object || {};
+          const md = sess.metadata || {};
+          if (md.kind === "invoice") {
+            markInvoicePaid(Number(md.invoice_id), "Card", Number(md.surcharge || 0));
+          } else if (md.kind === "subscription") {
+            activateSubscription(md.method || "ach", { stripe_customer_id: sess.customer, stripe_subscription_id: sess.subscription });
+          }
+        }
+      } catch (e) { console.error("webhook handler:", e); }
+      return json(res, 200, { received: true });
+    }
+    // Customer starts paying an invoice by card -> returns a checkout URL.
+    if (req.method === "POST" && p === "/api/pay") {
+      const body = await readBody(req);
+      const inv = db().invoices.find(v => v.id === Number(body.invoice_id));
+      if (!inv) return json(res, 404, { error: "Invoice not found." });
+      const pay = (db().payments || []).find(pp => pp.invoice_id === inv.id);
+      if (inv.cancelled) return json(res, 400, { error: "This invoice was cancelled." });
+      if (pay && pay.paid) return json(res, 400, { error: "This invoice is already paid." });
+      const s = db().settings;
+      const pct = payments.effectiveSurchargePct(s, s.dealer_state);
+      const sc = payments.surchargeAmount(inv.total, pct);
+      const cust = findCustomerById(inv.customer_id);
+      try {
+        const r = await payments.createInvoiceCheckout({
+          invoiceId: inv.id, invoiceNum: inv.invoice_num, dealerName: s.dealer_name,
+          amount: inv.total, surcharge: sc, surchargeLabel: s.surcharge_label,
+          customerEmail: cust ? cust.email : "",
+          successUrl: BASE_URL + "/pay/success?invoice=" + inv.id,
+          cancelUrl: BASE_URL + "/invoice/" + inv.id
+        });
+        return json(res, 200, { url: r.url, provider: r.provider, surcharge: sc, card_total: round2(inv.total + sc) });
+      } catch (e) { return json(res, 502, { error: "Payment setup failed: " + String(e.message || e) }); }
+    }
+    // Simulated card-checkout page for an invoice (only used when no Stripe key).
+    if (req.method === "GET" && p === "/pay/sim") {
+      const id = Number(u.searchParams.get("invoice"));
+      const inv = db().invoices.find(v => v.id === id);
+      if (!inv) return send(res, 404, "Invoice not found", "text/plain");
+      const amount = Number(u.searchParams.get("amount")) || inv.total;
+      const sc = Number(u.searchParams.get("surcharge")) || 0;
+      const total = round2(amount + sc);
+      return send(res, 200, simCheckoutPage({
+        title: "Pay invoice " + inv.invoice_num, lines: [
+          ["Invoice " + inv.invoice_num, money(amount)],
+          (sc > 0 ? [(db().settings.surcharge_label || "Card processing fee"), money(sc)] : null)
+        ], total: total, payLabel: "Pay " + money(total) + " by card",
+        action: "/api/pay/sim/complete", payload: { invoice_id: inv.id, surcharge: sc },
+        done: "/pay/success?invoice=" + inv.id
+      }), "text/html");
+    }
+    if (req.method === "POST" && p === "/api/pay/sim/complete") {
+      if (payments.isLive()) return json(res, 400, { error: "Live mode — use real Stripe." });
+      const body = await readBody(req);
+      markInvoicePaid(Number(body.invoice_id), "Card", Number(body.surcharge || 0));
+      return json(res, 200, { ok: true });
+    }
+    // Simulated subscription-checkout page (only used when no Stripe key).
+    if (req.method === "GET" && p === "/pay/sim-sub") {
+      const s = db().settings;
+      const method = u.searchParams.get("method") === "card" ? "card" : "ach";
+      const intro = Number(s.sub_intro_price) || 59.99;
+      const pct = method === "card" ? payments.effectiveSurchargePct(s, s.dealer_state) : 0;
+      const sc = payments.surchargeAmount(intro, pct);
+      const total = round2(intro + sc);
+      return send(res, 200, simCheckoutPage({
+        title: "Start your DealerCycle subscription",
+        lines: [
+          ["DealerCycle — intro (months 1–6)", money(intro)],
+          (sc > 0 ? ["Card processing fee (" + pct + "%)", money(sc)] : null),
+          [method === "card" ? "Paying by credit card" : "Paying by bank (ACH) — no fee", ""]
+        ],
+        total: total, payLabel: (method === "card" ? "Subscribe — " + money(total) + "/mo by card" : "Subscribe — " + money(intro) + "/mo by ACH"),
+        note: "Then " + money(Number(s.sub_list_price) || 99) + "/mo after " + (Number(s.sub_intro_months) || 6) + " months.",
+        action: "/api/sub/sim/complete", payload: { method: method },
+        done: "/admin"
+      }), "text/html");
+    }
+    if (req.method === "POST" && p === "/api/sub/sim/complete") {
+      if (payments.isLive()) return json(res, 400, { error: "Live mode — use real Stripe." });
+      const body = await readBody(req);
+      activateSubscription(body.method === "card" ? "card" : "ach", {});
+      return json(res, 200, { ok: true });
+    }
+    if (req.method === "GET" && p === "/pay/success") {
+      return send(res, 200, simResultPage("Payment received", "Thank you — your payment is recorded. You can close this page."), "text/html");
+    }
+
     // ----- admin app -----
     if (req.method === "GET" && (p === "/" || p === "/admin")) return serveStatic(res, "admin.html");
+
+    // ----- phone-framed dealer preview (for the pitch) -----
+    if (req.method === "GET" && (p === "/phone" || p === "/dealer-phone")) return serveStatic(res, "phone.html");
 
     // ----- admin API (passcode gated) -----
     if (p.startsWith("/api/admin/")) {
@@ -572,6 +876,10 @@ const server = http.createServer(async (req, res) => {
           if (e.status === "sent") sent++; else captured++;
         }
         return json(res, 200, { ok: true, sent, captured, noEmail });
+      }
+      if (req.method === "POST" && p === "/api/admin/mill/send") {
+        const r = await emailMillOrder();
+        return json(res, r.ok ? 200 : 400, r);
       }
       if (req.method === "POST" && p === "/api/admin/reset") {
         // Clear test activity but KEEP catalog, customers (and their link tokens), and settings.
@@ -713,6 +1021,183 @@ const server = http.createServer(async (req, res) => {
         save();
         return json(res, 200, { ok: true, results });
       }
+      // ----- INVENTORY (prototype) -----
+      // Start carrying a product / update its reorder rule (+ optional opening stock).
+      if (req.method === "POST" && p === "/api/admin/inventory/item") {
+        ensureInventory();
+        const prod = product(body.product_id);
+        if (!prod) return json(res, 404, { error: "Product not found" });
+        let it = invItem(body.product_id);
+        if (!it) { it = { product_id: body.product_id, on_hand: 0, avg_cost: 0, reorder_point: 0, reorder_qty: 0 }; db().inventory_items.push(it); }
+        if (body.reorder_point !== undefined) it.reorder_point = Math.max(0, Number(body.reorder_point) || 0);
+        if (body.reorder_qty !== undefined) it.reorder_qty = Math.max(0, Number(body.reorder_qty) || 0);
+        const opening = Number(body.opening_qty) || 0;
+        if (opening > 0) {
+          const cost = body.unit_cost != null ? Number(body.unit_cost) : prod.wholesale;
+          recordMovement(body.product_id, "receive", opening, { unit_cost: cost, reason: "Opening count" });
+          logQbo("Bill", opening + " × " + prod.name + " received (opening)", opening * cost);
+        }
+        save();
+        return json(res, 200, { ok: true });
+      }
+      // Stop carrying a product.
+      if (req.method === "POST" && p === "/api/admin/inventory/remove") {
+        ensureInventory();
+        db().inventory_items = db().inventory_items.filter(i => i.product_id !== body.product_id);
+        save();
+        return json(res, 200, { ok: true });
+      }
+      // Receive a shipment from the mill (stock in).
+      if (req.method === "POST" && p === "/api/admin/inventory/receive") {
+        ensureInventory();
+        const lines = Array.isArray(body.items) ? body.items : [];
+        let count = 0, value = 0;
+        lines.forEach(l => {
+          const it = invItem(l.product_id); const prod = product(l.product_id);
+          const qty = Number(l.qty) || 0;
+          if (!it || !prod || qty <= 0) return;
+          const cost = l.unit_cost != null ? Number(l.unit_cost) : (it.avg_cost || prod.wholesale);
+          recordMovement(l.product_id, "receive", qty, { unit_cost: cost, reason: body.reason || "Mill shipment" });
+          count += qty; value += qty * cost;
+        });
+        if (count) {
+          db().receipts.push({ id: nextId("receipts"), at: new Date().toISOString(), count, value: round2(value), note: body.reason || "Mill shipment" });
+          // Native payable (for dealers without QuickBooks): you now owe the mill.
+          if (!db().bills) db().bills = [];
+          const today = new Date().toISOString().slice(0, 10);
+          const net = Number(db().settings.payable_net_days) || 15;
+          db().bills.push({
+            id: nextId("bills"), vendor: body.vendor || "Umbarger Feeds",
+            description: count + " bags · " + (body.reason || "Mill shipment"),
+            amount: round2(value), date_created: today,
+            due_date: new Date(Date.now() + net * 86400000).toISOString().slice(0, 10),
+            status: "open", date_paid: null, method: "", ref: "RECEIVE", auto: true
+          });
+          logQbo("Bill", count + " bags received from mill", value);
+        }
+        save();
+        return json(res, 200, { ok: true, count, value: round2(value) });
+      }
+      // Manual quantity correction (count / shrink) — not a sale.
+      if (req.method === "POST" && p === "/api/admin/inventory/adjust") {
+        ensureInventory();
+        const it = invItem(body.product_id);
+        if (!it) return json(res, 404, { error: "Not carried" });
+        const newQty = Number(body.new_qty);
+        if (!(newQty >= 0)) return json(res, 400, { error: "Enter a valid count" });
+        const delta = round2(newQty - (it.on_hand || 0));
+        if (delta !== 0) {
+          recordMovement(body.product_id, "adjust", delta, { reason: (body.reason || "Count correction") });
+          logQbo("Inventory Adjustment", (product(body.product_id) || {}).name + " set to " + newQty, null);
+        }
+        save();
+        return json(res, 200, { ok: true });
+      }
+      // Walk-in / counter sale — HARD-GATED to available stock. Records a paid
+      // Sales Receipt (so it shows in Invoices/Payments) and pulls stock.
+      if (req.method === "POST" && p === "/api/admin/inventory/quicksale") {
+        ensureInventory();
+        const s = db().settings;
+        const lines = (Array.isArray(body.items) ? body.items : []).filter(l => (Number(l.qty) || 0) > 0);
+        if (!lines.length) return json(res, 400, { error: "Add at least one item." });
+        // gate every line against live availability
+        for (const l of lines) {
+          const prod = product(l.product_id); const it = invItem(l.product_id);
+          if (!it || !prod) return json(res, 400, { error: "Item not carried: " + l.product_id });
+          if ((Number(l.qty) || 0) > availableQty(l.product_id)) return json(res, 400, { error: "Only " + availableQty(l.product_id) + " available of " + prod.name });
+        }
+        const today = new Date().toISOString().slice(0, 10);
+        const baseLines = lines.map(l => {
+          const prod = product(l.product_id); const qty = Number(l.qty);
+          const unit = round2(basePrice(prod, s)); const freight = round2(qty * s.freight);
+          return { description: prod.name, qty, unitPrice: unit, freight, total: round2(qty * unit + freight) };
+        });
+        const subtotal = round2(baseLines.reduce((a, l) => a + l.total, 0));
+        const taxRate = s.tax_enabled ? s.tax_pct / 100 : 0;
+        const tax = round2(subtotal * taxRate);
+        const total = round2(subtotal + tax);
+        const inv = {
+          id: nextId("invoices"), invoice_num: nextInvoiceNum(),
+          customer_id: body.customer_id || null,
+          customer_name: (body.customer_name || "").trim() || "Counter sale",
+          cycle_id: null, cycle_label: "Walk-in", date_issued: today,
+          lines: baseLines, subtotal, tax_rate: taxRate, tax, credit_total: 0, total, freight_rate: s.freight,
+          walk_in: true
+        };
+        db().invoices.push(inv);
+        // pull stock + record what to restore on cancel
+        const fulfilled = [];
+        lines.forEach(l => { recordMovement(l.product_id, "fulfill", -Number(l.qty), { reason: "Walk-in " + inv.invoice_num, ref: "INV:" + inv.id }); fulfilled.push({ product_id: l.product_id, qty: Number(l.qty) }); });
+        inv.fulfilled_items = fulfilled;
+        // paid Sales Receipt
+        db().payments.push({ id: nextId("payments"), invoice_id: inv.id, invoice_num: inv.invoice_num, customer_id: inv.customer_id, customer_name: inv.customer_name, amount: total, cycle: "Walk-in", date_issued: today, paid: true, date_paid: today, method: body.method || "Cash", notes: "Counter sale", reminders: 0 });
+        logQbo("Sales Receipt", inv.invoice_num + " · " + inv.customer_name + " (paid " + (body.method || "Cash") + ")", total);
+        save();
+        return json(res, 200, { ok: true, invoice_num: inv.invoice_num, total });
+      }
+      // Cancel an invoice (no-show) and either restock or write off the bags.
+      if (req.method === "POST" && p === "/api/admin/invoice/cancel") {
+        ensureInventory();
+        const inv = db().invoices.find(v => v.id === body.id);
+        if (!inv) return json(res, 404, { error: "Invoice not found" });
+        if (inv.cancelled) return json(res, 400, { error: "Already cancelled" });
+        const mode = body.mode === "writeoff" ? "writeoff" : "restock";
+        (inv.fulfilled_items || []).forEach(f => {
+          if (!invItem(f.product_id)) return;
+          if (mode === "restock") recordMovement(f.product_id, "return", f.qty, { reason: "Cancel " + inv.invoice_num + (body.reason ? " — " + body.reason : ""), ref: "INV:" + inv.id });
+          else recordMovement(f.product_id, "write_off", 0, { reason: "Write-off " + inv.invoice_num + (body.reason ? " — " + body.reason : ""), ref: "INV:" + inv.id });
+        });
+        inv.cancelled = true; inv.cancel_reason = (body.reason || "Not picked up");
+        inv.cancel_mode = mode; inv.cancelled_date = new Date().toISOString().slice(0, 10);
+        // void the money: remove the payment so it leaves the outstanding/collected tallies
+        db().payments = db().payments.filter(pp => pp.invoice_id !== inv.id);
+        logQbo(mode === "restock" ? "Void Invoice" : "Write-off", inv.invoice_num + " · " + inv.customer_name + (mode === "restock" ? " (restocked, A/R cleared)" : " (loss to COGS)"), mode === "restock" ? -inv.total : null);
+        save();
+        return json(res, 200, { ok: true, mode });
+      }
+      // ----- PAYABLES / BILLS (native books for dealers without QuickBooks) -----
+      if (req.method === "POST" && p === "/api/admin/bill") {
+        if (!db().bills) db().bills = [];
+        let b = body.id ? db().bills.find(x => x.id === body.id) : null;
+        if (!b) { b = { id: nextId("bills"), status: "open", date_paid: null, method: "", auto: false, date_created: new Date().toISOString().slice(0, 10) }; db().bills.push(b); }
+        ["vendor", "description", "due_date"].forEach(k => { if (body[k] !== undefined) b[k] = body[k]; });
+        if (body.amount !== undefined) b.amount = round2(Number(body.amount) || 0);
+        if (!b.vendor) return json(res, 400, { error: "Vendor is required." });
+        if (!(b.amount > 0)) return json(res, 400, { error: "Amount must be greater than 0." });
+        save();
+        return json(res, 200, { ok: true, bill: b });
+      }
+      if (req.method === "POST" && p === "/api/admin/bill/toggle") {
+        const b = (db().bills || []).find(x => x.id === body.id);
+        if (!b) return json(res, 404, { error: "Not found" });
+        b.status = b.status === "paid" ? "open" : "paid";
+        b.date_paid = b.status === "paid" ? new Date().toISOString().slice(0, 10) : null;
+        if (body.method !== undefined) b.method = body.method;
+        logQbo(b.status === "paid" ? "Bill Payment" : "Bill", b.vendor + " · " + (b.description || ""), b.status === "paid" ? -b.amount : b.amount);
+        save();
+        return json(res, 200, { ok: true, bill: b });
+      }
+      if (req.method === "POST" && p === "/api/admin/bill/delete") {
+        db().bills = (db().bills || []).filter(x => x.id !== body.id);
+        save();
+        return json(res, 200, { ok: true });
+      }
+      // ----- DEALERCYCLE SUBSCRIPTION (how this dealer pays us) -----
+      if (req.method === "POST" && p === "/api/admin/subscribe") {
+        const method = body.method === "card" ? "card" : "ach";
+        const s = db().settings;
+        try {
+          const r = await payments.createSubscriptionCheckout({
+            dealerEmail: s.email, method,
+            successUrl: BASE_URL + "/admin", cancelUrl: BASE_URL + "/admin"
+          });
+          return json(res, 200, { url: r.url, provider: r.provider });
+        } catch (e) { return json(res, 502, { error: "Subscription setup failed: " + String(e.message || e) }); }
+      }
+      if (req.method === "POST" && p === "/api/admin/subscription/cancel") {
+        if (db().subscription) { db().subscription.status = "canceled"; save(); }
+        return json(res, 200, { ok: true });
+      }
       return json(res, 404, { error: "Unknown admin route" });
     }
 
@@ -726,8 +1211,120 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// Scheduler — runs the cycle automatically on the dealer's clock:
+//   Saturday open_time   → open ordering + email each customer their link
+//   Monday   close_time  → close ordering
+//   Monday   mill_time   → email the consolidated order to the mill contact
+//   Wednesday invoice_time → generate + email invoices for the cycle
+// All gated by settings.automation_enabled. Idempotent per cycle via
+// settings.schedule_state. Times honor settings.timezone (default Eastern).
+// ---------------------------------------------------------------------------
+function tzParts(date, tz) {
+  const f = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour12: false, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+  const o = {}; f.formatToParts(date).forEach(p => { o[p.type] = p.value; }); return o;
+}
+function zonedToUTC(y, mo, d, h, mi, tz) {
+  const guess = Date.UTC(y, mo - 1, d, h, mi);
+  const o = tzParts(new Date(guess), tz);
+  const asUTC = Date.UTC(+o.year, +o.month - 1, +o.day, +o.hour, +o.minute);
+  return guess - (asUTC - guess);
+}
+function parseHM(t) { const m = String(t).match(/(\d+):(\d+)\s*(AM|PM)?/i); if (!m) return { h: 0, mi: 0 }; let h = +m[1]; const mi = +m[2]; const ap = (m[3] || "").toUpperCase(); if (ap === "PM" && h < 12) h += 12; if (ap === "AM" && h === 12) h = 0; return { h, mi }; }
+function isoUTC(d) { return d.getUTCFullYear() + "-" + String(d.getUTCMonth() + 1).padStart(2, "0") + "-" + String(d.getUTCDate()).padStart(2, "0"); }
+function currentCycleSaturday(s, tz, nowMs) {
+  const now = tzParts(new Date(nowMs == null ? Date.now() : nowMs), tz);
+  const today = Date.UTC(+now.year, +now.month - 1, +now.day);
+  const anchor = Date.UTC(...s.cycle_anchor.split("-").map((v, i) => i === 1 ? +v - 1 : +v));
+  const freq = (Number(s.frequency_days) || 14) * 86400000;
+  if (today < anchor) return null;
+  const k = Math.floor((today - anchor) / freq);
+  return new Date(anchor + k * freq); // UTC-midnight of the most recent cycle Saturday (dealer's tz)
+}
+// The cycle a moment belongs to: stays on the just-opened cycle through its order
+// week (Sat..Thu) so a Sat→Mon order window all lands on one cycle; otherwise the
+// upcoming cycle. Used for both order placement and the scheduler so they agree.
+function cycleSaturdayForNow(s, nowMs) {
+  const tz = s.timezone || "America/New_York";
+  const cur = currentCycleSaturday(s, tz, nowMs);
+  if (!cur) return nextCycleSaturday(s);
+  const now = tzParts(new Date(nowMs == null ? Date.now() : nowMs), tz);
+  const today = Date.UTC(+now.year, +now.month - 1, +now.day);
+  if (today <= cur.getTime() + 5 * 86400000) return cur;                          // within this cycle's order week
+  return new Date(cur.getTime() + (Number(s.frequency_days) || 14) * 86400000);    // else the upcoming cycle
+}
+function addDays(d, n) { return new Date(d.getTime() + n * 86400000); }
+function dealerNudge(subject, body) {
+  const link = (process.env.BASE_URL || "") + "/admin";
+  return { subject, text: body + "\n\nOpen your back office: " + link,
+    html: wrapHtml('<h2 style="color:#2F6B3A;margin:0 0 8px">' + esc(subject) + '</h2><p style="color:#555">' + esc(body) + '</p><p style="margin:14px 0"><a href="' + link + '" style="background:#2F6B3A;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-weight:bold">Open back office</a></p>') };
+}
+async function emailMillOrder(keyIso) {
+  const cyc = keyIso ? db().cycles.find(c => c.delivery_key === keyIso) : getOrCreateCycle(db().settings);
+  if (!cyc) return { ok: false, reason: "no orders this cycle" };
+  const s = db().settings; const to = (s.mill_contact_email || "").trim(); if (!to) return { ok: false, reason: "no mill email set" };
+  const text = millOrderText(cyc);
+  const msg = { subject: "Umbarger Order — " + s.dealer_name + " (" + cyc.delivery_label + ")", text, html: "<pre style=\"font-family:Menlo,Consolas,monospace;font-size:13px;white-space:pre-wrap\">" + esc(text) + "</pre>" };
+  const e = await queueMail("mill", to, s.mill_contact_name || "Mill", msg);
+  return { ok: true, to, status: e.status };
+}
+async function genAndSendInvoices(keyIso) {
+  const cyc = db().cycles.find(c => c.delivery_key === keyIso); if (!cyc) return { made: 0 };
+  let made = 0;
+  for (const o of db().orders.filter(x => x.cycle_id === cyc.id && x.status === "submitted")) {
+    const wasNew = !db().invoices.find(v => v.customer_id === o.customer_id && v.cycle_id === cyc.id);
+    const inv = buildInvoiceForCustomer(o.customer_id, cyc.id);
+    if (inv && wasNew) { const cust = findCustomerById(o.customer_id); if (cust && cust.email) { try { await queueMail("invoice", cust.email, cust.name, emailInvoice(inv)); } catch (e) {} } made++; }
+  }
+  return { made };
+}
+async function schedJobOpen(mode) {
+  const s = db().settings; s.order_window = "open"; save();
+  if (mode === "auto") {
+    let sent = 0;
+    for (const c of db().customers.filter(x => x.active)) { if (c.email) { try { const e = await queueMail("cycle-open", c.email, c.name, emailCycleOpen(c)); if (e.status === "sent") sent++; } catch (e) {} } }
+    console.log(`[scheduler] OPENED + order links sent (${sent})`);
+  } else {
+    if (s.email) { try { await queueMail("nudge", s.email, s.dealer_name, dealerNudge("Ordering is open — send order links", "The order window just opened for this cycle. Review your roster, then tap “Email order link to all customers.”")); } catch (e) {} }
+    console.log("[scheduler] OPENED (review mode — dealer nudged)");
+  }
+}
+async function schedJobMill(keyIso, mode) {
+  const s = db().settings;
+  if (mode === "auto") { const r = await emailMillOrder(keyIso); console.log("[scheduler] mill auto-sent:", JSON.stringify(r)); }
+  else { if (s.email) { try { await queueMail("nudge", s.email, s.dealer_name, dealerNudge("Mill order ready to send", "It’s time to send the consolidated order to " + (s.mill_contact_name || "the mill") + ". Review it and tap “Email mill order.”")); } catch (e) {} } console.log("[scheduler] mill ready (review mode — dealer nudged)"); }
+}
+async function schedJobInvoices(keyIso, mode) {
+  const s = db().settings;
+  if (mode === "auto") { const r = await genAndSendInvoices(keyIso); console.log(`[scheduler] invoices generated + emailed (${r.made})`); }
+  else { if (s.email) { try { await queueMail("nudge", s.email, s.dealer_name, dealerNudge("Invoice day — generate & send", "It’s invoice day for this cycle. Open the back office and tap “Generate invoices for this cycle” to create and email them.")); } catch (e) {} } console.log("[scheduler] invoices due (review mode — dealer nudged)"); }
+}
+async function runScheduler(nowMs) {
+  try {
+    if (nowMs == null) nowMs = Date.now();
+    const s = db().settings;
+    if (!s.automation_enabled) return;
+    const mode = (s.automation_mode === "auto") ? "auto" : "review";
+    const tz = s.timezone || "America/New_York";
+    const sat = currentCycleSaturday(s, tz, nowMs); if (!sat) return;
+    const key = isoUTC(sat);
+    s.schedule_state = s.schedule_state || {};
+    const due = (job, dateObj, hm) => {
+      const t = parseHM(hm);
+      const utc = zonedToUTC(dateObj.getUTCFullYear(), dateObj.getUTCMonth() + 1, dateObj.getUTCDate(), t.h, t.mi, tz);
+      return nowMs >= utc && nowMs <= utc + 12 * 3600000 && s.schedule_state[job] !== key; // fire once, never >12h late
+    };
+    if (due("open", sat, s.open_time || "7:00 AM")) { s.schedule_state.open = key; save(); await schedJobOpen(mode); }
+    if (due("close", addDays(sat, 2), s.close_time || "10:00 AM")) { s.order_window = "closed"; s.schedule_state.close = key; save(); console.log("[scheduler] ordering CLOSED"); }
+    if (due("mill", addDays(sat, 2), s.mill_time || "10:30 AM")) { s.schedule_state.mill = key; save(); await schedJobMill(key, mode); }
+    if (due("invoice", addDays(sat, 4), s.invoice_time || "8:00 AM")) { s.schedule_state.invoice = key; save(); await schedJobInvoices(key, mode); }
+  } catch (e) { console.error("[scheduler] error:", e); }
+}
+module.exports = { runScheduler, cycleSaturdayForNow, currentCycleSaturday, emailMillOrder };
+
 server.listen(PORT, () => {
   reload();
+  setInterval(runScheduler, 60000); runScheduler();
   console.log(`DealerCycle running → http://localhost:${PORT}`);
   console.log(`  Dealer back office: http://localhost:${PORT}/admin  (passcode: ${ADMIN_PASSCODE})`);
   console.log(`  Email mode: ${mailer.providerName()}${mailer.providerName() === "outbox" ? " (preview — messages captured in the Outbox tab; set RESEND_API_KEY to send for real)" : ""}`);

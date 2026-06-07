@@ -30,8 +30,9 @@ var D = null;                 // admin data
 var view = "dashboard";
 var dealerTab = "product";
 var custScreen = "list";
+var priceOpenCat = null;
 
-var TABS = [["dashboard","Dashboard"],["customers","Customers"],["pricing","Pricing"],["invoices","Invoices"],["payments","Payments"],["check","Cycle check"],["outbox","Outbox"],["setup","Setup"],["network","Umbarger"]];
+var TABS = [["dashboard","Dashboard"],["customers","Customers"],["pricing","Pricing"],["inventory","Inventory"],["invoices","Invoices"],["payments","Payments"],["payables","Payables"],["billing","Billing"],["check","Cycle check"],["outbox","Outbox"],["setup","Setup"],["network","Umbarger"]];
 
 function money(n){ return "$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function money0(n){ return "$"+Math.round(n).toLocaleString("en-US"); }
@@ -75,8 +76,11 @@ function render(){
   if(view==="dashboard") return renderDash();
   if(view==="customers") return renderCustomers();
   if(view==="pricing") return renderPricing();
+  if(view==="inventory") return renderInventory();
   if(view==="invoices") return renderInvoices();
   if(view==="payments") return renderPayments();
+  if(view==="payables") return renderPayables();
+  if(view==="billing") return renderBilling();
   if(view==="check") return renderCheck();
   if(view==="outbox") return renderOutbox();
   if(view==="setup") return renderSetup();
@@ -117,6 +121,7 @@ function renderDash(){
   var actionBar='<div style="display:flex;gap:8px;flex-wrap:wrap">'+
     '<button class="btn primary sm" onclick="cycleOpen()">Email order link to all customers</button>'+
     '<button class="btn ghost sm" onclick="genInvoices()">Generate invoices for this cycle</button>'+
+    '<button class="btn ghost sm" onclick="sendMill()">Email mill order</button>'+
     (dealerTab==="mill"?'<button class="btn ghost sm" onclick="copyMill()">Copy mill order</button>':'')+'</div>';
   document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2 class="sec" style="margin:0">Dealer dashboard · '+esc(D.settings.dealer_name)+'</h2>'+mailBadge()+'</div>'+k+checkBanner+
     '<div class="panel"><div class="panel-h"><h3>Cycle delivering '+esc(D.cycle.delivery_label)+'</h3><span class="pill '+(D.window.open?'live':'warn')+'">'+(D.window.open?'● ORDERING OPEN':'ORDERING CLOSED')+'</span></div>'+
@@ -181,9 +186,24 @@ function copyLink(l){ navigator.clipboard.writeText(l).then(function(){toast("Li
 /* =================== PRICING =================== */
 function renderPricing(){
   var s=D.settings, basisSrp=s.pricing_basis==="srp";
-  var rows=D.pricing.map(function(p){
-    return '<tr><td><span class="bag-td">'+bagSvg(p.bag_hex)+esc(p.name)+'</span></td><td class="hide-sm"><span class="pill cat" style="background:'+(D.categoryColors[p.category]||'#888')+'">'+esc(p.category)+'</span></td>'+
-      '<td class="num hide-sm">'+money(p.wholesale)+'</td><td class="num hide-sm">'+money(p.srp)+'</td><td class="num">'+money(p.base)+'</td><td class="num"><b>'+money(p.allIn)+'</b></td><td class="num" style="color:var(--green)">'+money(p.margin)+'</td></tr>';
+  // group products by division (category), in the dealer's category order
+  var byCat={}; D.pricing.forEach(function(p){ (byCat[p.category]=byCat[p.category]||[]).push(p); });
+  var order=(D.categoryOrder||[]).filter(function(c){return byCat[c] && byCat[c].length;});
+  Object.keys(byCat).forEach(function(c){ if(order.indexOf(c)<0) order.push(c); });
+  if(priceOpenCat===null) priceOpenCat=order[0]||"";   // open the first division by default
+  var cats=order.map(function(name){
+    var items=byCat[name]; var open=priceOpenCat===name;
+    var rows=items.map(function(p){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border)">'+
+        '<span class="bag-td" style="min-width:0">'+bagSvg(p.bag_hex)+'<span style="min-width:0"><span style="font-weight:500">'+esc(p.name)+'</span>'+
+        '<span class="muted hide-sm" style="font-size:11.5px;display:block">cost '+money(p.wholesale)+' · SRP '+money(p.srp)+'</span></span></span>'+
+        '<span style="text-align:right;white-space:nowrap"><b style="color:var(--navy);font-size:15px">'+money(p.allIn)+'</b>'+
+        '<span class="muted" style="font-size:11px;display:block">base '+money(p.base)+' · <span style="color:var(--green)">+'+money(p.margin)+'</span>/bag</span></span></div>';
+    }).join("");
+    return '<div class="cat'+(open?' open':'')+'"><div class="cat-h" onclick="togglePriceCat(\''+esc(name)+'\')">'+
+      '<div class="l"><span class="swatch" style="background:'+(D.categoryColors[name]||'#888')+'"></span>'+esc(name)+'</div>'+
+      '<div style="display:flex;align-items:center;gap:10px"><span class="cnt">'+items.length+'</span><span class="chev">&#9654;</span></div></div>'+
+      '<div class="cat-body">'+rows+'</div></div>';
   }).join("");
   var ctl='<div class="panel"><div class="panel-h"><h3>Your pricing rules</h3><span class="hint">save → customer prices update</span></div><div class="pad"><div class="ctlgrid">'+
     '<div class="field"><label>Pricing basis</label><select id="p_basis"><option value="srp"'+(basisSrp?' selected':'')+'>% off Umbarger SRP</option><option value="cost"'+(!basisSrp?' selected':'')+'>Markup % on cost</option></select></div>'+
@@ -193,9 +213,10 @@ function renderPricing(){
     '</div><button class="btn primary sm" style="margin-top:10px" onclick="savePricing()">Save pricing</button></div></div>';
   document.getElementById("view").innerHTML='<h2 class="sec">Pricing · '+esc(s.dealer_name)+'</h2>'+
     '<p class="sub-h">Umbarger maintains wholesale + SRP; you set margin, freight and tax. The system computes every customer price.</p>'+ctl+
-    '<div class="panel"><div class="panel-h"><h3>Master sheet → your prices</h3><span class="hint">'+D.pricing.length+' products</span></div>'+
-    '<div style="max-height:520px;overflow:auto"><table><thead><tr><th>Product</th><th class="hide-sm">Category</th><th class="num hide-sm">Cost</th><th class="num hide-sm">SRP</th><th class="num">Base</th><th class="num">Customer</th><th class="num">Margin</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+    '<div class="panel"><div class="panel-h"><h3>Master sheet → your prices</h3><span class="hint">'+D.pricing.length+' products · tap a division</span></div>'+
+    '<div class="pad">'+cats+'</div></div>';
 }
+function togglePriceCat(n){ priceOpenCat=(priceOpenCat===n?"":n); renderPricing(); }
 function savePricing(){
   var b={ pricing_basis:document.getElementById("p_basis").value, margin_pct:parseFloat(document.getElementById("p_margin").value)||0,
     freight:parseFloat(document.getElementById("p_freight").value)||0, tax_enabled:document.getElementById("p_taxen").checked, tax_pct:parseFloat(document.getElementById("p_taxpct").value)||0 };
@@ -208,7 +229,11 @@ function renderInvoices(){
   D.invoices.forEach(function(v){ (byCust[v.customer_name]=byCust[v.customer_name]||[]).push(v); });
   var names=Object.keys(byCust).sort();
   var body=names.length? names.map(function(n){
-    var list=byCust[n].map(function(v){return '<tr><td>'+esc(v.invoice_num)+'</td><td class="hide-sm">'+esc(v.cycle_label)+'</td><td class="hide-sm">'+esc(v.date_issued)+'</td><td class="num">'+money(v.total)+'</td><td><a class="btn ghost sm" href="/invoice/'+v.id+'" target="_blank">View / PDF</a></td></tr>';}).join("");
+    var list=byCust[n].map(function(v){
+      var badge=v.cancelled?' <span class="pill warn">Cancelled</span>':(v.walk_in?' <span class="pill cat" style="background:#3D8FCE">Walk-in</span>':'');
+      var act='<a class="btn ghost sm" href="/invoice/'+v.id+'" target="_blank">View / PDF</a>';
+      if(!v.cancelled) act+=' <button class="btn ghost sm" style="color:var(--red);border-color:#e6c9c2" onclick="cancelInvoice('+v.id+',\''+esc(v.invoice_num)+'\','+(v.fulfilled?1:0)+')">Cancel</button>';
+      return '<tr'+(v.cancelled?' class="muted" style="opacity:.6"':'')+'><td>'+esc(v.invoice_num)+badge+'</td><td class="hide-sm">'+esc(v.cycle_label)+'</td><td class="hide-sm">'+esc(v.date_issued)+'</td><td class="num">'+money(v.total)+'</td><td><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">'+act+'</div></td></tr>';}).join("");
     return '<div class="panel"><div class="panel-h"><h3>'+esc(n)+'</h3><span class="hint">'+byCust[n].length+' invoice(s)</span></div><div style="overflow-x:auto"><table><thead><tr><th>Invoice #</th><th class="hide-sm">Cycle</th><th class="hide-sm">Issued</th><th class="num">Total</th><th></th></tr></thead><tbody>'+list+'</tbody></table></div></div>';
   }).join("") : '<div class="panel"><div class="pad muted">No invoices yet. Generate them from the Dashboard, or per customer below.</div></div>';
   var custOpts=D.orders.map(function(o){return '<option value="'+o.customer_id+'">'+esc(o.customer)+'</option>';}).join("");
@@ -218,6 +243,21 @@ function renderInvoices(){
     body;
 }
 function genOne(){ var id=Number(document.getElementById("invcust").value); api("/api/admin/invoices/generate","POST",{customer_id:id}).then(function(d){ toast(d.made?("Invoice "+d.list[0].num+" created."):"No order to invoice."); refresh(); }); }
+function cancelInvoice(id,num,hasStock){
+  var stockNote=hasStock?'<p class="muted" style="font-size:12.5px">This invoice pulled bags from stock. Choose what happens to them:</p>'+
+    '<label class="checkrow" style="display:block;margin:6px 0"><input type="radio" name="cxmode" value="restock" checked> Return to sellable stock (bags are fine)</label>'+
+    '<label class="checkrow" style="display:block;margin:6px 0"><input type="radio" name="cxmode" value="writeoff"> Write off as loss (spoiled / damaged)</label>'
+    :'<p class="muted" style="font-size:12.5px">No stock was tied to this invoice; it will just be voided.</p>';
+  showModal('<h3 style="color:var(--navy)">Cancel invoice '+esc(num)+'</h3>'+
+    '<p style="font-size:13px">Voids the invoice and clears it from the payment tracker (no money collected).</p>'+stockNote+
+    '<div class="field" style="margin-top:8px"><label>Reason</label><input id="cx_reason" placeholder="Not picked up"></div>'+
+    '<div style="margin-top:12px;display:flex;gap:8px"><button class="btn primary sm" onclick="doCancelInvoice('+id+')">Confirm cancel</button><button class="btn ghost sm" onclick="closeModal()">Keep invoice</button></div>');
+}
+function doCancelInvoice(id){
+  var mEl=document.querySelector('input[name="cxmode"]:checked');
+  var b={id:id, mode:mEl?mEl.value:"restock", reason:(document.getElementById("cx_reason").value||"").trim()};
+  api("/api/admin/invoice/cancel","POST",b).then(function(d){ if(d&&d.ok){toast(d.mode==="restock"?"Cancelled — stock returned.":"Cancelled — written off.");closeModal();refresh();} else {toast((d&&d.error)||"Could not cancel.");} });
+}
 
 /* =================== PAYMENTS =================== */
 function renderPayments(){
@@ -231,7 +271,7 @@ function renderPayments(){
       '<td><b>'+esc(p.customer_name)+'</b><div class="muted" style="font-size:11.5px">'+esc(p.invoice_num)+' · '+esc(p.cycle)+'</div></td>'+
       '<td class="num">'+money(p.amount)+'</td>'+
       '<td class="hide-sm">'+(p.paid?('<span class="pill live">Paid '+esc(p.date_paid||"")+'</span>'):'<span class="pill warn">Unpaid</span>')+'</td>'+
-      '<td class="hide-sm"><select onchange="setMethod('+p.id+',this.value)" style="padding:6px;border:1px solid var(--border);border-radius:7px">'+["","Venmo","Check","Cash","Other"].map(function(m){return '<option'+(p.method===m?' selected':'')+'>'+(m||"—")+'</option>';}).join("")+'</select></td>'+
+      '<td class="hide-sm"><select onchange="setMethod('+p.id+',this.value)" style="padding:6px;border:1px solid var(--border);border-radius:7px">'+["","Venmo","Check","Cash","Card","ACH","Other"].map(function(m){return '<option'+(p.method===m?' selected':'')+'>'+(m||"—")+'</option>';}).join("")+'</select></td>'+
       '<td class="num hide-sm">'+(p.reminders||0)+'</td></tr>';
   }).join("");
   var creds=(D.credits||[]);
@@ -267,6 +307,96 @@ function sendReminders(){
     go("outbox");
   });
 }
+
+/* =================== PAYABLES (native books, no QuickBooks needed) =================== */
+function renderPayables(){
+  var m=D.money||{ar_out:0,ap_out:0,net:0,ar_in:0};
+  var bills=D.bills||[];
+  var open=bills.filter(function(b){return b.status!=='paid';});
+  var unpaidInv=(D.payments||[]).filter(function(p){return !p.paid;}).length;
+  var k='<div class="kpis">'+
+    kpi(money0(m.ar_out),"You're owed",unpaidInv+" unpaid invoice"+(unpaidInv===1?"":"s"))+
+    kpi(money0(m.ap_out),"You owe",open.length+" open bill"+(open.length===1?"":"s"))+
+    kpi((m.net<0?'−':'')+money0(Math.abs(m.net)),"Net position","owed − owe")+
+    kpi(money0(m.ar_in),"Collected","customer payments")+'</div>';
+  var addPanel='<div class="panel"><div class="panel-h"><h3>Add a bill</h3><span class="hint">money you owe a vendor</span></div><div class="pad">'+
+    '<div class="ctlgrid">'+
+    '<div class="field"><label>Vendor</label><input id="bl_vendor" placeholder="Umbarger Feeds"></div>'+
+    '<div class="field"><label>Amount ($)</label><input id="bl_amt" type="number" step="0.01" placeholder="0.00"></div>'+
+    '<div class="field"><label>Description</label><input id="bl_desc" placeholder="Feed shipment, fuel, supplies…"></div>'+
+    '<div class="field"><label>Due date</label><input id="bl_due" type="date"></div>'+
+    '</div><button class="btn primary sm" style="margin-top:8px" onclick="addBill()">Add bill</button></div></div>';
+  var rows=bills.map(function(b){
+    var paid=b.status==='paid';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)'+(paid?';opacity:.55':'')+'">'+
+      '<div style="display:flex;align-items:center;gap:10px;min-width:0">'+
+      '<button class="toggle '+(paid?'on':'')+'" onclick="toggleBill('+b.id+')" title="Mark paid"></button>'+
+      '<div style="min-width:0"><div style="font-weight:600">'+esc(b.vendor)+(b.auto?' <span class="pill cat" style="background:#C26B2D">auto</span>':'')+'</div>'+
+      '<div class="muted" style="font-size:11.5px">'+esc(b.description||'')+(b.due_date?' · due '+esc(b.due_date):'')+(paid&&b.date_paid?' · paid '+esc(b.date_paid):'')+'</div></div></div>'+
+      '<div style="text-align:right;white-space:nowrap"><b>'+money(b.amount)+'</b>'+
+      '<div><button class="btn ghost sm" style="padding:2px 7px;font-size:11px;color:var(--red);border-color:#e6c9c2" onclick="deleteBill('+b.id+')">remove</button></div></div>'+
+      '</div>';
+  }).join("")||'<div class="pad muted" style="text-align:center;padding:24px">No bills yet. Receiving a mill shipment books one automatically, or add one above.</div>';
+  document.getElementById("view").innerHTML='<h2 class="sec" style="margin:0 0 4px">Payables · '+esc(D.settings.dealer_name)+'</h2>'+
+    '<p class="sub-h">Money in vs. money out — a simple cash tracker for dealers who don’t run QuickBooks. Receiving a mill shipment books a bill automatically.</p>'+k+addPanel+
+    '<div class="panel"><div class="panel-h"><h3>Bills &amp; vendors</h3><span class="hint">tap the toggle to mark paid</span></div>'+rows+'</div>';
+}
+function addBill(){
+  var b={vendor:(document.getElementById('bl_vendor').value||'').trim(),amount:parseFloat(document.getElementById('bl_amt').value),description:(document.getElementById('bl_desc').value||'').trim(),due_date:document.getElementById('bl_due').value||''};
+  if(!b.vendor){toast('Enter a vendor.');return;}
+  if(!b.amount||b.amount<=0){toast('Enter an amount.');return;}
+  api('/api/admin/bill','POST',b).then(function(d){ if(d&&d.ok){toast('Bill added.');refresh();} else {toast((d&&d.error)||'Could not add.');} });
+}
+function toggleBill(id){ api('/api/admin/bill/toggle','POST',{id:id}).then(function(){refresh();}); }
+function deleteBill(id){ if(!confirm('Remove this bill?'))return; api('/api/admin/bill/delete','POST',{id:id}).then(function(){toast('Removed.');refresh();}); }
+
+/* =================== BILLING (how THIS dealer pays DealerCycle) =================== */
+function effSurchargePct(){
+  var s=D.settings; if(!s.surcharge_enabled) return 0;
+  var pct=Number(s.surcharge_pct); if(!(pct>=0)) pct=3; pct=Math.min(pct,3);
+  var caps={CT:0,MA:0,ME:0,PR:0,CO:2,IL:1}; var st=String(s.dealer_state||"").toUpperCase();
+  if(Object.prototype.hasOwnProperty.call(caps,st)) pct=Math.min(pct,caps[st]);
+  return pct;
+}
+function renderBilling(){
+  var s=D.settings;
+  var live=D.payments_provider==="stripe";
+  var sub=D.subscription;
+  var intro=Number(s.sub_intro_price)||59.99, list=Number(s.sub_list_price)||99, months=Number(s.sub_intro_months)||6;
+  var pct=effSurchargePct();
+  var introCard=Math.round(intro*(1+pct/100)*100)/100, listCard=Math.round(list*(1+pct/100)*100)/100;
+  var badge=live?'<span class="pill live">Stripe: live</span>':'<span class="pill warn">Stripe: simulated (no key)</span>';
+  var statusPanel;
+  if(sub && sub.status==="active"){
+    statusPanel='<div class="panel" style="border-left:4px solid var(--green)"><div class="pad">'+
+      '<b style="color:var(--green)">✓ Subscribed</b> — '+(sub.method==="card"?"paying by credit card":"paying by bank (ACH)")+', since '+esc(sub.started_at||"")+'.'+
+      '<div class="muted" style="font-size:12.5px;margin-top:6px">'+money(intro)+'/mo for the first '+months+' months, then '+money(list)+'/mo.</div>'+
+      '<button class="btn ghost sm" style="margin-top:10px;border-color:var(--red);color:var(--red)" onclick="cancelSub()">Cancel subscription</button>'+
+      '</div></div>';
+  } else {
+    statusPanel='<div class="panel"><div class="panel-h"><h3>Start your DealerCycle subscription</h3>'+badge+'</div><div class="pad">'+
+      '<p style="font-size:14px;margin-top:0"><b>'+money(intro)+'/mo</b> for your first '+months+' months, then <b>'+money(list)+'/mo</b>. Everything included.</p>'+
+      '<div class="ctlgrid">'+
+      '<div class="field"><label>Pay by bank (ACH) — no fee</label><button class="btn primary" style="width:100%" onclick="startSub(\'ach\')">Subscribe — '+money(intro)+'/mo by ACH</button></div>'+
+      '<div class="field"><label>Pay by credit card'+(pct>0?' — adds '+pct+'%':'')+'</label><button class="btn ghost" style="width:100%" onclick="startSub(\'card\')">Subscribe — '+(pct>0?money(introCard):money(intro))+'/mo by card</button></div>'+
+      '</div>'+
+      (pct>0?'<p class="muted" style="font-size:12px;margin-top:8px">Card adds a '+pct+'% processing fee ('+money(intro)+' → '+money(introCard)+' during intro; '+money(list)+' → '+money(listCard)+' after). ACH/bank has no fee.</p>':'')+
+      '</div></div>';
+  }
+  var explain='<div class="panel"><div class="panel-h"><h3>Two different card fees — don’t mix them up</h3></div><div class="pad" style="font-size:13px;line-height:1.6">'+
+    '<p style="margin-top:0"><b>This page</b> is how <i>you</i> pay DealerCycle (your subscription). Pay by ACH and there’s no fee; pay by card and the '+pct+'% fee is added to your bill.</p>'+
+    '<p style="margin-bottom:0">Separately, when <b>your customers</b> pay their feed invoices by card, that same pass-through fee is added to <i>their</i> total — set it under Setup → Card payments. ACH/check stays free for them.</p>'+
+    '</div></div>';
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2 class="sec" style="margin:0">Billing · your subscription</h2>'+badge+'</div>'+
+    '<p class="sub-h">Your DealerCycle plan. ACH is free; credit card adds the processing fee.</p>'+statusPanel+explain;
+}
+function startSub(method){
+  api("/api/admin/subscribe","POST",{method:method}).then(function(d){
+    if(d&&d.url){ window.location=d.url; }
+    else { toast((d&&d.error)||"Could not start checkout."); }
+  });
+}
+function cancelSub(){ if(!confirm("Cancel your DealerCycle subscription?"))return; api("/api/admin/subscription/cancel","POST",{}).then(function(){toast("Subscription cancelled.");refresh();}); }
 
 /* =================== OUTBOX =================== */
 function kindLabel(k){ return {confirmation:"Order confirmation","cycle-open":"Order link",invoice:"Invoice",reminder:"Payment reminder"}[k]||k; }
@@ -317,9 +447,8 @@ function renderSetup(){
     '</select><p class="muted" style="font-size:12px;margin-top:6px">Keep "Always open" during the pilot so testers can order anytime.</p></div></div></div>';
   var email='<div class="panel"><div class="panel-h"><h3>Email sending</h3>'+mailBadge()+'</div><div class="pad">'+
     (D.mail_provider==="outbox"
-      ? '<p class="muted" style="font-size:13px">Right now emails are <b>captured in the Outbox</b> (nothing is sent). To send for real, stop the app and restart it with one of these:</p>'+
-        '<pre style="white-space:pre-wrap;font-size:12px;background:#f7f9fc;border-radius:8px;padding:12px;margin-top:8px">Resend (recommended):\n  RESEND_API_KEY=your_key node server.js\n\nGmail:\n  npm install nodemailer\n  EMAIL_PROVIDER=gmail GMAIL_USER=you@gmail.com GMAIL_APP_PASSWORD=app_pw node server.js</pre>'+
-        '<p class="muted" style="font-size:12px;margin-top:8px">Get a free Resend key at resend.com → API Keys. Until then, everything still works — you just send from the Outbox yourself.</p>'
+      ? '<p class="muted" style="font-size:13px">Automatic email isn’t switched on yet, so every message — order confirmations, invoices, reminders — is <b>prepared for you in the Outbox</b>. Open the Outbox tab and send any message with one tap.</p>'+
+        '<p class="muted" style="font-size:13px;margin-top:8px">Want them to send automatically? We’ll connect email sending for you during setup — nothing for you to configure.</p>'
       : '<p class="muted" style="font-size:13px">Emails send automatically via <b>'+esc(D.mail_provider)+'</b>. Confirmations go out on order, invoices on generate, reminders on demand, and the order link from the dashboard.</p>')+
     '</div></div>';
   var yy=String(new Date().getFullYear()).slice(-2);
@@ -328,11 +457,31 @@ function renderSetup(){
     '<p class="muted" style="font-size:13px">The next invoice will be <b>'+nextNum+'</b>. To continue your existing sequence, enter the number the <b>next</b> invoice should use (e.g. enter <code>'+yy+'-086</code> or just <code>86</code> so the next invoice is '+yy+'-086).</p>'+
     '<div class="ctlgrid" style="margin-top:8px"><div class="field"><label>Next invoice number</label><input id="s_invnext" placeholder="e.g. '+yy+'-086 or 86"></div></div>'+
     '<button class="btn primary sm" style="margin-top:6px" onclick="saveInvoiceNumber()">Set invoice number</button></div></div>';
+  var states=["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY","PR"];
+  var pctVal=(s.surcharge_pct==null?3:s.surcharge_pct);
+  var cards='<div class="panel"><div class="panel-h"><h3>Card payments (surcharge)</h3>'+(D.payments_provider==="stripe"?'<span class="pill live">Stripe live</span>':'<span class="pill warn">Stripe simulated</span>')+'</div><div class="pad">'+
+    '<p class="muted" style="font-size:13px;margin-top:0">When a customer pays an invoice by credit card, this fee is added to <b>their</b> total (pass-through). Check, cash, Venmo and ACH stay free. Capped at 3% by card networks; some states are lower or ban it — we apply your state’s cap automatically.</p>'+
+    '<div class="ctlgrid">'+
+    '<div class="field"><label>Pass card fees to customers</label><div style="display:flex;align-items:center;height:43px"><label class="checkrow"><input type="checkbox" id="s_surcharge_enabled" '+(s.surcharge_enabled?'checked':'')+'> charge a card surcharge</label></div></div>'+
+    '<div class="field"><label>Surcharge (%)</label><input id="s_surcharge_pct" type="number" step="0.5" min="0" max="3" value="'+pctVal+'"></div>'+
+    '<div class="field"><label>Fee label (shown on invoice)</label><input id="s_surcharge_label" value="'+esc(s.surcharge_label||"Card processing fee")+'"></div>'+
+    '<div class="field"><label>Your state (sets the cap)</label><select id="s_dealer_state">'+states.map(function(st){return '<option'+(s.dealer_state===st?' selected':'')+'>'+st+'</option>';}).join("")+'</select></div>'+
+    '</div><button class="btn primary sm" style="margin-top:8px" onclick="saveCards()">Save card settings</button>'+
+    '<p class="muted" style="font-size:12px;margin-top:8px">Note: debit cards can’t be surcharged by law; banned in CT, MA, ME, PR; capped at 2% in CO and 1% in IL. To process real cards, add your Stripe keys (see STRIPE_SETUP.md).</p>'+
+    '</div></div>';
   var danger='<div class="panel"><div class="panel-h"><h3>Clear test data</h3></div><div class="pad">'+
     '<p class="muted" style="font-size:13px">Wipes all orders, invoices, payments, and the email Outbox, and resets invoice numbering to start fresh. <b>Keeps</b> your products, customers, and their order links. Use this once before real customers start ordering.</p>'+
     '<button class="btn ghost sm" style="margin-top:10px;border-color:var(--red);color:var(--red)" onclick="clearTestData()">Clear test data</button></div></div>';
+  var automation='<div class="panel"><div class="panel-h"><h3>Automation</h3><span class="pill '+(s.automation_enabled?'live':'warn')+'">'+(s.automation_enabled?('● ON · '+((s.automation_mode==="auto")?"Automatic":"Review")):'OFF')+'</span></div><div class="pad">'+
+    '<p class="muted" style="font-size:13px;margin-top:0">When on, DealerCycle runs the cycle on your schedule above — opens ordering '+esc(s.open_day||"")+' '+esc(s.open_time||"")+', closes '+esc(s.close_day||"")+' '+esc(s.close_time||"")+', mill order '+esc(s.mill_day||"")+' '+esc(s.mill_time||"")+', invoices '+esc(s.invoice_day||"")+' '+esc(s.invoice_time||"")+' ('+esc(s.timezone||"America/New_York")+').</p>'+
+    '<label class="checkrow" style="margin:6px 0 10px"><input type="checkbox" id="a_enabled" '+(s.automation_enabled?"checked":"")+'> Turn automation on</label>'+
+    '<div class="field"><label>How it runs</label><select id="a_mode">'+
+      '<option value="review"'+((s.automation_mode!=="auto")?" selected":"")+'>Review &amp; send — it nudges me at each step, I press send</option>'+
+      '<option value="auto"'+((s.automation_mode==="auto")?" selected":"")+'>Fully automatic — it sends links, the mill order &amp; invoices itself</option>'+
+    '</select></div>'+
+    '<button class="btn primary sm" style="margin-top:8px" onclick="saveAutomation()">Save automation</button></div></div>';
   document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><h2 class="sec" style="margin:0">Setup · '+esc(s.dealer_name)+'</h2><button class="btn primary sm" onclick="saveSetup()">Save setup</button></div>'+
-    '<p class="sub-h">Everything the order system needs to run this dealer.</p>'+cycle+company+email+invnum+danger;
+    '<p class="sub-h">Everything the order system needs to run this dealer.</p>'+cycle+automation+company+cards+email+invnum+danger;
 }
 function saveInvoiceNumber(){
   var v=(document.getElementById('s_invnext').value||'').trim();
@@ -346,30 +495,46 @@ function clearTestData(){
   if(!confirm("Clear ALL orders, invoices, payments, and the Outbox, and reset invoice numbering? Your customers and their links are kept. This cannot be undone.")) return;
   api("/api/admin/reset","POST",{}).then(function(){ toast("Test data cleared — starting fresh."); go("dashboard"); });
 }
+function saveAutomation(){
+  var b={automation_enabled:document.getElementById('a_enabled').checked, automation_mode:document.getElementById('a_mode').value};
+  api('/api/admin/settings','POST',b).then(function(){ toast('Automation '+(b.automation_enabled?('ON · '+(b.automation_mode==='auto'?'Automatic':'Review')):'OFF')+'.'); refresh(); });
+}
+function sendMill(){
+  if(!confirm("Email the consolidated mill order to "+(D.settings.mill_contact_name||"the mill")+" ("+(D.settings.mill_contact_email||"no email set")+")?")) return;
+  api("/api/admin/mill/send","POST",{}).then(function(d){ toast(d.ok?("Mill order sent to "+d.to+" ("+d.status+")."):(d.reason||"Could not send.")); });
+}
 function saveSetup(){
   var keys=["dealer_name","payable_to","address","phone","email","venmo","cycle_anchor","frequency_days","open_day","open_time","close_day","close_time","mill_day","mill_time","invoice_day","invoice_time","mill_contact_name","mill_contact_email","order_window"];
   var b={}; keys.forEach(function(k){ var el=document.getElementById("s_"+k); if(el) b[k]=(k==="frequency_days")?(parseInt(el.value)||14):el.value; });
   api("/api/admin/settings","POST",b).then(function(){ toast("Setup saved."); refresh(); });
 }
+function saveCards(){
+  var pct=parseFloat(document.getElementById("s_surcharge_pct").value); if(!(pct>=0))pct=3; pct=Math.min(pct,3);
+  var b={ surcharge_enabled:document.getElementById("s_surcharge_enabled").checked, surcharge_pct:pct,
+    surcharge_label:(document.getElementById("s_surcharge_label").value||"Card processing fee").trim(),
+    dealer_state:document.getElementById("s_dealer_state").value };
+  api("/api/admin/settings","POST",b).then(function(){ toast("Card settings saved."); refresh(); });
+}
 
 /* =================== UMBARGER NETWORK (Phase 2 prize, seeded) =================== */
 function renderNetwork(){
   var evansBags=D.tally.reduce(function(a,r){return a+r.bags;},0);
+  var me=esc(D.settings.dealer_name||"Your dealership");
   var sample=[["Bluegrass Feed Co.","KY","Southeast",142],["C&C Feed Store","TX","South",268],["Lone Star Show Supply","TX","South",201],["Hearne Feed & Supply","TX","South",176],["RR Farm & Feed","OK","South",154],["Prairie View Ag","IL","Midwest",223],["Heartland Show Feeds","IA","Midwest",188],["The Mill","MD","Northeast",131],["Cornerstone Ag","OH","Midwest",97],["Western Slope Feed","CO","West",84]];
-  var dealers=[["Evans Cattle Company","KY","Southeast",evansBags,true]].concat(sample.map(function(d){return d.concat([false]);}));
+  var dealers=[[D.settings.dealer_name||"Your dealership","KY","Southeast",evansBags,true]].concat(sample.map(function(d){return d.concat([false]);}));
   var total=dealers.reduce(function(a,d){return a+d[3];},0);
   dealers.sort(function(a,b){return b[3]-a[3];});
   var byReg={}; dealers.forEach(function(d){byReg[d[2]]=(byReg[d[2]]||0)+d[3];});
   var regArr=Object.keys(byReg).map(function(r){return [r,byReg[r]];}).sort(function(a,b){return b[1]-a[1];});
   var maxR=regArr[0][1];
   var prodArr=D.tally.slice(0,8); var maxP=prodArr.length?prodArr[0].bags:1;
-  var banner='<div class="netbanner"><div class="big">UMBARGER · PRODUCTION INTELLIGENCE</div><h2>Network demand — live, before any feed leaves the mill</h2><div class="big">Aggregated across every dealer on DealerCycle. Built now with Evans live + sample dealers; real once dealers join (Phase 2).</div></div>';
-  var k='<div class="kpis" style="margin-top:16px">'+kpi(dealers.length,"Active dealers","incl. sample")+kpi(total.toLocaleString(),"Network bags","this cycle")+kpi(prodArr.length?esc(prodArr[0].name):"—","Top product (Evans)","")+kpi(regArr.length,"Regions","")+'</div>';
+  var banner='<div class="netbanner"><div class="big">UMBARGER · PRODUCTION INTELLIGENCE</div><h2>Network demand — live, before any feed leaves the mill</h2><div class="big">Aggregated across every dealer on DealerCycle. Built now with '+me+' live + sample dealers; real once dealers join (Phase 2).</div></div>';
+  var k='<div class="kpis" style="margin-top:16px">'+kpi(dealers.length,"Active dealers","incl. sample")+kpi(total.toLocaleString(),"Network bags","this cycle")+kpi(prodArr.length?esc(prodArr[0].name):"—","Top product (you)","")+kpi(regArr.length,"Regions","")+'</div>';
   var regBars=regArr.map(function(r){var w=Math.round(r[1]/maxR*100);return '<div class="bar-row"><div class="lbl">'+esc(r[0])+'</div><div class="bar-track"><div class="bar-fill" style="width:'+w+'%">'+r[1]+'</div></div></div>';}).join("");
-  var prodBars=prodArr.map(function(r){var w=Math.round(r.bags/maxP*100);return '<div class="bar-row"><div class="lbl">'+esc(r.name)+'</div><div class="bar-track"><div class="bar-fill" style="width:'+w+'%">'+r.bags+'</div></div></div>';}).join("")||'<div class="pad muted">Place orders to populate Evans demand.</div>';
+  var prodBars=prodArr.map(function(r){var w=Math.round(r.bags/maxP*100);return '<div class="bar-row"><div class="lbl">'+esc(r.name)+'</div><div class="bar-track"><div class="bar-fill" style="width:'+w+'%">'+r.bags+'</div></div></div>';}).join("")||'<div class="pad muted">Place orders to populate your demand.</div>';
   var dealerRows=dealers.map(function(d){return '<tr><td><b>'+esc(d[0])+'</b>'+(d[4]?' <span class="pill live">YOU</span>':'')+'</td><td>'+d[1]+'</td><td class="muted hide-sm">'+d[2]+'</td><td class="num"><b>'+d[3]+'</b></td></tr>';}).join("");
-  document.getElementById("view").innerHTML='<span class="sampletag amber">Evans live · other dealers sample</span>'+banner+k+
-    '<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Evans demand by product</h3><span class="hint">bags, this cycle</span></div><div style="padding:8px 0 14px">'+prodBars+'</div></div>'+
+  document.getElementById("view").innerHTML='<span class="sampletag amber">'+me+' live · other dealers sample</span>'+banner+k+
+    '<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Your demand by product</h3><span class="hint">bags, this cycle</span></div><div style="padding:8px 0 14px">'+prodBars+'</div></div>'+
     '<div class="panel"><div class="panel-h"><h3>Network demand by region</h3><span class="hint">bags, this cycle</span></div><div style="padding:8px 0 14px">'+regBars+'</div></div>'+
     '<div class="panel"><div class="panel-h"><h3>Dealers reporting</h3><span class="pill live">● LIVE</span></div><div style="overflow-x:auto"><table><thead><tr><th>Dealer</th><th>State</th><th class="hide-sm">Region</th><th class="num">Bags</th></tr></thead><tbody>'+dealerRows+'</tbody></table></div></div>';
 }
@@ -405,6 +570,141 @@ function renderCheck(){
   document.getElementById("view").innerHTML='<h2 class="sec" style="margin:0 0 4px">Cycle check · '+esc(ck.cyc)+'</h2>'+
     '<p class="sub-h">One glance to confirm nobody slips through: every order becomes an invoice, every invoice lands in the tracker.</p>'+
     banner+s1+s2+s3;
+}
+
+/* =================== INVENTORY (prototype) =================== */
+function renderInventory(){
+  if(!D.inventory_enabled){
+    document.getElementById("view").innerHTML='<h2 class="sec">Inventory</h2>'+
+      '<div class="panel"><div class="pad">'+
+      '<p style="font-size:14px;line-height:1.6">DealerCycle can track the stock you physically carry — on hand, committed, and available — updating live as orders, walk-in sales, receipts and cancellations happen. QuickBooks receives only the money side, so this works on <b>any</b> QuickBooks plan.</p>'+
+      '<p class="muted" style="font-size:12.5px">Turn it on for dealers who stock product. Relay-only dealers can leave it off.</p>'+
+      '<button class="btn primary" onclick="toggleInventory(true)">Enable inventory tracking</button>'+
+      '</div></div>';
+    return;
+  }
+  var inv=D.inventory||[];
+  var low=inv.filter(function(i){return i.low;});
+  var units=inv.reduce(function(a,i){return a+i.on_hand;},0);
+  var value=inv.reduce(function(a,i){return a+i.value;},0);
+  var k='<div class="kpis">'+kpi(inv.length,"Products carried","")+
+    kpi(units.toLocaleString(),"Units on hand","across all SKUs")+
+    kpi(money0(value),"Stock value","at avg cost")+
+    kpi(low.length,"Low stock",(low.length?"need reorder":"all healthy"))+'</div>';
+  var lowBanner=low.length?'<div class="panel" style="border-left:4px solid var(--red)"><div class="pad"><b style="color:var(--red)">⚠ '+low.length+' product(s) at or below reorder point</b> — '+low.map(function(i){return esc(i.name)+" ("+i.available+")";}).join(", ")+'</div></div>':'';
+  var rows=inv.map(function(i){
+    return '<div style="padding:12px 14px;border-bottom:1px solid var(--border)'+(i.low?';background:#fdf3e6':'')+'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'+
+      '<span class="bag-td" style="min-width:0">'+bagSvg(i.bag_hex)+'<span style="font-weight:600">'+esc(i.name)+'</span>'+(i.low?' <span class="pill warn">LOW</span>':'')+'</span>'+
+      '<span style="text-align:right;white-space:nowrap"><b style="font-size:17px;color:var(--navy)">'+i.available+'</b><div class="muted" style="font-size:10.5px">available</div></span></div>'+
+      '<div class="muted" style="font-size:12px;margin-top:4px">on hand '+i.on_hand+' · committed '+i.committed+' · reorder at '+i.reorder_point+' · avg '+money(i.avg_cost)+'</div>'+
+      '<div class="linkrow" style="margin-top:8px"><button class="btn ghost sm" onclick="invReceive(\''+i.product_id+'\')">Receive</button>'+
+      '<button class="btn ghost sm" onclick="invAdjust(\''+i.product_id+'\')">Adjust</button>'+
+      '<button class="btn ghost sm" onclick="invEdit(\''+i.product_id+'\')">Reorder</button></div></div>';
+  }).join("")||'<div class="pad muted" style="text-align:center;padding:24px">No products carried yet. Add one below.</div>';
+  var carried={}; inv.forEach(function(i){carried[i.product_id]=true;});
+  var addOpts=D.pricing.filter(function(p){return !carried[p.id];}).map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join("");
+  var addPanel='<div class="panel"><div class="panel-h"><h3>Carry a new product</h3></div><div class="pad"><div class="ctlgrid">'+
+    '<div class="field"><label>Product</label><select id="iv_prod">'+(addOpts||'<option value="">All products already carried</option>')+'</select></div>'+
+    '<div class="field"><label>Opening count</label><input id="iv_open" type="number" min="0" step="1" placeholder="0"></div>'+
+    '<div class="field"><label>Unit cost ($, optional)</label><input id="iv_cost" type="number" min="0" step="0.01" placeholder="wholesale"></div>'+
+    '<div class="field"><label>Reorder point</label><input id="iv_rp" type="number" min="0" step="1" placeholder="10"></div>'+
+    '</div><button class="btn primary sm" style="margin-top:8px" onclick="invAddItem()">Add to inventory</button></div></div>';
+  var ql=(D.qbo_log||[]);
+  var qboRows=ql.length?ql.slice(0,12).map(function(q){return '<tr><td><span class="pill cat" style="background:#2CA01C">'+esc(q.txn)+'</span></td><td style="font-size:12.5px">'+esc(q.detail)+'</td><td class="num">'+(q.amount==null?'—':money(q.amount))+'</td><td class="muted hide-sm" style="font-size:11.5px">'+(q.at||'').slice(0,16).replace("T"," ")+'</td></tr>';}).join(""):'<tr><td colspan="4" class="muted" style="padding:18px;text-align:center">Nothing posted yet.</td></tr>';
+  var qboPanel='<div class="panel"><div class="panel-h"><h3>What would post to QuickBooks</h3><span class="hint">money only · prototype preview</span></div><div style="overflow-x:auto"><table><thead><tr><th>Txn</th><th>Detail</th><th class="num">Amount</th><th class="hide-sm">When</th></tr></thead><tbody>'+qboRows+'</tbody></table></div></div>';
+  var mv=(D.stock_movements||[]);
+  var mvRows=mv.length?mv.slice(0,15).map(function(m){var sign=m.qty>0?'+':'';return '<tr><td style="font-size:12.5px"><b>'+esc(m.product_name)+'</b></td><td><span class="pill cat" style="background:'+mvColor(m.type)+'">'+esc(m.type)+'</span></td><td class="num '+(m.qty>0?'':'')+'" style="color:'+(m.qty>0?'var(--green)':(m.qty<0?'var(--red)':'var(--muted)'))+'">'+sign+m.qty+'</td><td class="num hide-sm">'+m.balance_after+'</td><td class="muted hide-sm" style="font-size:11.5px">'+esc(m.reason||"")+'</td></tr>';}).join(""):'<tr><td colspan="5" class="muted" style="padding:18px;text-align:center">No movements yet.</td></tr>';
+  var mvPanel='<div class="panel"><div class="panel-h"><h3>Stock movement log</h3><span class="hint">most recent</span></div><div style="overflow-x:auto"><table><thead><tr><th>Product</th><th>Type</th><th class="num">Qty</th><th class="num hide-sm">Balance</th><th class="hide-sm">Reason</th></tr></thead><tbody>'+mvRows+'</tbody></table></div></div>';
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2 class="sec" style="margin:0">Inventory · '+esc(D.settings.dealer_name)+'</h2>'+
+    '<button class="btn primary sm" onclick="openQuickSale()">+ Walk-in sale</button></div>'+
+    '<p class="sub-h">Live stock — updates as orders are invoiced, walk-in sales ring up, shipments arrive, and no-shows are cancelled.</p>'+k+lowBanner+
+    '<div class="panel"><div class="panel-h"><h3>On-hand by product</h3><span class="hint">available = on hand − committed</span></div>'+rows+'</div>'+
+    addPanel+qboPanel+mvPanel;
+}
+function mvColor(t){ return {receive:"#2F6B3A",fulfill:"#C26B2D",return:"#3D8FCE","write_off":"#a3271f",adjust:"#7a6f5a"}[t]||"#888"; }
+function toggleInventory(on){ api("/api/admin/settings","POST",{inventory_enabled:!!on}).then(function(){ toast(on?"Inventory tracking on.":"Inventory off."); refresh(); }); }
+function invAddItem(){
+  var pid=document.getElementById("iv_prod").value; if(!pid){ toast("Pick a product."); return; }
+  var b={product_id:pid, opening_qty:Number(document.getElementById("iv_open").value)||0, reorder_point:Number(document.getElementById("iv_rp").value)||0};
+  var c=document.getElementById("iv_cost").value; if(c!=="") b.unit_cost=Number(c);
+  api("/api/admin/inventory/item","POST",b).then(function(d){ if(d&&d.ok){toast("Now carrying it.");refresh();} else {toast((d&&d.error)||"Could not add.");} });
+}
+function invEdit(pid){
+  var i=(D.inventory||[]).find(function(x){return x.product_id===pid;}); if(!i)return;
+  showModal('<h3 style="color:var(--navy)">Reorder rule · '+esc(i.name)+'</h3>'+
+    '<div class="ctlgrid" style="margin-top:8px"><div class="field"><label>Reorder point</label><input id="m_rp" type="number" min="0" value="'+i.reorder_point+'"></div>'+
+    '<div class="field"><label>Reorder qty</label><input id="m_rq" type="number" min="0" value="'+i.reorder_qty+'"></div></div>'+
+    '<div style="margin-top:12px;display:flex;gap:8px"><button class="btn primary sm" onclick="invSaveRule(\''+pid+'\')">Save</button>'+
+    '<button class="btn ghost sm" onclick="closeModal()">Cancel</button>'+
+    '<button class="btn ghost sm" style="margin-left:auto;color:var(--red)" onclick="invStop(\''+pid+'\',\''+esc(i.name).replace(/\x27/g,"")+'\')">Stop carrying</button></div>');
+}
+function invSaveRule(pid){ api("/api/admin/inventory/item","POST",{product_id:pid,reorder_point:Number(document.getElementById("m_rp").value)||0,reorder_qty:Number(document.getElementById("m_rq").value)||0}).then(function(){toast("Saved.");closeModal();refresh();}); }
+function invStop(pid,name){ if(!confirm("Stop carrying "+name+"? Its stock history stays in the log."))return; api("/api/admin/inventory/remove","POST",{product_id:pid}).then(function(){toast("Stopped carrying "+name+".");closeModal();refresh();}); }
+function invReceive(pid){
+  var i=(D.inventory||[]).find(function(x){return x.product_id===pid;}); if(!i)return;
+  showModal('<h3 style="color:var(--navy)">Receive shipment · '+esc(i.name)+'</h3>'+
+    '<p class="muted" style="font-size:12.5px">On hand now: <b>'+i.on_hand+'</b></p>'+
+    '<div class="ctlgrid"><div class="field"><label>Bags received</label><input id="m_qty" type="number" min="1" step="1" placeholder="20"></div>'+
+    '<div class="field"><label>Unit cost ($)</label><input id="m_cost" type="number" min="0" step="0.01" placeholder="'+i.avg_cost+'"></div></div>'+
+    '<div style="margin-top:12px;display:flex;gap:8px"><button class="btn primary sm" onclick="invDoReceive(\''+pid+'\')">Receive into stock</button><button class="btn ghost sm" onclick="closeModal()">Cancel</button></div>');
+}
+function invDoReceive(pid){
+  var qty=Number(document.getElementById("m_qty").value)||0; if(qty<=0){toast("Enter bags received.");return;}
+  var c=document.getElementById("m_cost").value; var line={product_id:pid,qty:qty}; if(c!=="")line.unit_cost=Number(c);
+  api("/api/admin/inventory/receive","POST",{items:[line]}).then(function(d){ if(d&&d.ok){toast(d.count+" bags received.");closeModal();refresh();} else {toast((d&&d.error)||"Could not receive.");} });
+}
+function invAdjust(pid){
+  var i=(D.inventory||[]).find(function(x){return x.product_id===pid;}); if(!i)return;
+  showModal('<h3 style="color:var(--navy)">Adjust count · '+esc(i.name)+'</h3>'+
+    '<p class="muted" style="font-size:12.5px">System shows <b>'+i.on_hand+'</b> on hand. Enter the true physical count.</p>'+
+    '<div class="ctlgrid"><div class="field"><label>Actual count</label><input id="m_new" type="number" min="0" step="1" value="'+i.on_hand+'"></div>'+
+    '<div class="field"><label>Reason</label><input id="m_reason" placeholder="Cycle count / shrink"></div></div>'+
+    '<div style="margin-top:12px;display:flex;gap:8px"><button class="btn primary sm" onclick="invDoAdjust(\''+pid+'\')">Save correction</button><button class="btn ghost sm" onclick="closeModal()">Cancel</button></div>');
+}
+function invDoAdjust(pid){ api("/api/admin/inventory/adjust","POST",{product_id:pid,new_qty:Number(document.getElementById("m_new").value),reason:(document.getElementById("m_reason").value||"").trim()}).then(function(d){ if(d&&d.ok){toast("Count corrected.");closeModal();refresh();} else {toast((d&&d.error)||"Could not adjust.");} }); }
+/* ---- Walk-in / quick sale (in-stock gated) ---- */
+var qsLines=[];
+function openQuickSale(){
+  qsLines=[];
+  var avail=(D.inventory||[]).filter(function(i){return i.available>0;});
+  if(!avail.length){ showModal('<h3 style="color:var(--navy)">Walk-in sale</h3><p class="muted">Nothing is in stock to sell right now.</p><div style="margin-top:10px"><button class="btn ghost sm" onclick="closeModal()">Close</button></div>'); return; }
+  drawQuickSale();
+}
+function drawQuickSale(){
+  var avail=(D.inventory||[]).filter(function(i){return i.available>0;});
+  var opts=avail.map(function(i){return '<option value="'+i.product_id+'">'+esc(i.name)+' — '+i.available+' avail</option>';}).join("");
+  var lineRows=qsLines.map(function(l,idx){var i=avail.find(function(x){return x.product_id===l.product_id;})||{available:l.qty,name:l.product_id};return '<tr><td style="font-size:12.5px">'+esc(i.name)+'</td><td class="num">'+l.qty+'</td><td><button class="btn ghost sm" onclick="qsDel('+idx+')">✕</button></td></tr>';}).join("");
+  showModal('<h3 style="color:var(--navy)">Walk-in / counter sale</h3>'+
+    '<p class="muted" style="font-size:12.5px">Only items in stock appear; quantity is capped at what&#39;s available.</p>'+
+    '<div class="ctlgrid"><div class="field"><label>Item</label><select id="qs_prod" onchange="qsCap()">'+opts+'</select></div>'+
+    '<div class="field"><label>Qty (max <span id="qs_max"></span>)</label><input id="qs_qty" type="number" min="1" step="1" value="1"></div></div>'+
+    '<button class="btn ghost sm" onclick="qsAdd()">+ Add line</button>'+
+    (qsLines.length?'<table style="margin-top:10px"><thead><tr><th>Item</th><th class="num">Qty</th><th></th></tr></thead><tbody>'+lineRows+'</tbody></table>':'')+
+    '<div class="field" style="margin-top:10px"><label>Customer (optional)</label><input id="qs_cust" placeholder="Counter sale"></div>'+
+    '<div class="field"><label>Paid by</label><select id="qs_method"><option>Cash</option><option>Check</option><option>Venmo</option><option>Card</option></select></div>'+
+    '<div style="margin-top:12px;display:flex;gap:8px"><button class="btn primary sm" onclick="qsSubmit()">Ring up sale</button><button class="btn ghost sm" onclick="closeModal()">Cancel</button></div>');
+  qsCap();
+}
+function qsCap(){ var avail=(D.inventory||[]).filter(function(i){return i.available>0;}); var pid=document.getElementById("qs_prod").value; var i=avail.find(function(x){return x.product_id===pid;}); var max=i?i.available:1; var ms=document.getElementById("qs_max"); if(ms)ms.textContent=max; var q=document.getElementById("qs_qty"); if(q){q.max=max; if(Number(q.value)>max)q.value=max;} }
+function qsAdd(){
+  var pid=document.getElementById("qs_prod").value; var qty=Number(document.getElementById("qs_qty").value)||0;
+  var avail=(D.inventory||[]).find(function(i){return i.product_id===pid;}); if(!avail){return;}
+  var already=qsLines.filter(function(l){return l.product_id===pid;}).reduce(function(a,l){return a+l.qty;},0);
+  if(qty<=0){toast("Enter a quantity.");return;}
+  if(qty+already>avail.available){toast("Only "+avail.available+" available.");return;}
+  qsLines.push({product_id:pid,qty:qty}); drawQuickSale();
+}
+function qsDel(idx){ qsLines.splice(idx,1); drawQuickSale(); }
+function qsSubmit(){
+  if(!qsLines.length){
+    // allow a single quick line straight from the selectors
+    var pid=document.getElementById("qs_prod").value; var qty=Number(document.getElementById("qs_qty").value)||0;
+    if(pid&&qty>0) qsLines.push({product_id:pid,qty:qty});
+  }
+  if(!qsLines.length){ toast("Add at least one item."); return; }
+  var b={items:qsLines, customer_name:(document.getElementById("qs_cust").value||"").trim(), method:document.getElementById("qs_method").value};
+  api("/api/admin/inventory/quicksale","POST",b).then(function(d){ if(d&&d.ok){toast("Sold — "+d.invoice_num+" · "+money(d.total));qsLines=[];closeModal();refresh();} else {toast((d&&d.error)||"Could not complete sale.");} });
 }
 
 /* ---------- modal ---------- */

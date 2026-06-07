@@ -1,1848 +1,2246 @@
 {
-  "products": [
-    {
-      "id": "ca1",
-      "name": "Primer Plus",
-      "category": "Cattle",
-      "wholesale": 15.1,
-      "srp": 17.6,
-      "size": "50 lb",
-      "bag_hex": "#D9D9D9",
-      "bag_color_name": "Gray",
-      "active": 1
-    },
-    {
-      "id": "ca2",
-      "name": "Breeder Grower",
-      "category": "Cattle",
-      "wholesale": 15.7,
-      "srp": 18.2,
-      "size": "50 lb",
-      "bag_hex": "#0070C0",
-      "bag_color_name": "Blue",
-      "active": 1
-    },
-    {
-      "id": "ca3",
-      "name": "Cattle Blaster",
-      "category": "Cattle",
-      "wholesale": 15.35,
-      "srp": 17.85,
-      "size": "50 lb",
-      "bag_hex": "#FF0000",
-      "bag_color_name": "Red",
-      "active": 1
-    },
-    {
-      "id": "ca4",
-      "name": "Light'em Up",
-      "category": "Cattle",
-      "wholesale": 17.05,
-      "srp": 19.55,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "ca5",
-      "name": "Barley Base",
-      "category": "Cattle",
-      "wholesale": 15.48,
-      "srp": 17.98,
-      "size": "50 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ca6",
-      "name": "Payload",
-      "category": "Cattle",
-      "wholesale": 17.13,
-      "srp": 19.63,
-      "size": "50 lb",
-      "bag_hex": "#7030A0",
-      "bag_color_name": "Purple",
-      "active": 1
-    },
-    {
-      "id": "ca7",
-      "name": "Launch",
-      "category": "Cattle",
-      "wholesale": 15.95,
-      "srp": 18.45,
-      "size": "50 lb",
-      "bag_hex": "#00B0F0",
-      "bag_color_name": "Sky Blue",
-      "active": 1
-    },
-    {
-      "id": "ca8",
-      "name": "Cattlelac",
-      "category": "Cattle",
-      "wholesale": 18.93,
-      "srp": 21.43,
-      "size": "50 lb",
-      "bag_hex": "#E7B7E4",
-      "bag_color_name": "Pink",
-      "active": 1
-    },
-    {
-      "id": "ca9",
-      "name": "Show Ready",
-      "category": "Cattle",
-      "wholesale": 16.33,
-      "srp": 18.83,
-      "size": "50 lb",
-      "bag_hex": "#00B050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "ca10",
-      "name": "Synurgy",
-      "category": "Cattle",
-      "wholesale": 15.58,
-      "srp": 18.08,
-      "size": "50 lb",
-      "bag_hex": "#000000",
-      "bag_color_name": "Black",
-      "active": 1
-    },
-    {
-      "id": "ca11",
-      "name": "Beef 11%",
-      "category": "Cattle",
-      "wholesale": 12.88,
-      "srp": 15.38,
-      "size": "50 lb",
-      "bag_hex": "#FFFFFF",
-      "bag_color_name": "\u2014",
-      "active": 1
-    },
-    {
-      "id": "ca12",
-      "name": "Calf Starter",
-      "category": "Cattle",
-      "wholesale": 15.75,
-      "srp": 18.25,
-      "size": "50 lb",
-      "bag_hex": "#FFFFFF",
-      "bag_color_name": "\u2014",
-      "active": 1
-    },
-    {
-      "id": "ca13",
-      "name": "Beef'em Up",
-      "category": "Cattle",
-      "wholesale": 13.75,
-      "srp": 16.25,
-      "size": "50 lb",
-      "bag_hex": "#8B4513",
-      "bag_color_name": "Brown",
-      "active": 1
-    },
-    {
-      "id": "la1",
-      "name": "Top Choice Lamb 19%",
-      "category": "Lamb",
-      "wholesale": 18,
-      "srp": 21,
-      "size": "50 lb",
-      "bag_hex": "#FF66CC",
-      "bag_color_name": "Pink",
-      "active": 1
-    },
-    {
-      "id": "la2",
-      "name": "Top Choice Lamb 17%",
-      "category": "Lamb",
-      "wholesale": 17.73,
-      "srp": 20.73,
-      "size": "50 lb",
-      "bag_hex": "#FF66CC",
-      "bag_color_name": "Pink",
-      "active": 1
-    },
-    {
-      "id": "la3",
-      "name": "Top Choice Lamb 16%",
-      "category": "Lamb",
-      "wholesale": 18.83,
-      "srp": 21.83,
-      "size": "50 lb",
-      "bag_hex": "#FF66CC",
-      "bag_color_name": "Pink",
-      "active": 1
-    },
-    {
-      "id": "la4",
-      "name": "Ewe Breeder Ration 12%",
-      "category": "Lamb",
-      "wholesale": 14.33,
-      "srp": 17.33,
-      "size": "50 lb",
-      "bag_hex": "#FF66CC",
-      "bag_color_name": "Pink",
-      "active": 1
-    },
-    {
-      "id": "la5",
-      "name": "Top Choice Lamb Creep 19%",
-      "category": "Lamb",
-      "wholesale": 17.53,
-      "srp": 20.53,
-      "size": "50 lb",
-      "bag_hex": "#FF66CC",
-      "bag_color_name": "Pink",
-      "active": 1
-    },
-    {
-      "id": "la6",
-      "name": "Top Choice Lamb Creep 18%",
-      "category": "Lamb",
-      "wholesale": 17.9,
-      "srp": 20.9,
-      "size": "50 lb",
-      "bag_hex": "#FF66CC",
-      "bag_color_name": "Pink",
-      "active": 1
-    },
-    {
-      "id": "go1",
-      "name": "Meat Goat Grower/R 16%",
-      "category": "Goats",
-      "wholesale": 17.83,
-      "srp": 20.83,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "go2",
-      "name": "Meat Goat Fusion",
-      "category": "Goats",
-      "wholesale": 17.55,
-      "srp": 20.55,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "go3",
-      "name": "Meat Goat Creep 18%",
-      "category": "Goats",
-      "wholesale": 18.2,
-      "srp": 21.2,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "go4",
-      "name": "Commercial Goat 16%",
-      "category": "Goats",
-      "wholesale": 14.98,
-      "srp": 17.98,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "go5",
-      "name": "Dairy Goat Ration 16%",
-      "category": "Goats",
-      "wholesale": 0,
-      "srp": 20.55,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "go6",
-      "name": "Crossfire",
-      "category": "Goats",
-      "wholesale": 12.95,
-      "srp": 15.95,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "go7",
-      "name": "Next Level",
-      "category": "Goats",
-      "wholesale": 19.2,
-      "srp": 22.2,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "go8",
-      "name": "Prevail GSP 16%",
-      "category": "Goats",
-      "wholesale": 18.58,
-      "srp": 21.58,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "re1",
-      "name": "Dynamic Sheep and Goat Breeder",
-      "category": "Repro",
-      "wholesale": 12.52,
-      "srp": 15.52,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "re2",
-      "name": "Maximizer",
-      "category": "Repro",
-      "wholesale": 17.48,
-      "srp": 20.48,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "re3",
-      "name": "Customize Balancer 20%",
-      "category": "Repro",
-      "wholesale": 36.26,
-      "srp": 39.25,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "re4",
-      "name": "Foundation Sheep 50#",
-      "category": "Repro",
-      "wholesale": 43,
-      "srp": 43,
-      "size": "50 lb",
-      "bag_hex": "#FF66CC",
-      "bag_color_name": "Pink",
-      "active": 1
-    },
-    {
-      "id": "re5",
-      "name": "Foundation Goat 50#",
-      "category": "Repro",
-      "wholesale": 45,
-      "srp": 45,
-      "size": "50 lb",
-      "bag_hex": "#ED7D31",
-      "bag_color_name": "Orange",
-      "active": 1
-    },
-    {
-      "id": "sw1",
-      "name": "Clutch Denagard",
-      "category": "Swine",
-      "wholesale": 29.1,
-      "srp": 32.13,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw2",
-      "name": "Clutch CTC Denagard",
-      "category": "Swine",
-      "wholesale": 29.61,
-      "srp": 32.63,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw3",
-      "name": "Umbarger Pedal Down 19%",
-      "category": "Swine",
-      "wholesale": 19.85,
-      "srp": 22.85,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw4",
-      "name": "Umbarger Spot Light 17%",
-      "category": "Swine",
-      "wholesale": 19.08,
-      "srp": 22.08,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw5",
-      "name": "Umbarger Massive 16%",
-      "category": "Swine",
-      "wholesale": 19.03,
-      "srp": 22.03,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw6",
-      "name": "Swine Gestation 14%",
-      "category": "Swine",
-      "wholesale": 12.2,
-      "srp": 15.2,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw7",
-      "name": "Swine Lactation 18%",
-      "category": "Swine",
-      "wholesale": 14.1,
-      "srp": 17.1,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw8",
-      "name": "Xcel 18%",
-      "category": "Swine",
-      "wholesale": 20.03,
-      "srp": 23.03,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw9",
-      "name": "Cool Down 13.5",
-      "category": "Swine",
-      "wholesale": 17.22,
-      "srp": 20.22,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw10",
-      "name": "Umbarger Ultraboost RTU 2.5#",
-      "category": "Swine",
-      "wholesale": 45,
-      "srp": 65,
-      "size": "2.5 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw11",
-      "name": "Umbarger Hi Energy Supplement 35#",
-      "category": "Swine",
-      "wholesale": 73.5,
-      "srp": 89,
-      "size": "35 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw12",
-      "name": "Freedom Base Plus 50#",
-      "category": "Swine",
-      "wholesale": 46.9,
-      "srp": 52.9,
-      "size": "50 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "sw13",
-      "name": "Umbarger Sow Base 90 45#",
-      "category": "Swine",
-      "wholesale": 41.75,
-      "srp": 47.75,
-      "size": "45 lb",
-      "bag_hex": "#92D050",
-      "bag_color_name": "Green",
-      "active": 1
-    },
-    {
-      "id": "ho1",
-      "name": "Textured Horse 12%",
-      "category": "Horse",
-      "wholesale": 13.67,
-      "srp": 15.58,
-      "size": "50 lb",
-      "bag_hex": "#BFBFBF",
-      "bag_color_name": "Gray",
-      "active": 1
-    },
-    {
-      "id": "ho2",
-      "name": "Endurance No Corn 12%",
-      "category": "Horse",
-      "wholesale": 17.43,
-      "srp": 19.6,
-      "size": "50 lb",
-      "bag_hex": "#BFBFBF",
-      "bag_color_name": "Gray",
-      "active": 1
-    },
-    {
-      "id": "ho3",
-      "name": "Top Class 14%",
-      "category": "Horse",
-      "wholesale": 15.13,
-      "srp": 17.48,
-      "size": "50 lb",
-      "bag_hex": "#BFBFBF",
-      "bag_color_name": "Gray",
-      "active": 1
-    },
-    {
-      "id": "po1",
-      "name": "Layer 16% Premium Poultry",
-      "category": "Poultry",
-      "wholesale": 13.67,
-      "srp": 16.51,
-      "size": "50 lb",
-      "bag_hex": "#FFE699",
-      "bag_color_name": "Cream",
-      "active": 1
-    },
-    {
-      "id": "vf1",
-      "name": "Sure Champ",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 45,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf2",
-      "name": "Sure Champ Extreme W/clarifly 40#",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 72,
-      "size": "40 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf3",
-      "name": "Sure Champ Extreme Bucket Sheep and Goats",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 44.71,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf4",
-      "name": "Dura Ferm Goat Concept Aid heat",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 48,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf5",
-      "name": "Dura Ferm Goat Concept Aid Tub 50lb",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 80,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf6",
-      "name": "DuraFerm Sheep Concept Aid 50# bag",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 44.5,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf7",
-      "name": "Dura Ferm Sheep Con Aid Heat",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 45,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf8",
-      "name": "Dura Ferm Sheep Con Aid Tub 125#",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 132,
-      "size": "125 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf9",
-      "name": "VitaCharge Stress Tub w heat  #50",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 88,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf10",
-      "name": "VitaCharge Stress MOS Tub #50",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 75,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf11",
-      "name": "VitaCharge Drench 5L",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 215,
-      "size": "5 l",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf12",
-      "name": "VitaCharge Liquid Boost 32oz",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 36,
-      "size": "32 oz",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf13",
-      "name": "Concept Aid protein tub #200",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 170,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf14",
-      "name": "Cattlemens blend #50",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 41.5,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf15",
-      "name": "Concept Aid 5/S #50",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 45,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf16",
-      "name": "Concept Aid 5/S Heat W/Clarifly",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 55.25,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf17",
-      "name": "Concept Aid 8/S #50",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 39.9,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf18",
-      "name": "Sure Champ Spark 25lb",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 60,
-      "size": "25 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf19",
-      "name": "VitaFerm Heat W/ Clarifly",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 50,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf20",
-      "name": "Joint Juice 1 gallon",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 160,
-      "size": "gallon",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf21",
-      "name": "Vitaferm Concept Aid Protein 200#",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 140,
-      "size": "200 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf22",
-      "name": "Gainsmart Stocker",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 28,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf23",
-      "name": "Sea Salt #50",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 16,
-      "size": "50 lb",
-      "bag_hex": "#FFC000",
-      "bag_color_name": "Gold",
-      "active": 1
-    },
-    {
-      "id": "vf24",
-      "name": "VitaCharge Hydraboost",
-      "category": "Vita Ferm",
-      "wholesale": 0,
-      "srp": 95,
-      "size": "50 lb",
-      "bag_hex": "#FFFFFF",
-      "bag_color_name": "\u2014",
-      "active": 1
-    },
-    {
-      "id": "ex1",
-      "name": "Bullet Proof Sheep and Goat 30#",
-      "category": "Extras",
-      "wholesale": 105,
-      "srp": 125,
-      "size": "30 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex2",
-      "name": "Champion Choice 50# bag",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 16.25,
-      "size": "50 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex3",
-      "name": "Change Up 40# bag",
-      "category": "Extras",
-      "wholesale": 18.75,
-      "srp": 21.5,
-      "size": "40 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex4",
-      "name": "Cobboom 40# bag",
-      "category": "Extras",
-      "wholesale": 12.52,
-      "srp": 16.52,
-      "size": "40 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex5",
-      "name": "Cotton Seed Hulls 45#",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 13,
-      "size": "45 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex6",
-      "name": "FullBack Swine 25#",
-      "category": "Extras",
-      "wholesale": 110.5,
-      "srp": 130,
-      "size": "25 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex7",
-      "name": "Frosting XL",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 45,
-      "size": "50 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex8",
-      "name": "Loaded  40# bag",
-      "category": "Extras",
-      "wholesale": 24.38,
-      "srp": 29.48,
-      "size": "40 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex9",
-      "name": "Apex 40# bag",
-      "category": "Extras",
-      "wholesale": 22,
-      "srp": 25,
-      "size": "40 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex10",
-      "name": "Pine River Shavings",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 10.5,
-      "size": "50 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex11",
-      "name": "Cedar Fiber Bedding",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 11,
-      "size": "50 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex12",
-      "name": "Rolled Barley",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 22,
-      "size": "50 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex13",
-      "name": "Rolled Oats",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 35,
-      "size": "50 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex14",
-      "name": "Show Shake 3LB",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 43,
-      "size": "3 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex15",
-      "name": "Show Shake 25LB",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 260,
-      "size": "25 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex16",
-      "name": "Dyne Gallon",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 61,
-      "size": "gallon",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex17",
-      "name": "Millennium 5LB",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 58,
-      "size": "5 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex18",
-      "name": "Final Force 10lb",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 83,
-      "size": "10 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex19",
-      "name": "Star Glo",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 65,
-      "size": "50 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex20",
-      "name": "Hydrator X 5#",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 48,
-      "size": "5 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex21",
-      "name": "Two Step 10lb",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 82,
-      "size": "10 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    },
-    {
-      "id": "ex22",
-      "name": "Show Bloom",
-      "category": "Extras",
-      "wholesale": 0,
-      "srp": 62,
-      "size": "50 lb",
-      "bag_hex": "#FFFF00",
-      "bag_color_name": "Yellow",
-      "active": 1
-    }
-  ],
-  "categoryOrder": [
-    "Cattle",
-    "Lamb",
-    "Goats",
-    "Repro",
-    "Swine",
-    "Horse",
-    "Poultry",
-    "Vita Ferm",
-    "Extras"
-  ],
-  "categoryColors": {
-    "Cattle": "#1F3864",
-    "Lamb": "#8E44AD",
-    "Goats": "#C0392B",
-    "Repro": "#16A085",
-    "Swine": "#D35400",
-    "Horse": "#7F8C8D",
-    "Poultry": "#B7950B",
-    "Vita Ferm": "#27AE60",
-    "Extras": "#2980B9"
-  },
-  "settings": {
-    "dealer_name": "Riverbend Feed & Supply",
-    "payable_to": "Riverbend Feed & Supply",
-    "address": "100 Mill Road, Lexington, KY 40504",
-    "phone": "(859) 555-0142",
-    "email": "orders@riverbendfeed.example",
-    "venmo": "@Riverbend-Feed",
-    "pricing_basis": "srp",
-    "margin_pct": 1,
-    "freight": 2.75,
-    "tax_enabled": false,
-    "tax_pct": 6,
-    "cycle_anchor": "2026-05-02",
-    "frequency_days": 14,
-    "open_day": "Saturday",
-    "open_time": "9:00 AM",
-    "close_day": "Monday",
-    "close_time": "10:30 AM",
-    "mill_day": "Monday",
-    "mill_time": "10:45 AM",
-    "invoice_day": "Wednesday",
-    "invoice_time": "8:00 AM",
-    "mill_contact_name": "Hannah Cragen",
-    "mill_contact_email": "hcragen@umbargerandsons.com",
-    "invoice_terms": "Total due in 10 business days. Overdue accounts subject to a service charge of 20% per month.",
-    "invoice_counter": 7,
-    "order_window": "open",
-    "public_signup": true,
-    "auto_invoice_minutes": 1
-  },
-  "customers": [
-    {
-      "id": 1,
-      "name": "Sunrise Cattle Co.",
-      "phone": "(859) 555-0100",
-      "email": "sunrise@example.com",
-      "address": "",
-      "payment_method": "Check",
-      "payment_detail_label": "",
-      "link_token": "03d78f1f498258b9dfa99d93b33eb502",
-      "source": "seed",
-      "active": 1
-    },
-    {
-      "id": 2,
-      "name": "Maple Creek Farm",
-      "phone": "(859) 555-0101",
-      "email": "maple@example.com",
-      "address": "",
-      "payment_method": "Check",
-      "payment_detail_label": "",
-      "link_token": "d653cbe167f8973f7848756c1a4b18e7",
-      "source": "seed",
-      "active": 1
-    },
-    {
-      "id": 3,
-      "name": "Willow Bend Ranch",
-      "phone": "(859) 555-0102",
-      "email": "willow@example.com",
-      "address": "",
-      "payment_method": "Check",
-      "payment_detail_label": "",
-      "link_token": "39e2848bb76f8e90c1f5b04db68e0661",
-      "source": "seed",
-      "active": 1
-    },
-    {
-      "id": 4,
-      "name": "Oak Hollow Livestock",
-      "phone": "(859) 555-0103",
-      "email": "oak@example.com",
-      "address": "",
-      "payment_method": "Check",
-      "payment_detail_label": "",
-      "link_token": "a87c51bfaffbcfeeac7af13dc9336d06",
-      "source": "seed",
-      "active": 1
-    },
-    {
-      "id": 5,
-      "name": "Cedar Point Farm",
-      "phone": "(859) 555-0104",
-      "email": "cedar@example.com",
-      "address": "",
-      "payment_method": "Check",
-      "payment_detail_label": "",
-      "link_token": "414581624321e43af70ef72515914ac8",
-      "source": "seed",
-      "active": 1
-    },
-    {
-      "id": 6,
-      "name": "Stonegate Show Stock",
-      "phone": "(859) 555-0105",
-      "email": "stonegate@example.com",
-      "address": "",
-      "payment_method": "Check",
-      "payment_detail_label": "",
-      "link_token": "e779888f07d3cd64ced4cecfbd7dc36f",
-      "source": "seed",
-      "active": 1
-    },
-    {
-      "id": 7,
-      "name": "Twin Pines Farm",
-      "phone": "(859) 555-0106",
-      "email": "twin@example.com",
-      "address": "",
-      "payment_method": "Check",
-      "payment_detail_label": "",
-      "link_token": "256659dce4e206114693906db457a8bc",
-      "source": "seed",
-      "active": 1
-    },
-    {
-      "id": 8,
-      "name": "Clearwater Cattle",
-      "phone": "(859) 555-0107",
-      "email": "clearwater@example.com",
-      "address": "",
-      "payment_method": "Check",
-      "payment_detail_label": "",
-      "link_token": "c9cec2806edd376ff8844b032d1a8ba1",
-      "source": "seed",
-      "active": 1
-    },
-    {
-      "id": 9,
-      "name": "Highland Meadows",
-      "phone": "(859) 555-0108",
-      "email": "highland@example.com",
-      "address": "",
-      "payment_method": "Check",
-      "payment_detail_label": "",
-      "link_token": "f90116b31501cae9b48a0a869142fe50",
-      "source": "seed",
-      "active": 1
-    },
-    {
-      "id": 10,
-      "name": "Birchwood Farm",
-      "phone": "(859) 555-0109",
-      "email": "birchwood@example.com",
-      "address": "",
-      "payment_method": "Check",
-      "payment_detail_label": "",
-      "link_token": "afcf8e3c9a6377a557b5ed87680568ae",
-      "source": "seed",
-      "active": 1
-    },
-    {
-      "id": 11,
-      "link_token": "804d4fef0aa16d096e09ee668a9c69bd",
-      "source": "demo-live",
-      "active": 1,
-      "name": "Eric King",
-      "email": "",
-      "phone": "",
-      "payment_method": "Check",
-      "payment_detail_label": ""
-    },
-    {
-      "id": 12,
-      "link_token": "6e64db24006f100763c88dd7e0c4821d",
-      "source": "demo-live",
-      "active": 1,
-      "name": "Hannah Cragen",
-      "email": "",
-      "phone": "",
-      "payment_method": "Check",
-      "payment_detail_label": ""
-    },
-    {
-      "id": 13,
-      "link_token": "8b6d0f680d13d5bba37703c09ae1b1ea",
-      "source": "demo-live",
-      "active": 1,
-      "name": "Guest 1",
-      "email": "",
-      "phone": "",
-      "payment_method": "Check",
-      "payment_detail_label": ""
-    },
-    {
-      "id": 14,
-      "link_token": "bd3ea1918442369d63d49fa4b09f168b",
-      "source": "demo-live",
-      "active": 1,
-      "name": "Guest 2",
-      "email": "",
-      "phone": "",
-      "payment_method": "Check",
-      "payment_detail_label": ""
-    },
-    {
-      "id": 15,
-      "link_token": "6f22d2f23ab30ed0b7a7cfaf08ea0fa1",
-      "source": "demo-live",
-      "active": 1,
-      "name": "Guest 3",
-      "email": "",
-      "phone": "",
-      "payment_method": "Check",
-      "payment_detail_label": ""
-    },
-    {
-      "id": 16,
-      "link_token": "5530949320c3d389f132fac692cb7d68",
-      "source": "demo-live",
-      "active": 1,
-      "name": "Kent Bennington",
-      "email": "",
-      "phone": "",
-      "payment_method": "Check",
-      "payment_detail_label": ""
-    }
-  ],
-  "cycles": [
-    {
-      "id": 1,
-      "delivery_key": "2026-06-13",
-      "delivery_label": "6/13/2026",
-      "status": "open"
-    }
-  ],
-  "orders": [
-    {
-      "id": 1,
-      "customer_id": 1,
-      "cycle_id": 1,
-      "status": "submitted",
-      "created_at": "2026-06-05T05:20:33.448Z",
-      "updated_at": "2026-06-05T05:20:33.448Z"
-    },
-    {
-      "id": 2,
-      "customer_id": 2,
-      "cycle_id": 1,
-      "status": "submitted",
-      "created_at": "2026-06-05T05:20:33.455Z",
-      "updated_at": "2026-06-05T05:20:33.455Z"
-    },
-    {
-      "id": 3,
-      "customer_id": 3,
-      "cycle_id": 1,
-      "status": "submitted",
-      "created_at": "2026-06-05T05:20:33.456Z",
-      "updated_at": "2026-06-05T05:20:33.456Z"
-    },
-    {
-      "id": 4,
-      "customer_id": 4,
-      "cycle_id": 1,
-      "status": "submitted",
-      "created_at": "2026-06-05T05:20:33.456Z",
-      "updated_at": "2026-06-05T05:20:33.456Z"
-    },
-    {
-      "id": 5,
-      "customer_id": 5,
-      "cycle_id": 1,
-      "status": "submitted",
-      "created_at": "2026-06-05T05:20:33.457Z",
-      "updated_at": "2026-06-05T05:20:33.457Z"
-    },
-    {
-      "id": 6,
-      "customer_id": 7,
-      "cycle_id": 1,
-      "status": "submitted",
-      "created_at": "2026-06-05T05:20:33.458Z",
-      "updated_at": "2026-06-05T05:20:33.458Z"
-    },
-    {
-      "id": 7,
-      "customer_id": 9,
-      "cycle_id": 1,
-      "status": "submitted",
-      "created_at": "2026-06-05T05:20:33.459Z",
-      "updated_at": "2026-06-05T05:20:33.459Z"
-    }
-  ],
-  "order_items": [
-    {
-      "id": 1,
-      "order_id": 1,
-      "product_id": "ca1",
-      "qty": 6
-    },
-    {
-      "id": 2,
-      "order_id": 1,
-      "product_id": "ca8",
-      "qty": 4
-    },
-    {
-      "id": 3,
-      "order_id": 2,
-      "product_id": "ca6",
-      "qty": 5
-    },
-    {
-      "id": 4,
-      "order_id": 2,
-      "product_id": "ca10",
-      "qty": 3
-    },
-    {
-      "id": 5,
-      "order_id": 3,
-      "product_id": "go7",
-      "qty": 8
-    },
-    {
-      "id": 6,
-      "order_id": 4,
-      "product_id": "ca3",
-      "qty": 4
-    },
-    {
-      "id": 7,
-      "order_id": 4,
-      "product_id": "ca5",
-      "qty": 2
-    },
-    {
-      "id": 8,
-      "order_id": 4,
-      "product_id": "ca6",
-      "qty": 4
-    },
-    {
-      "id": 9,
-      "order_id": 5,
-      "product_id": "go6",
-      "qty": 6
-    },
-    {
-      "id": 10,
-      "order_id": 6,
-      "product_id": "ca8",
-      "qty": 8
-    },
-    {
-      "id": 11,
-      "order_id": 6,
-      "product_id": "ca10",
-      "qty": 5
-    },
-    {
-      "id": 12,
-      "order_id": 7,
-      "product_id": "la2",
-      "qty": 4
-    }
-  ],
-  "invoices": [
-    {
-      "id": 1,
-      "invoice_num": "26-001",
-      "customer_id": 1,
-      "customer_name": "Sunrise Cattle Co.",
-      "cycle_id": 1,
-      "cycle_label": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "lines": [
-        {
-          "description": "Primer Plus",
-          "qty": 6,
-          "unitPrice": 17.42,
-          "freight": 16.5,
-          "total": 121.02
-        },
-        {
-          "description": "Cattlelac",
-          "qty": 4,
-          "unitPrice": 21.22,
-          "freight": 11,
-          "total": 95.88
-        }
-      ],
-      "subtotal": 216.9,
-      "tax_rate": 0,
-      "tax": 0,
-      "credit_total": 0,
-      "total": 216.9,
-      "freight_rate": 2.75
-    },
-    {
-      "id": 2,
-      "invoice_num": "26-002",
-      "customer_id": 2,
-      "customer_name": "Maple Creek Farm",
-      "cycle_id": 1,
-      "cycle_label": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "lines": [
-        {
-          "description": "Payload",
-          "qty": 5,
-          "unitPrice": 19.43,
-          "freight": 13.75,
-          "total": 110.9
-        },
-        {
-          "description": "Synurgy",
-          "qty": 3,
-          "unitPrice": 17.9,
-          "freight": 8.25,
-          "total": 61.95
-        }
-      ],
-      "subtotal": 172.85,
-      "tax_rate": 0,
-      "tax": 0,
-      "credit_total": 0,
-      "total": 172.85,
-      "freight_rate": 2.75
-    },
-    {
-      "id": 3,
-      "invoice_num": "26-003",
-      "customer_id": 3,
-      "customer_name": "Willow Bend Ranch",
-      "cycle_id": 1,
-      "cycle_label": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "lines": [
-        {
-          "description": "Next Level",
-          "qty": 8,
-          "unitPrice": 21.98,
-          "freight": 22,
-          "total": 197.84
-        }
-      ],
-      "subtotal": 197.84,
-      "tax_rate": 0,
-      "tax": 0,
-      "credit_total": 0,
-      "total": 197.84,
-      "freight_rate": 2.75
-    },
-    {
-      "id": 4,
-      "invoice_num": "26-004",
-      "customer_id": 4,
-      "customer_name": "Oak Hollow Livestock",
-      "cycle_id": 1,
-      "cycle_label": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "lines": [
-        {
-          "description": "Cattle Blaster",
-          "qty": 4,
-          "unitPrice": 17.67,
-          "freight": 11,
-          "total": 81.68
-        },
-        {
-          "description": "Barley Base",
-          "qty": 2,
-          "unitPrice": 17.8,
-          "freight": 5.5,
-          "total": 41.1
-        },
-        {
-          "description": "Payload",
-          "qty": 4,
-          "unitPrice": 19.43,
-          "freight": 11,
-          "total": 88.72
-        }
-      ],
-      "subtotal": 211.5,
-      "tax_rate": 0,
-      "tax": 0,
-      "credit_total": 0,
-      "total": 211.5,
-      "freight_rate": 2.75
-    },
-    {
-      "id": 5,
-      "invoice_num": "26-005",
-      "customer_id": 5,
-      "customer_name": "Cedar Point Farm",
-      "cycle_id": 1,
-      "cycle_label": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "lines": [
-        {
-          "description": "Crossfire",
-          "qty": 6,
-          "unitPrice": 15.79,
-          "freight": 16.5,
-          "total": 111.24
-        }
-      ],
-      "subtotal": 111.24,
-      "tax_rate": 0,
-      "tax": 0,
-      "credit_total": 0,
-      "total": 111.24,
-      "freight_rate": 2.75
-    },
-    {
-      "id": 6,
-      "invoice_num": "26-006",
-      "customer_id": 7,
-      "customer_name": "Twin Pines Farm",
-      "cycle_id": 1,
-      "cycle_label": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "lines": [
-        {
-          "description": "Cattlelac",
-          "qty": 8,
-          "unitPrice": 21.22,
-          "freight": 22,
-          "total": 191.76
-        },
-        {
-          "description": "Synurgy",
-          "qty": 5,
-          "unitPrice": 17.9,
-          "freight": 13.75,
-          "total": 103.25
-        }
-      ],
-      "subtotal": 295.01,
-      "tax_rate": 0,
-      "tax": 0,
-      "credit_total": 0,
-      "total": 295.01,
-      "freight_rate": 2.75
-    },
-    {
-      "id": 7,
-      "invoice_num": "26-007",
-      "customer_id": 9,
-      "customer_name": "Highland Meadows",
-      "cycle_id": 1,
-      "cycle_label": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "lines": [
-        {
-          "description": "Top Choice Lamb 17%",
-          "qty": 4,
-          "unitPrice": 20.52,
-          "freight": 11,
-          "total": 93.08
-        }
-      ],
-      "subtotal": 93.08,
-      "tax_rate": 0,
-      "tax": 0,
-      "credit_total": 0,
-      "total": 93.08,
-      "freight_rate": 2.75
-    }
-  ],
-  "payments": [
-    {
-      "id": 1,
-      "invoice_id": 1,
-      "invoice_num": "26-001",
-      "customer_id": 1,
-      "customer_name": "Sunrise Cattle Co.",
-      "amount": 216.9,
-      "cycle": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "paid": true,
-      "date_paid": "2026-06-05",
-      "method": "Check",
-      "notes": "",
-      "reminders": 0
-    },
-    {
-      "id": 2,
-      "invoice_id": 2,
-      "invoice_num": "26-002",
-      "customer_id": 2,
-      "customer_name": "Maple Creek Farm",
-      "amount": 172.85,
-      "cycle": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "paid": false,
-      "date_paid": null,
-      "method": "",
-      "notes": "",
-      "reminders": 0
-    },
-    {
-      "id": 3,
-      "invoice_id": 3,
-      "invoice_num": "26-003",
-      "customer_id": 3,
-      "customer_name": "Willow Bend Ranch",
-      "amount": 197.84,
-      "cycle": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "paid": true,
-      "date_paid": "2026-06-05",
-      "method": "Venmo",
-      "notes": "",
-      "reminders": 0
-    },
-    {
-      "id": 4,
-      "invoice_id": 4,
-      "invoice_num": "26-004",
-      "customer_id": 4,
-      "customer_name": "Oak Hollow Livestock",
-      "amount": 211.5,
-      "cycle": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "paid": false,
-      "date_paid": null,
-      "method": "",
-      "notes": "",
-      "reminders": 0
-    },
-    {
-      "id": 5,
-      "invoice_id": 5,
-      "invoice_num": "26-005",
-      "customer_id": 5,
-      "customer_name": "Cedar Point Farm",
-      "amount": 111.24,
-      "cycle": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "paid": false,
-      "date_paid": null,
-      "method": "",
-      "notes": "",
-      "reminders": 0
-    },
-    {
-      "id": 6,
-      "invoice_id": 6,
-      "invoice_num": "26-006",
-      "customer_id": 7,
-      "customer_name": "Twin Pines Farm",
-      "amount": 295.01,
-      "cycle": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "paid": true,
-      "date_paid": "2026-06-05",
-      "method": "Check",
-      "notes": "",
-      "reminders": 0
-    },
-    {
-      "id": 7,
-      "invoice_id": 7,
-      "invoice_num": "26-007",
-      "customer_id": 9,
-      "customer_name": "Highland Meadows",
-      "amount": 93.08,
-      "cycle": "6/13/2026",
-      "date_issued": "2026-06-05",
-      "paid": false,
-      "date_paid": null,
-      "method": "",
-      "notes": "",
-      "reminders": 0
-    }
-  ],
-  "outbox": [
-    {
-      "id": 1,
-      "kind": "confirmation",
-      "to": "sunrise@example.com",
-      "to_name": "Sunrise Cattle Co.",
-      "subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
-      "text": "Thanks, Sunrise Cattle Co.. Order received for the 6/13/2026 cycle \u2014 10 bags, total $216.90 (incl. $2.75/bag freight). Reply to change anything.",
-      "html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Sunrise Cattle Co.. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Primer Plus</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">6</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$121.02</td></tr><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Cattlelac</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">4</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$95.88</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (10 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$216.90</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
-      "created_at": "2026-06-05T05:20:33.455Z",
-      "status": "captured",
-      "provider": "outbox",
-      "error": ""
-    },
-    {
-      "id": 2,
-      "kind": "confirmation",
-      "to": "maple@example.com",
-      "to_name": "Maple Creek Farm",
-      "subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
-      "text": "Thanks, Maple Creek Farm. Order received for the 6/13/2026 cycle \u2014 8 bags, total $172.85 (incl. $2.75/bag freight). Reply to change anything.",
-      "html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Maple Creek Farm. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Payload</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">5</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$110.90</td></tr><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Synurgy</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">3</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$61.95</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (8 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$172.85</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
-      "created_at": "2026-06-05T05:20:33.456Z",
-      "status": "captured",
-      "provider": "outbox",
-      "error": ""
-    },
-    {
-      "id": 3,
-      "kind": "confirmation",
-      "to": "willow@example.com",
-      "to_name": "Willow Bend Ranch",
-      "subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
-      "text": "Thanks, Willow Bend Ranch. Order received for the 6/13/2026 cycle \u2014 8 bags, total $197.84 (incl. $2.75/bag freight). Reply to change anything.",
-      "html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Willow Bend Ranch. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Next Level</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">8</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$197.84</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (8 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$197.84</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
-      "created_at": "2026-06-05T05:20:33.456Z",
-      "status": "captured",
-      "provider": "outbox",
-      "error": ""
-    },
-    {
-      "id": 4,
-      "kind": "confirmation",
-      "to": "oak@example.com",
-      "to_name": "Oak Hollow Livestock",
-      "subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
-      "text": "Thanks, Oak Hollow Livestock. Order received for the 6/13/2026 cycle \u2014 10 bags, total $211.50 (incl. $2.75/bag freight). Reply to change anything.",
-      "html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Oak Hollow Livestock. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Cattle Blaster</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">4</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$81.68</td></tr><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Barley Base</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">2</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$41.10</td></tr><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Payload</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">4</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$88.72</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (10 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$211.50</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
-      "created_at": "2026-06-05T05:20:33.457Z",
-      "status": "captured",
-      "provider": "outbox",
-      "error": ""
-    },
-    {
-      "id": 5,
-      "kind": "confirmation",
-      "to": "cedar@example.com",
-      "to_name": "Cedar Point Farm",
-      "subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
-      "text": "Thanks, Cedar Point Farm. Order received for the 6/13/2026 cycle \u2014 6 bags, total $111.24 (incl. $2.75/bag freight). Reply to change anything.",
-      "html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Cedar Point Farm. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Crossfire</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">6</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$111.24</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (6 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$111.24</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
-      "created_at": "2026-06-05T05:20:33.457Z",
-      "status": "captured",
-      "provider": "outbox",
-      "error": ""
-    },
-    {
-      "id": 6,
-      "kind": "confirmation",
-      "to": "twin@example.com",
-      "to_name": "Twin Pines Farm",
-      "subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
-      "text": "Thanks, Twin Pines Farm. Order received for the 6/13/2026 cycle \u2014 13 bags, total $295.01 (incl. $2.75/bag freight). Reply to change anything.",
-      "html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Twin Pines Farm. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Cattlelac</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">8</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$191.76</td></tr><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Synurgy</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">5</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$103.25</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (13 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$295.01</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
-      "created_at": "2026-06-05T05:20:33.458Z",
-      "status": "captured",
-      "provider": "outbox",
-      "error": ""
-    },
-    {
-      "id": 7,
-      "kind": "confirmation",
-      "to": "highland@example.com",
-      "to_name": "Highland Meadows",
-      "subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
-      "text": "Thanks, Highland Meadows. Order received for the 6/13/2026 cycle \u2014 4 bags, total $93.08 (incl. $2.75/bag freight). Reply to change anything.",
-      "html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Highland Meadows. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Top Choice Lamb 17%</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">4</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$93.08</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (4 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$93.08</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
-      "created_at": "2026-06-05T05:20:33.459Z",
-      "status": "captured",
-      "provider": "outbox",
-      "error": ""
-    }
-  ],
-  "credits": [
-    {
-      "id": 1,
-      "customer_id": 5,
-      "customer_name": "Cedar Point Farm",
-      "amount": 24.53,
-      "used": 0,
-      "reason": "Rolled Barley (1 bag) out of stock \u2014 paid, not received",
-      "source_invoice_num": "",
-      "status": "open",
-      "created_at": "2026-06-05",
-      "applications": []
-    }
-  ]
+"products": [
+{
+"id": "ca1",
+"name": "Primer Plus",
+"category": "Cattle",
+"wholesale": 15.1,
+"srp": 17.6,
+"size": "50 lb",
+"bag_hex": "#D9D9D9",
+"bag_color_name": "Gray",
+"active": 1
+},
+{
+"id": "ca2",
+"name": "Breeder Grower",
+"category": "Cattle",
+"wholesale": 15.7,
+"srp": 18.2,
+"size": "50 lb",
+"bag_hex": "#0070C0",
+"bag_color_name": "Blue",
+"active": 1
+},
+{
+"id": "ca3",
+"name": "Cattle Blaster",
+"category": "Cattle",
+"wholesale": 15.35,
+"srp": 17.85,
+"size": "50 lb",
+"bag_hex": "#FF0000",
+"bag_color_name": "Red",
+"active": 1
+},
+{
+"id": "ca4",
+"name": "Light'em Up",
+"category": "Cattle",
+"wholesale": 17.05,
+"srp": 19.55,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "ca5",
+"name": "Barley Base",
+"category": "Cattle",
+"wholesale": 15.48,
+"srp": 17.98,
+"size": "50 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ca6",
+"name": "Payload",
+"category": "Cattle",
+"wholesale": 17.13,
+"srp": 19.63,
+"size": "50 lb",
+"bag_hex": "#7030A0",
+"bag_color_name": "Purple",
+"active": 1
+},
+{
+"id": "ca7",
+"name": "Launch",
+"category": "Cattle",
+"wholesale": 15.95,
+"srp": 18.45,
+"size": "50 lb",
+"bag_hex": "#00B0F0",
+"bag_color_name": "Sky Blue",
+"active": 1
+},
+{
+"id": "ca8",
+"name": "Cattlelac",
+"category": "Cattle",
+"wholesale": 18.93,
+"srp": 21.43,
+"size": "50 lb",
+"bag_hex": "#E7B7E4",
+"bag_color_name": "Pink",
+"active": 1
+},
+{
+"id": "ca9",
+"name": "Show Ready",
+"category": "Cattle",
+"wholesale": 16.33,
+"srp": 18.83,
+"size": "50 lb",
+"bag_hex": "#00B050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "ca10",
+"name": "Synurgy",
+"category": "Cattle",
+"wholesale": 15.58,
+"srp": 18.08,
+"size": "50 lb",
+"bag_hex": "#000000",
+"bag_color_name": "Black",
+"active": 1
+},
+{
+"id": "ca11",
+"name": "Beef 11%",
+"category": "Cattle",
+"wholesale": 12.88,
+"srp": 15.38,
+"size": "50 lb",
+"bag_hex": "#FFFFFF",
+"bag_color_name": "\u2014",
+"active": 1
+},
+{
+"id": "ca12",
+"name": "Calf Starter",
+"category": "Cattle",
+"wholesale": 15.75,
+"srp": 18.25,
+"size": "50 lb",
+"bag_hex": "#FFFFFF",
+"bag_color_name": "\u2014",
+"active": 1
+},
+{
+"id": "ca13",
+"name": "Beef'em Up",
+"category": "Cattle",
+"wholesale": 13.75,
+"srp": 16.25,
+"size": "50 lb",
+"bag_hex": "#8B4513",
+"bag_color_name": "Brown",
+"active": 1
+},
+{
+"id": "la1",
+"name": "Top Choice Lamb 19%",
+"category": "Lamb",
+"wholesale": 18,
+"srp": 21,
+"size": "50 lb",
+"bag_hex": "#FF66CC",
+"bag_color_name": "Pink",
+"active": 1
+},
+{
+"id": "la2",
+"name": "Top Choice Lamb 17%",
+"category": "Lamb",
+"wholesale": 17.73,
+"srp": 20.73,
+"size": "50 lb",
+"bag_hex": "#FF66CC",
+"bag_color_name": "Pink",
+"active": 1
+},
+{
+"id": "la3",
+"name": "Top Choice Lamb 16%",
+"category": "Lamb",
+"wholesale": 18.83,
+"srp": 21.83,
+"size": "50 lb",
+"bag_hex": "#FF66CC",
+"bag_color_name": "Pink",
+"active": 1
+},
+{
+"id": "la4",
+"name": "Ewe Breeder Ration 12%",
+"category": "Lamb",
+"wholesale": 14.33,
+"srp": 17.33,
+"size": "50 lb",
+"bag_hex": "#FF66CC",
+"bag_color_name": "Pink",
+"active": 1
+},
+{
+"id": "la5",
+"name": "Top Choice Lamb Creep 19%",
+"category": "Lamb",
+"wholesale": 17.53,
+"srp": 20.53,
+"size": "50 lb",
+"bag_hex": "#FF66CC",
+"bag_color_name": "Pink",
+"active": 1
+},
+{
+"id": "la6",
+"name": "Top Choice Lamb Creep 18%",
+"category": "Lamb",
+"wholesale": 17.9,
+"srp": 20.9,
+"size": "50 lb",
+"bag_hex": "#FF66CC",
+"bag_color_name": "Pink",
+"active": 1
+},
+{
+"id": "go1",
+"name": "Meat Goat Grower/R 16%",
+"category": "Goats",
+"wholesale": 17.83,
+"srp": 20.83,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "go2",
+"name": "Meat Goat Fusion",
+"category": "Goats",
+"wholesale": 17.55,
+"srp": 20.55,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "go3",
+"name": "Meat Goat Creep 18%",
+"category": "Goats",
+"wholesale": 18.2,
+"srp": 21.2,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "go4",
+"name": "Commercial Goat 16%",
+"category": "Goats",
+"wholesale": 14.98,
+"srp": 17.98,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "go5",
+"name": "Dairy Goat Ration 16%",
+"category": "Goats",
+"wholesale": 0,
+"srp": 20.55,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "go6",
+"name": "Crossfire",
+"category": "Goats",
+"wholesale": 12.95,
+"srp": 15.95,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "go7",
+"name": "Next Level",
+"category": "Goats",
+"wholesale": 19.2,
+"srp": 22.2,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "go8",
+"name": "Prevail GSP 16%",
+"category": "Goats",
+"wholesale": 18.58,
+"srp": 21.58,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "re1",
+"name": "Dynamic Sheep and Goat Breeder",
+"category": "Repro",
+"wholesale": 12.52,
+"srp": 15.52,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "re2",
+"name": "Maximizer",
+"category": "Repro",
+"wholesale": 17.48,
+"srp": 20.48,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "re3",
+"name": "Customize Balancer 20%",
+"category": "Repro",
+"wholesale": 36.26,
+"srp": 39.25,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "re4",
+"name": "Foundation Sheep 50#",
+"category": "Repro",
+"wholesale": 43,
+"srp": 43,
+"size": "50 lb",
+"bag_hex": "#FF66CC",
+"bag_color_name": "Pink",
+"active": 1
+},
+{
+"id": "re5",
+"name": "Foundation Goat 50#",
+"category": "Repro",
+"wholesale": 45,
+"srp": 45,
+"size": "50 lb",
+"bag_hex": "#ED7D31",
+"bag_color_name": "Orange",
+"active": 1
+},
+{
+"id": "sw1",
+"name": "Clutch Denagard",
+"category": "Swine",
+"wholesale": 29.1,
+"srp": 32.13,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw2",
+"name": "Clutch CTC Denagard",
+"category": "Swine",
+"wholesale": 29.61,
+"srp": 32.63,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw3",
+"name": "Umbarger Pedal Down 19%",
+"category": "Swine",
+"wholesale": 19.85,
+"srp": 22.85,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw4",
+"name": "Umbarger Spot Light 17%",
+"category": "Swine",
+"wholesale": 19.08,
+"srp": 22.08,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw5",
+"name": "Umbarger Massive 16%",
+"category": "Swine",
+"wholesale": 19.03,
+"srp": 22.03,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw6",
+"name": "Swine Gestation 14%",
+"category": "Swine",
+"wholesale": 12.2,
+"srp": 15.2,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw7",
+"name": "Swine Lactation 18%",
+"category": "Swine",
+"wholesale": 14.1,
+"srp": 17.1,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw8",
+"name": "Xcel 18%",
+"category": "Swine",
+"wholesale": 20.03,
+"srp": 23.03,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw9",
+"name": "Cool Down 13.5",
+"category": "Swine",
+"wholesale": 17.22,
+"srp": 20.22,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw10",
+"name": "Umbarger Ultraboost RTU 2.5#",
+"category": "Swine",
+"wholesale": 45,
+"srp": 65,
+"size": "2.5 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw11",
+"name": "Umbarger Hi Energy Supplement 35#",
+"category": "Swine",
+"wholesale": 73.5,
+"srp": 89,
+"size": "35 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw12",
+"name": "Freedom Base Plus 50#",
+"category": "Swine",
+"wholesale": 46.9,
+"srp": 52.9,
+"size": "50 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "sw13",
+"name": "Umbarger Sow Base 90 45#",
+"category": "Swine",
+"wholesale": 41.75,
+"srp": 47.75,
+"size": "45 lb",
+"bag_hex": "#92D050",
+"bag_color_name": "Green",
+"active": 1
+},
+{
+"id": "ho1",
+"name": "Textured Horse 12%",
+"category": "Horse",
+"wholesale": 13.67,
+"srp": 15.58,
+"size": "50 lb",
+"bag_hex": "#BFBFBF",
+"bag_color_name": "Gray",
+"active": 1
+},
+{
+"id": "ho2",
+"name": "Endurance No Corn 12%",
+"category": "Horse",
+"wholesale": 17.43,
+"srp": 19.6,
+"size": "50 lb",
+"bag_hex": "#BFBFBF",
+"bag_color_name": "Gray",
+"active": 1
+},
+{
+"id": "ho3",
+"name": "Top Class 14%",
+"category": "Horse",
+"wholesale": 15.13,
+"srp": 17.48,
+"size": "50 lb",
+"bag_hex": "#BFBFBF",
+"bag_color_name": "Gray",
+"active": 1
+},
+{
+"id": "po1",
+"name": "Layer 16% Premium Poultry",
+"category": "Poultry",
+"wholesale": 13.67,
+"srp": 16.51,
+"size": "50 lb",
+"bag_hex": "#FFE699",
+"bag_color_name": "Cream",
+"active": 1
+},
+{
+"id": "vf1",
+"name": "Sure Champ",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 45,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf2",
+"name": "Sure Champ Extreme W/clarifly 40#",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 72,
+"size": "40 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf3",
+"name": "Sure Champ Extreme Bucket Sheep and Goats",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 44.71,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf4",
+"name": "Dura Ferm Goat Concept Aid heat",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 48,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf5",
+"name": "Dura Ferm Goat Concept Aid Tub 50lb",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 80,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf6",
+"name": "DuraFerm Sheep Concept Aid 50# bag",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 44.5,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf7",
+"name": "Dura Ferm Sheep Con Aid Heat",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 45,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf8",
+"name": "Dura Ferm Sheep Con Aid Tub 125#",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 132,
+"size": "125 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf9",
+"name": "VitaCharge Stress Tub w heat  #50",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 88,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf10",
+"name": "VitaCharge Stress MOS Tub #50",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 75,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf11",
+"name": "VitaCharge Drench 5L",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 215,
+"size": "5 l",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf12",
+"name": "VitaCharge Liquid Boost 32oz",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 36,
+"size": "32 oz",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf13",
+"name": "Concept Aid protein tub #200",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 170,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf14",
+"name": "Cattlemens blend #50",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 41.5,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf15",
+"name": "Concept Aid 5/S #50",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 45,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf16",
+"name": "Concept Aid 5/S Heat W/Clarifly",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 55.25,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf17",
+"name": "Concept Aid 8/S #50",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 39.9,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf18",
+"name": "Sure Champ Spark 25lb",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 60,
+"size": "25 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf19",
+"name": "VitaFerm Heat W/ Clarifly",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 50,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf20",
+"name": "Joint Juice 1 gallon",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 160,
+"size": "gallon",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf21",
+"name": "Vitaferm Concept Aid Protein 200#",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 140,
+"size": "200 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf22",
+"name": "Gainsmart Stocker",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 28,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf23",
+"name": "Sea Salt #50",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 16,
+"size": "50 lb",
+"bag_hex": "#FFC000",
+"bag_color_name": "Gold",
+"active": 1
+},
+{
+"id": "vf24",
+"name": "VitaCharge Hydraboost",
+"category": "Vita Ferm",
+"wholesale": 0,
+"srp": 95,
+"size": "50 lb",
+"bag_hex": "#FFFFFF",
+"bag_color_name": "\u2014",
+"active": 1
+},
+{
+"id": "ex1",
+"name": "Bullet Proof Sheep and Goat 30#",
+"category": "Extras",
+"wholesale": 105,
+"srp": 125,
+"size": "30 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex2",
+"name": "Champion Choice 50# bag",
+"category": "Extras",
+"wholesale": 0,
+"srp": 16.25,
+"size": "50 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex3",
+"name": "Change Up 40# bag",
+"category": "Extras",
+"wholesale": 18.75,
+"srp": 21.5,
+"size": "40 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex4",
+"name": "Cobboom 40# bag",
+"category": "Extras",
+"wholesale": 12.52,
+"srp": 16.52,
+"size": "40 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex5",
+"name": "Cotton Seed Hulls 45#",
+"category": "Extras",
+"wholesale": 0,
+"srp": 13,
+"size": "45 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex6",
+"name": "FullBack Swine 25#",
+"category": "Extras",
+"wholesale": 110.5,
+"srp": 130,
+"size": "25 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex7",
+"name": "Frosting XL",
+"category": "Extras",
+"wholesale": 0,
+"srp": 45,
+"size": "50 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex8",
+"name": "Loaded  40# bag",
+"category": "Extras",
+"wholesale": 24.38,
+"srp": 29.48,
+"size": "40 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex9",
+"name": "Apex 40# bag",
+"category": "Extras",
+"wholesale": 22,
+"srp": 25,
+"size": "40 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex10",
+"name": "Pine River Shavings",
+"category": "Extras",
+"wholesale": 0,
+"srp": 10.5,
+"size": "50 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex11",
+"name": "Cedar Fiber Bedding",
+"category": "Extras",
+"wholesale": 0,
+"srp": 11,
+"size": "50 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex12",
+"name": "Rolled Barley",
+"category": "Extras",
+"wholesale": 0,
+"srp": 22,
+"size": "50 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex13",
+"name": "Rolled Oats",
+"category": "Extras",
+"wholesale": 0,
+"srp": 35,
+"size": "50 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex14",
+"name": "Show Shake 3LB",
+"category": "Extras",
+"wholesale": 0,
+"srp": 43,
+"size": "3 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex15",
+"name": "Show Shake 25LB",
+"category": "Extras",
+"wholesale": 0,
+"srp": 260,
+"size": "25 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex16",
+"name": "Dyne Gallon",
+"category": "Extras",
+"wholesale": 0,
+"srp": 61,
+"size": "gallon",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex17",
+"name": "Millennium 5LB",
+"category": "Extras",
+"wholesale": 0,
+"srp": 58,
+"size": "5 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex18",
+"name": "Final Force 10lb",
+"category": "Extras",
+"wholesale": 0,
+"srp": 83,
+"size": "10 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex19",
+"name": "Star Glo",
+"category": "Extras",
+"wholesale": 0,
+"srp": 65,
+"size": "50 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex20",
+"name": "Hydrator X 5#",
+"category": "Extras",
+"wholesale": 0,
+"srp": 48,
+"size": "5 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex21",
+"name": "Two Step 10lb",
+"category": "Extras",
+"wholesale": 0,
+"srp": 82,
+"size": "10 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+},
+{
+"id": "ex22",
+"name": "Show Bloom",
+"category": "Extras",
+"wholesale": 0,
+"srp": 62,
+"size": "50 lb",
+"bag_hex": "#FFFF00",
+"bag_color_name": "Yellow",
+"active": 1
+}
+],
+"categoryOrder": [
+"Cattle",
+"Lamb",
+"Goats",
+"Repro",
+"Swine",
+"Horse",
+"Poultry",
+"Vita Ferm",
+"Extras"
+],
+"categoryColors": {
+"Cattle": "#1F3864",
+"Lamb": "#8E44AD",
+"Goats": "#C0392B",
+"Repro": "#16A085",
+"Swine": "#D35400",
+"Horse": "#7F8C8D",
+"Poultry": "#B7950B",
+"Vita Ferm": "#27AE60",
+"Extras": "#2980B9"
+},
+"settings": {
+"dealer_name": "Riverbend Feed & Supply",
+"payable_to": "Riverbend Feed & Supply",
+"address": "100 Mill Road, Lexington, KY 40504",
+"phone": "(859) 555-0142",
+"email": "orders@riverbendfeed.example",
+"venmo": "@Riverbend-Feed",
+"pricing_basis": "srp",
+"margin_pct": 1,
+"freight": 2.75,
+"tax_enabled": false,
+"tax_pct": 6,
+"cycle_anchor": "2026-05-02",
+"frequency_days": 14,
+"open_day": "Saturday",
+"open_time": "7:00 AM",
+"close_day": "Monday",
+"close_time": "10:00 AM",
+"mill_day": "Monday",
+"mill_time": "10:30 AM",
+"invoice_day": "Wednesday",
+"invoice_time": "8:00 AM",
+"mill_contact_name": "Hannah Cragen (demo)",
+"mill_contact_email": "derekpe14@gmail.com",
+"invoice_terms": "Total due in 10 business days. Overdue accounts subject to a service charge of 20% per month.",
+"invoice_counter": 9,
+"order_window": "open",
+"public_signup": true,
+"auto_invoice_minutes": 1,
+"inventory_enabled": true,
+"payable_net_days": 15,
+"automation_enabled": true,
+"automation_mode": "review",
+"timezone": "America/New_York",
+"schedule_state": {}
+},
+"customers": [
+{
+"id": 1,
+"name": "Sunrise Cattle Co.",
+"phone": "(859) 555-0100",
+"email": "sunrise@example.com",
+"address": "",
+"payment_method": "Check",
+"payment_detail_label": "",
+"link_token": "03d78f1f498258b9dfa99d93b33eb502",
+"source": "seed",
+"active": 1
+},
+{
+"id": 2,
+"name": "Maple Creek Farm",
+"phone": "(859) 555-0101",
+"email": "maple@example.com",
+"address": "",
+"payment_method": "Check",
+"payment_detail_label": "",
+"link_token": "d653cbe167f8973f7848756c1a4b18e7",
+"source": "seed",
+"active": 1
+},
+{
+"id": 3,
+"name": "Willow Bend Ranch",
+"phone": "(859) 555-0102",
+"email": "willow@example.com",
+"address": "",
+"payment_method": "Check",
+"payment_detail_label": "",
+"link_token": "39e2848bb76f8e90c1f5b04db68e0661",
+"source": "seed",
+"active": 1
+},
+{
+"id": 4,
+"name": "Oak Hollow Livestock",
+"phone": "(859) 555-0103",
+"email": "oak@example.com",
+"address": "",
+"payment_method": "Check",
+"payment_detail_label": "",
+"link_token": "a87c51bfaffbcfeeac7af13dc9336d06",
+"source": "seed",
+"active": 1
+},
+{
+"id": 5,
+"name": "Cedar Point Farm",
+"phone": "(859) 555-0104",
+"email": "cedar@example.com",
+"address": "",
+"payment_method": "Check",
+"payment_detail_label": "",
+"link_token": "414581624321e43af70ef72515914ac8",
+"source": "seed",
+"active": 1
+},
+{
+"id": 6,
+"name": "Stonegate Show Stock",
+"phone": "(859) 555-0105",
+"email": "stonegate@example.com",
+"address": "",
+"payment_method": "Check",
+"payment_detail_label": "",
+"link_token": "e779888f07d3cd64ced4cecfbd7dc36f",
+"source": "seed",
+"active": 1
+},
+{
+"id": 7,
+"name": "Twin Pines Farm",
+"phone": "(859) 555-0106",
+"email": "twin@example.com",
+"address": "",
+"payment_method": "Check",
+"payment_detail_label": "",
+"link_token": "256659dce4e206114693906db457a8bc",
+"source": "seed",
+"active": 1
+},
+{
+"id": 8,
+"name": "Clearwater Cattle",
+"phone": "(859) 555-0107",
+"email": "clearwater@example.com",
+"address": "",
+"payment_method": "Check",
+"payment_detail_label": "",
+"link_token": "c9cec2806edd376ff8844b032d1a8ba1",
+"source": "seed",
+"active": 1
+},
+{
+"id": 9,
+"name": "Highland Meadows",
+"phone": "(859) 555-0108",
+"email": "highland@example.com",
+"address": "",
+"payment_method": "Check",
+"payment_detail_label": "",
+"link_token": "f90116b31501cae9b48a0a869142fe50",
+"source": "seed",
+"active": 1
+},
+{
+"id": 10,
+"name": "Birchwood Farm",
+"phone": "(859) 555-0109",
+"email": "birchwood@example.com",
+"address": "",
+"payment_method": "Check",
+"payment_detail_label": "",
+"link_token": "afcf8e3c9a6377a557b5ed87680568ae",
+"source": "seed",
+"active": 1
+},
+{
+"id": 11,
+"link_token": "804d4fef0aa16d096e09ee668a9c69bd",
+"source": "demo-live",
+"active": 1,
+"name": "Eric King",
+"email": "",
+"phone": "",
+"payment_method": "Check",
+"payment_detail_label": ""
+},
+{
+"id": 12,
+"link_token": "6e64db24006f100763c88dd7e0c4821d",
+"source": "demo-live",
+"active": 1,
+"name": "Hannah Cragen",
+"email": "",
+"phone": "",
+"payment_method": "Check",
+"payment_detail_label": ""
+},
+{
+"id": 13,
+"link_token": "8b6d0f680d13d5bba37703c09ae1b1ea",
+"source": "demo-live",
+"active": 1,
+"name": "Guest 1",
+"email": "",
+"phone": "",
+"payment_method": "Check",
+"payment_detail_label": ""
+},
+{
+"id": 14,
+"link_token": "bd3ea1918442369d63d49fa4b09f168b",
+"source": "demo-live",
+"active": 1,
+"name": "Guest 2",
+"email": "",
+"phone": "",
+"payment_method": "Check",
+"payment_detail_label": ""
+},
+{
+"id": 15,
+"link_token": "6f22d2f23ab30ed0b7a7cfaf08ea0fa1",
+"source": "demo-live",
+"active": 1,
+"name": "Guest 3",
+"email": "",
+"phone": "",
+"payment_method": "Check",
+"payment_detail_label": ""
+},
+{
+"id": 16,
+"link_token": "5530949320c3d389f132fac692cb7d68",
+"source": "demo-live",
+"active": 1,
+"name": "Kent Bennington",
+"email": "",
+"phone": "",
+"payment_method": "Check",
+"payment_detail_label": ""
+}
+],
+"cycles": [
+{
+"id": 1,
+"delivery_key": "2026-06-13",
+"delivery_label": "6/13/2026",
+"status": "open"
+}
+],
+"orders": [
+{
+"id": 1,
+"customer_id": 1,
+"cycle_id": 1,
+"status": "submitted",
+"created_at": "2026-06-05T05:20:33.448Z",
+"updated_at": "2026-06-05T05:20:33.448Z"
+},
+{
+"id": 2,
+"customer_id": 2,
+"cycle_id": 1,
+"status": "submitted",
+"created_at": "2026-06-05T05:20:33.455Z",
+"updated_at": "2026-06-05T05:20:33.455Z"
+},
+{
+"id": 3,
+"customer_id": 3,
+"cycle_id": 1,
+"status": "submitted",
+"created_at": "2026-06-05T05:20:33.456Z",
+"updated_at": "2026-06-05T05:20:33.456Z"
+},
+{
+"id": 4,
+"customer_id": 4,
+"cycle_id": 1,
+"status": "submitted",
+"created_at": "2026-06-05T05:20:33.456Z",
+"updated_at": "2026-06-05T05:20:33.456Z"
+},
+{
+"id": 5,
+"customer_id": 5,
+"cycle_id": 1,
+"status": "submitted",
+"created_at": "2026-06-05T05:20:33.457Z",
+"updated_at": "2026-06-05T05:20:33.457Z"
+},
+{
+"id": 6,
+"customer_id": 7,
+"cycle_id": 1,
+"status": "submitted",
+"created_at": "2026-06-05T05:20:33.458Z",
+"updated_at": "2026-06-05T05:20:33.458Z"
+},
+{
+"id": 7,
+"customer_id": 9,
+"cycle_id": 1,
+"status": "submitted",
+"created_at": "2026-06-05T05:20:33.459Z",
+"updated_at": "2026-06-05T05:20:33.459Z"
+},
+{
+"customer_id": 6,
+"cycle_id": 1,
+"status": "submitted",
+"created_at": "2026-06-05T09:00:00Z",
+"updated_at": "2026-06-05T09:00:00Z",
+"id": 8
+},
+{
+"customer_id": 8,
+"cycle_id": 1,
+"status": "submitted",
+"created_at": "2026-06-05T09:00:00Z",
+"updated_at": "2026-06-05T09:00:00Z",
+"id": 9
+}
+],
+"order_items": [
+{
+"id": 1,
+"order_id": 1,
+"product_id": "ca1",
+"qty": 6
+},
+{
+"id": 2,
+"order_id": 1,
+"product_id": "ca8",
+"qty": 4
+},
+{
+"id": 3,
+"order_id": 2,
+"product_id": "ca6",
+"qty": 5
+},
+{
+"id": 4,
+"order_id": 2,
+"product_id": "ca10",
+"qty": 3
+},
+{
+"id": 5,
+"order_id": 3,
+"product_id": "go7",
+"qty": 8
+},
+{
+"id": 6,
+"order_id": 4,
+"product_id": "ca3",
+"qty": 4
+},
+{
+"id": 7,
+"order_id": 4,
+"product_id": "ca5",
+"qty": 2
+},
+{
+"id": 8,
+"order_id": 4,
+"product_id": "ca6",
+"qty": 4
+},
+{
+"id": 9,
+"order_id": 5,
+"product_id": "go6",
+"qty": 6
+},
+{
+"id": 10,
+"order_id": 6,
+"product_id": "ca8",
+"qty": 8
+},
+{
+"id": 11,
+"order_id": 6,
+"product_id": "ca10",
+"qty": 5
+},
+{
+"id": 12,
+"order_id": 7,
+"product_id": "la2",
+"qty": 4
+},
+{
+"order_id": 8,
+"product_id": "ca8",
+"qty": 10,
+"id": 13
+},
+{
+"order_id": 8,
+"product_id": "ca6",
+"qty": 6,
+"id": 14
+},
+{
+"order_id": 9,
+"product_id": "ca10",
+"qty": 8,
+"id": 15
+},
+{
+"order_id": 9,
+"product_id": "ca1",
+"qty": 4,
+"id": 16
+}
+],
+"invoices": [
+{
+"id": 1,
+"invoice_num": "26-001",
+"customer_id": 1,
+"customer_name": "Sunrise Cattle Co.",
+"cycle_id": 1,
+"cycle_label": "6/13/2026",
+"date_issued": "2026-06-05",
+"lines": [
+{
+"description": "Primer Plus",
+"qty": 6,
+"unitPrice": 17.42,
+"freight": 16.5,
+"total": 121.02
+},
+{
+"description": "Cattlelac",
+"qty": 4,
+"unitPrice": 21.22,
+"freight": 11,
+"total": 95.88
+}
+],
+"subtotal": 216.9,
+"tax_rate": 0,
+"tax": 0,
+"credit_total": 0,
+"total": 216.9,
+"freight_rate": 2.75
+},
+{
+"id": 2,
+"invoice_num": "26-002",
+"customer_id": 2,
+"customer_name": "Maple Creek Farm",
+"cycle_id": 1,
+"cycle_label": "6/13/2026",
+"date_issued": "2026-06-05",
+"lines": [
+{
+"description": "Payload",
+"qty": 5,
+"unitPrice": 19.43,
+"freight": 13.75,
+"total": 110.9
+},
+{
+"description": "Synurgy",
+"qty": 3,
+"unitPrice": 17.9,
+"freight": 8.25,
+"total": 61.95
+}
+],
+"subtotal": 172.85,
+"tax_rate": 0,
+"tax": 0,
+"credit_total": 0,
+"total": 172.85,
+"freight_rate": 2.75
+},
+{
+"id": 3,
+"invoice_num": "26-003",
+"customer_id": 3,
+"customer_name": "Willow Bend Ranch",
+"cycle_id": 1,
+"cycle_label": "6/13/2026",
+"date_issued": "2026-06-05",
+"lines": [
+{
+"description": "Next Level",
+"qty": 8,
+"unitPrice": 21.98,
+"freight": 22,
+"total": 197.84
+}
+],
+"subtotal": 197.84,
+"tax_rate": 0,
+"tax": 0,
+"credit_total": 0,
+"total": 197.84,
+"freight_rate": 2.75
+},
+{
+"id": 4,
+"invoice_num": "26-004",
+"customer_id": 4,
+"customer_name": "Oak Hollow Livestock",
+"cycle_id": 1,
+"cycle_label": "6/13/2026",
+"date_issued": "2026-06-05",
+"lines": [
+{
+"description": "Cattle Blaster",
+"qty": 4,
+"unitPrice": 17.67,
+"freight": 11,
+"total": 81.68
+},
+{
+"description": "Barley Base",
+"qty": 2,
+"unitPrice": 17.8,
+"freight": 5.5,
+"total": 41.1
+},
+{
+"description": "Payload",
+"qty": 4,
+"unitPrice": 19.43,
+"freight": 11,
+"total": 88.72
+}
+],
+"subtotal": 211.5,
+"tax_rate": 0,
+"tax": 0,
+"credit_total": 0,
+"total": 211.5,
+"freight_rate": 2.75
+},
+{
+"id": 5,
+"invoice_num": "26-005",
+"customer_id": 5,
+"customer_name": "Cedar Point Farm",
+"cycle_id": 1,
+"cycle_label": "6/13/2026",
+"date_issued": "2026-06-05",
+"lines": [
+{
+"description": "Crossfire",
+"qty": 6,
+"unitPrice": 15.79,
+"freight": 16.5,
+"total": 111.24
+}
+],
+"subtotal": 111.24,
+"tax_rate": 0,
+"tax": 0,
+"credit_total": 0,
+"total": 111.24,
+"freight_rate": 2.75
+},
+{
+"id": 6,
+"invoice_num": "26-006",
+"customer_id": 7,
+"customer_name": "Twin Pines Farm",
+"cycle_id": 1,
+"cycle_label": "6/13/2026",
+"date_issued": "2026-06-05",
+"lines": [
+{
+"description": "Cattlelac",
+"qty": 8,
+"unitPrice": 21.22,
+"freight": 22,
+"total": 191.76
+},
+{
+"description": "Synurgy",
+"qty": 5,
+"unitPrice": 17.9,
+"freight": 13.75,
+"total": 103.25
+}
+],
+"subtotal": 295.01,
+"tax_rate": 0,
+"tax": 0,
+"credit_total": 0,
+"total": 295.01,
+"freight_rate": 2.75
+},
+{
+"id": 7,
+"invoice_num": "26-007",
+"customer_id": 9,
+"customer_name": "Highland Meadows",
+"cycle_id": 1,
+"cycle_label": "6/13/2026",
+"date_issued": "2026-06-05",
+"lines": [
+{
+"description": "Top Choice Lamb 17%",
+"qty": 4,
+"unitPrice": 20.52,
+"freight": 11,
+"total": 93.08
+}
+],
+"subtotal": 93.08,
+"tax_rate": 0,
+"tax": 0,
+"credit_total": 0,
+"total": 93.08,
+"freight_rate": 2.75
+},
+{
+"invoice_num": "26-008",
+"customer_id": null,
+"customer_name": "Counter sale",
+"cycle_id": null,
+"cycle_label": "Walk-in",
+"date_issued": "2026-06-04",
+"lines": [
+{
+"description": "Primer Plus",
+"qty": 2,
+"unitPrice": 17.42,
+"freight": 5.5,
+"total": 40.34
+}
+],
+"subtotal": 40.34,
+"tax_rate": 0,
+"tax": 0.0,
+"credit_total": 0,
+"total": 40.34,
+"freight_rate": 2.75,
+"walk_in": true,
+"fulfilled_items": [
+{
+"product_id": "ca1",
+"qty": 2
+}
+],
+"id": 8
+},
+{
+"invoice_num": "26-009",
+"customer_id": 9,
+"customer_name": "Highland Meadows",
+"cycle_id": null,
+"cycle_label": "5/30/2026",
+"date_issued": "2026-05-30",
+"lines": [
+{
+"description": "Next Level",
+"qty": 3,
+"unitPrice": 21.98,
+"freight": 8.25,
+"total": 74.19
+}
+],
+"subtotal": 74.19,
+"tax_rate": 0,
+"tax": 0.0,
+"credit_total": 0,
+"total": 74.19,
+"freight_rate": 2.75,
+"fulfilled_items": [
+{
+"product_id": "go7",
+"qty": 3
+}
+],
+"cancelled": true,
+"cancel_reason": "Not picked up",
+"cancel_mode": "restock",
+"cancelled_date": "2026-06-03",
+"id": 9
+}
+],
+"payments": [
+{
+"id": 1,
+"invoice_id": 1,
+"invoice_num": "26-001",
+"customer_id": 1,
+"customer_name": "Sunrise Cattle Co.",
+"amount": 216.9,
+"cycle": "6/13/2026",
+"date_issued": "2026-06-05",
+"paid": true,
+"date_paid": "2026-06-05",
+"method": "Check",
+"notes": "",
+"reminders": 0
+},
+{
+"id": 2,
+"invoice_id": 2,
+"invoice_num": "26-002",
+"customer_id": 2,
+"customer_name": "Maple Creek Farm",
+"amount": 172.85,
+"cycle": "6/13/2026",
+"date_issued": "2026-06-05",
+"paid": false,
+"date_paid": null,
+"method": "",
+"notes": "",
+"reminders": 0
+},
+{
+"id": 3,
+"invoice_id": 3,
+"invoice_num": "26-003",
+"customer_id": 3,
+"customer_name": "Willow Bend Ranch",
+"amount": 197.84,
+"cycle": "6/13/2026",
+"date_issued": "2026-06-05",
+"paid": true,
+"date_paid": "2026-06-05",
+"method": "Venmo",
+"notes": "",
+"reminders": 0
+},
+{
+"id": 4,
+"invoice_id": 4,
+"invoice_num": "26-004",
+"customer_id": 4,
+"customer_name": "Oak Hollow Livestock",
+"amount": 211.5,
+"cycle": "6/13/2026",
+"date_issued": "2026-06-05",
+"paid": false,
+"date_paid": null,
+"method": "",
+"notes": "",
+"reminders": 0
+},
+{
+"id": 5,
+"invoice_id": 5,
+"invoice_num": "26-005",
+"customer_id": 5,
+"customer_name": "Cedar Point Farm",
+"amount": 111.24,
+"cycle": "6/13/2026",
+"date_issued": "2026-06-05",
+"paid": false,
+"date_paid": null,
+"method": "",
+"notes": "",
+"reminders": 0
+},
+{
+"id": 6,
+"invoice_id": 6,
+"invoice_num": "26-006",
+"customer_id": 7,
+"customer_name": "Twin Pines Farm",
+"amount": 295.01,
+"cycle": "6/13/2026",
+"date_issued": "2026-06-05",
+"paid": true,
+"date_paid": "2026-06-05",
+"method": "Check",
+"notes": "",
+"reminders": 0
+},
+{
+"id": 7,
+"invoice_id": 7,
+"invoice_num": "26-007",
+"customer_id": 9,
+"customer_name": "Highland Meadows",
+"amount": 93.08,
+"cycle": "6/13/2026",
+"date_issued": "2026-06-05",
+"paid": false,
+"date_paid": null,
+"method": "",
+"notes": "",
+"reminders": 0
+},
+{
+"invoice_id": 8,
+"invoice_num": "26-008",
+"customer_id": null,
+"customer_name": "Counter sale",
+"amount": 40.34,
+"cycle": "Walk-in",
+"date_issued": "2026-06-04",
+"paid": true,
+"date_paid": "2026-06-04",
+"method": "Cash",
+"notes": "Counter sale",
+"reminders": 0,
+"id": 8
+}
+],
+"outbox": [
+{
+"id": 1,
+"kind": "confirmation",
+"to": "sunrise@example.com",
+"to_name": "Sunrise Cattle Co.",
+"subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
+"text": "Thanks, Sunrise Cattle Co.. Order received for the 6/13/2026 cycle \u2014 10 bags, total $216.90 (incl. $2.75/bag freight). Reply to change anything.",
+"html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Sunrise Cattle Co.. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Primer Plus</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">6</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$121.02</td></tr><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Cattlelac</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">4</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$95.88</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (10 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$216.90</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
+"created_at": "2026-06-05T05:20:33.455Z",
+"status": "captured",
+"provider": "outbox",
+"error": ""
+},
+{
+"id": 2,
+"kind": "confirmation",
+"to": "maple@example.com",
+"to_name": "Maple Creek Farm",
+"subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
+"text": "Thanks, Maple Creek Farm. Order received for the 6/13/2026 cycle \u2014 8 bags, total $172.85 (incl. $2.75/bag freight). Reply to change anything.",
+"html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Maple Creek Farm. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Payload</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">5</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$110.90</td></tr><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Synurgy</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">3</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$61.95</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (8 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$172.85</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
+"created_at": "2026-06-05T05:20:33.456Z",
+"status": "captured",
+"provider": "outbox",
+"error": ""
+},
+{
+"id": 3,
+"kind": "confirmation",
+"to": "willow@example.com",
+"to_name": "Willow Bend Ranch",
+"subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
+"text": "Thanks, Willow Bend Ranch. Order received for the 6/13/2026 cycle \u2014 8 bags, total $197.84 (incl. $2.75/bag freight). Reply to change anything.",
+"html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Willow Bend Ranch. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Next Level</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">8</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$197.84</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (8 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$197.84</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
+"created_at": "2026-06-05T05:20:33.456Z",
+"status": "captured",
+"provider": "outbox",
+"error": ""
+},
+{
+"id": 4,
+"kind": "confirmation",
+"to": "oak@example.com",
+"to_name": "Oak Hollow Livestock",
+"subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
+"text": "Thanks, Oak Hollow Livestock. Order received for the 6/13/2026 cycle \u2014 10 bags, total $211.50 (incl. $2.75/bag freight). Reply to change anything.",
+"html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Oak Hollow Livestock. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Cattle Blaster</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">4</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$81.68</td></tr><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Barley Base</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">2</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$41.10</td></tr><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Payload</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">4</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$88.72</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (10 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$211.50</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
+"created_at": "2026-06-05T05:20:33.457Z",
+"status": "captured",
+"provider": "outbox",
+"error": ""
+},
+{
+"id": 5,
+"kind": "confirmation",
+"to": "cedar@example.com",
+"to_name": "Cedar Point Farm",
+"subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
+"text": "Thanks, Cedar Point Farm. Order received for the 6/13/2026 cycle \u2014 6 bags, total $111.24 (incl. $2.75/bag freight). Reply to change anything.",
+"html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Cedar Point Farm. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Crossfire</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">6</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$111.24</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (6 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$111.24</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
+"created_at": "2026-06-05T05:20:33.457Z",
+"status": "captured",
+"provider": "outbox",
+"error": ""
+},
+{
+"id": 6,
+"kind": "confirmation",
+"to": "twin@example.com",
+"to_name": "Twin Pines Farm",
+"subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
+"text": "Thanks, Twin Pines Farm. Order received for the 6/13/2026 cycle \u2014 13 bags, total $295.01 (incl. $2.75/bag freight). Reply to change anything.",
+"html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Twin Pines Farm. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Cattlelac</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">8</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$191.76</td></tr><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Synurgy</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">5</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$103.25</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (13 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$295.01</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
+"created_at": "2026-06-05T05:20:33.458Z",
+"status": "captured",
+"provider": "outbox",
+"error": ""
+},
+{
+"id": 7,
+"kind": "confirmation",
+"to": "highland@example.com",
+"to_name": "Highland Meadows",
+"subject": "Order received \u2014 Riverbend Feed & Supply (6/13/2026)",
+"text": "Thanks, Highland Meadows. Order received for the 6/13/2026 cycle \u2014 4 bags, total $93.08 (incl. $2.75/bag freight). Reply to change anything.",
+"html": "<div style=\"font-family:Arial,Helvetica,sans-serif;color:#1a2332;max-width:560px;margin:auto\"><h2 style=\"color:#2F6B3A;margin:0 0 4px\">Order received</h2><p style=\"color:#555;margin:0 0 14px\">Thanks, Highland Meadows. Here is your order with Riverbend Feed &amp; Supply for the 6/13/2026 cycle.</p><table style=\"width:100%;border-collapse:collapse;font-size:14px\"><thead><tr><th style=\"text-align:left;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Product</th><th style=\"text-align:center;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Bags</th><th style=\"text-align:right;padding:6px 10px;border-bottom:2px solid #2F6B3A\">Total</th></tr></thead><tbody><tr><td style=\"padding:6px 10px;border-bottom:1px solid #eee\">Top Choice Lamb 17%</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:center\">4</td><td style=\"padding:6px 10px;border-bottom:1px solid #eee;text-align:right\">$93.08</td></tr><tr><td colspan=\"2\" style=\"padding:8px 10px;text-align:right;font-weight:bold\">Total (4 bags)</td><td style=\"padding:8px 10px;text-align:right;font-weight:bold\">$93.08</td></tr></tbody></table><p style=\"color:#777;font-size:12px;margin-top:14px\">Prices include $2.75/bag freight. Need to change something before Monday 10:30 AM? Open your order link or reply to this email.</p></div>",
+"created_at": "2026-06-05T05:20:33.459Z",
+"status": "captured",
+"provider": "outbox",
+"error": ""
+}
+],
+"credits": [
+{
+"id": 1,
+"customer_id": 5,
+"customer_name": "Cedar Point Farm",
+"amount": 24.53,
+"used": 0,
+"reason": "Rolled Barley (1 bag) out of stock \u2014 paid, not received",
+"source_invoice_num": "",
+"status": "open",
+"created_at": "2026-06-05",
+"applications": []
+}
+],
+"inventory_items": [
+{
+"product_id": "ca1",
+"on_hand": 60,
+"reorder_point": 15,
+"reorder_qty": 30,
+"avg_cost": 15.1
+},
+{
+"product_id": "ca3",
+"on_hand": 30,
+"reorder_point": 10,
+"reorder_qty": 20,
+"avg_cost": 15.35
+},
+{
+"product_id": "ca6",
+"on_hand": 40,
+"reorder_point": 10,
+"reorder_qty": 20,
+"avg_cost": 17.13
+},
+{
+"product_id": "ca8",
+"on_hand": 18,
+"reorder_point": 12,
+"reorder_qty": 24,
+"avg_cost": 18.93
+},
+{
+"product_id": "ca10",
+"on_hand": 12,
+"reorder_point": 10,
+"reorder_qty": 20,
+"avg_cost": 15.58
+},
+{
+"product_id": "go7",
+"on_hand": 22,
+"reorder_point": 12,
+"reorder_qty": 24,
+"avg_cost": 19.2
+},
+{
+"product_id": "la2",
+"on_hand": 26,
+"reorder_point": 12,
+"reorder_qty": 24,
+"avg_cost": 17.73
+}
+],
+"stock_movements": [
+{
+"product_id": "ca1",
+"product_name": "Primer Plus",
+"type": "receive",
+"qty": 62,
+"balance_after": 62,
+"reason": "Opening count",
+"ref": "",
+"unit_cost": 15.1,
+"at": "2026-05-26T15:00:00Z",
+"id": 1
+},
+{
+"product_id": "ca3",
+"product_name": "Cattle Blaster",
+"type": "receive",
+"qty": 30,
+"balance_after": 30,
+"reason": "Opening count",
+"ref": "",
+"unit_cost": 15.35,
+"at": "2026-05-26T22:00:00Z",
+"id": 2
+},
+{
+"product_id": "ca6",
+"product_name": "Payload",
+"type": "receive",
+"qty": 40,
+"balance_after": 40,
+"reason": "Mill shipment",
+"ref": "",
+"unit_cost": 17.13,
+"at": "2026-05-27T05:00:00Z",
+"id": 3
+},
+{
+"product_id": "ca8",
+"product_name": "Cattlelac",
+"type": "receive",
+"qty": 18,
+"balance_after": 18,
+"reason": "Opening count",
+"ref": "",
+"unit_cost": 18.93,
+"at": "2026-05-27T12:00:00Z",
+"id": 4
+},
+{
+"product_id": "ca10",
+"product_name": "Synurgy",
+"type": "receive",
+"qty": 20,
+"balance_after": 20,
+"reason": "Mill shipment",
+"ref": "",
+"unit_cost": 15.58,
+"at": "2026-05-27T19:00:00Z",
+"id": 5
+},
+{
+"product_id": "go7",
+"product_name": "Next Level",
+"type": "receive",
+"qty": 22,
+"balance_after": 22,
+"reason": "Opening count",
+"ref": "",
+"unit_cost": 19.2,
+"at": "2026-05-28T02:00:00Z",
+"id": 6
+},
+{
+"product_id": "la2",
+"product_name": "Top Choice Lamb 17%",
+"type": "receive",
+"qty": 26,
+"balance_after": 26,
+"reason": "Mill shipment",
+"ref": "",
+"unit_cost": 17.73,
+"at": "2026-05-28T09:00:00Z",
+"id": 7
+},
+{
+"product_id": "ca10",
+"product_name": "Synurgy",
+"type": "adjust",
+"qty": -8,
+"balance_after": 12,
+"reason": "Cycle count \u2014 8 bags water-damaged",
+"ref": "",
+"unit_cost": null,
+"at": "2026-05-28T16:00:00Z",
+"id": 8
+},
+{
+"product_id": "ca1",
+"product_name": "Primer Plus",
+"type": "fulfill",
+"qty": -2,
+"balance_after": 60,
+"reason": "Walk-in 26-008",
+"ref": "",
+"unit_cost": null,
+"at": "2026-05-28T23:00:00Z",
+"id": 9
+},
+{
+"product_id": "go7",
+"product_name": "Next Level",
+"type": "fulfill",
+"qty": -3,
+"balance_after": 19,
+"reason": "Invoice 26-009",
+"ref": "",
+"unit_cost": null,
+"at": "2026-05-29T06:00:00Z",
+"id": 10
+},
+{
+"product_id": "go7",
+"product_name": "Next Level",
+"type": "return",
+"qty": 3,
+"balance_after": 22,
+"reason": "Cancel 26-009 \u2014 Not picked up",
+"ref": "",
+"unit_cost": null,
+"at": "2026-05-29T13:00:00Z",
+"id": 11
+}
+],
+"qbo_log": [
+{
+"txn": "Bill",
+"detail": "Opening inventory received (7 products)",
+"amount": 2159.84,
+"at": "2026-06-01T10:00:00Z",
+"id": 1
+},
+{
+"txn": "Bill",
+"detail": "Mill shipment \u2014 Payload, Synurgy, Top Choice Lamb",
+"amount": 1457.78,
+"at": "2026-06-02T10:00:00Z",
+"id": 2
+},
+{
+"txn": "Invoice",
+"detail": "26-003 \u00b7 Willow Bend Ranch (income + A/R)",
+"amount": null,
+"at": "2026-06-02T10:00:00Z",
+"id": 3
+},
+{
+"txn": "Void Invoice",
+"detail": "26-009 \u00b7 Highland Meadows (restocked, A/R cleared)",
+"amount": -74.19,
+"at": "2026-06-03T10:00:00Z",
+"id": 4
+},
+{
+"txn": "Sales Receipt",
+"detail": "26-008 \u00b7 Counter sale (paid Cash)",
+"amount": 40.34,
+"at": "2026-06-04T10:00:00Z",
+"id": 5
+}
+],
+"receipts": [
+{
+"id": 1,
+"at": "2026-06-02T10:00:00Z",
+"count": 86,
+"value": 1457.78,
+"note": "Mill shipment"
+}
+],
+"bills": [
+{
+"id": 1,
+"vendor": "Umbarger Feeds",
+"description": "86 bags \u00b7 Mill shipment",
+"amount": 1457.78,
+"date_created": "2026-06-02",
+"due_date": "2026-06-17",
+"status": "open",
+"date_paid": null,
+"method": "",
+"ref": "RECEIVE",
+"auto": true
+},
+{
+"id": 2,
+"vendor": "Tri-County Propane",
+"description": "Delivery truck fuel",
+"amount": 312.4,
+"date_created": "2026-06-03",
+"due_date": "2026-06-18",
+"status": "open",
+"date_paid": null,
+"method": "",
+"ref": "",
+"auto": false
+},
+{
+"id": 3,
+"vendor": "Umbarger Feeds",
+"description": "Prior cycle shipment",
+"amount": 980.0,
+"date_created": "2026-05-20",
+"due_date": "2026-06-04",
+"status": "paid",
+"date_paid": "2026-06-01",
+"method": "Check",
+"ref": "",
+"auto": false
+}
+]
 }
