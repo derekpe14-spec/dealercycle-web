@@ -311,10 +311,14 @@ function savePricing(){
 function renderInvoices(){
   var byCust={};
   D.invoices.forEach(function(v){ (byCust[v.customer_name]=byCust[v.customer_name]||[]).push(v); });
+  var paidByNum={};
+  (D.payments||[]).forEach(function(p){ if(p.paid) paidByNum[p.invoice_num]={date:p.date_paid||""}; });
   var names=Object.keys(byCust).sort();
   var body=names.length? names.map(function(n){
     var list=byCust[n].map(function(v){
       var badge=v.cancelled?' <span class="pill warn">Cancelled</span>':(v.walk_in?' <span class="pill cat" style="background:#3D8FCE">Walk-in</span>':'');
+      var pd=(!v.cancelled&&paidByNum[v.invoice_num])||null;
+      if(pd) badge+=' <span class="pill live" title="Marked paid in the payment tracker'+(pd.date?' on '+esc(pd.date):'')+'">✓ Paid'+(pd.date?' '+esc(pd.date):'')+'</span>';
       var act='<a class="btn ghost sm" href="/invoice/'+v.id+'" target="_blank">View / PDF</a>';
       if(!v.cancelled) act+=' <button class="btn ghost sm" style="color:var(--red);border-color:#e6c9c2" onclick="cancelInvoice('+v.id+',\''+esc(v.invoice_num)+'\','+(v.fulfilled?1:0)+')">Cancel</button>';
       return '<tr'+(v.cancelled?' class="muted" style="opacity:.6"':'')+'><td>'+esc(v.invoice_num)+badge+'</td><td class="hide-sm">'+esc(v.cycle_label)+'</td><td class="hide-sm">'+esc(v.date_issued)+'</td><td class="num">'+money(v.total)+'</td><td><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">'+act+'</div></td></tr>';}).join("");
