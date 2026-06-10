@@ -579,9 +579,19 @@ async function queueMail(kind, to, toName, msg) {
     const ccRaw = ((s.dealer_cc_email !== undefined ? s.dealer_cc_email : s.email) || "").trim();
     if (ccRaw && ccRaw.toLowerCase() !== String(to || "").toLowerCase()) cc = ccRaw;
   }
-  const result = await mailer.send({ to, cc, subject: msg.subject, text: msg.text, html: msg.html }, { dealerEmail: s.email, dealerName: s.dealer_name });
+  // Reply-To = the dealer's OWN email, so a customer (or the mill) who hits reply
+  // reaches the LOCAL dealer, not the platform address we send from. This keeps every
+  // dealer's customer conversations local to that dealer instead of funneling 400
+  // dealers' questions into the platform inbox. settings.reply_to_email can override;
+  // otherwise it falls back to the dealer's email.
+  let replyTo = msg.replyTo;
+  if (!replyTo) {
+    const rt = ((s.reply_to_email !== undefined ? s.reply_to_email : s.email) || "").trim();
+    if (rt && rt.toLowerCase() !== String(to || "").toLowerCase()) replyTo = rt;
+  }
+  const result = await mailer.send({ to, cc, replyTo, subject: msg.subject, text: msg.text, html: msg.html }, { dealerEmail: s.email, dealerName: s.dealer_name });
   const entry = {
-    id: nextId("outbox"), kind, to: to || "", to_name: toName || "", cc: cc || "",
+    id: nextId("outbox"), kind, to: to || "", to_name: toName || "", cc: cc || "", reply_to: replyTo || "",
     subject: msg.subject, text: msg.text, html: msg.html,
     created_at: new Date().toISOString(), status: result.status, provider: result.provider, error: result.error || ""
   };
@@ -724,13 +734,13 @@ function millOrderText(cycArg) {
   const order = db().categoryOrder;
   const rows = Object.keys(tally).map(pid => [product(pid), tally[pid]])
     .sort((a, b) => order.indexOf(a[0].category) - order.indexOf(b[0].category) || b[1] - a[1]);
+  const codes = s.umbarger_codes || {};
   let total = 0; let body = "";
-  let lastCat = "";
   rows.forEach(([p, bags]) => {
-    if (p.category !== lastCat) { body += `\n${p.category}\n`; lastCat = p.category; }
-    body += `  ${bags} × ${p.name}\n`; total += bags;
+    const code = codes[p.id] || "—";
+    body += `\n${code.padEnd(10)}${String(bags).padStart(3)}  ${p.name}`; total += bags;
   });
-  return `Consolidated Umbarger Order — ${s.dealer_name}\nCycle delivering ${cyc.delivery_label} · to ${s.mill_contact_name}\n${"=".repeat(46)}${body}\n${"=".repeat(46)}\nTOTAL: ${total} bags`;
+  return `Umbarger Order — ${s.dealer_name}\nDelivering ${cyc.delivery_label} · to ${s.mill_contact_name}\n${"=".repeat(46)}\nITEM       QTY  DESCRIPTION${body}\n${"=".repeat(46)}\nTOTAL: ${total} bags  (BAG)`;
 }
 
 // ---------------------------------------------------------------------------
@@ -1101,7 +1111,7 @@ const server = http.createServer(async (req, res) => {
         const entry = db().outbox.find(x => x.id === body.id);
         if (!entry) return json(res, 404, { error: "Not found" });
         const s = db().settings;
-        const r = await mailer.send({ to: entry.to, subject: entry.subject, text: entry.text, html: entry.html }, { dealerEmail: s.email, dealerName: s.dealer_name });
+        const r = await mailer.send({ to: entry.to, cc: entry.cc || undefined, replyTo: entry.reply_to || undefined, subject: entry.subject, text: entry.text, html: entry.html }, { dealerEmail: s.email, dealerName: s.dealer_name });
         entry.status = r.status; entry.provider = r.provider; entry.error = r.error || ""; entry.created_at = new Date().toISOString();
         save();
         return json(res, 200, { ok: true, entry });

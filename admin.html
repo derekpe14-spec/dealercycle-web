@@ -123,7 +123,18 @@ function renderDash(){
     '<button class="btn ghost sm" onclick="genInvoices()">Generate invoices for this cycle</button>'+
     '<button class="btn ghost sm" onclick="sendMill()">Email mill order</button>'+
     (dealerTab==="mill"?'<button class="btn ghost sm" onclick="copyMill()">Copy mill order</button>':'')+'</div>';
-  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2 class="sec" style="margin:0">Dealer dashboard · '+esc(D.settings.dealer_name)+'</h2>'+mailBadge()+'</div>'+k+checkBanner+
+  var _frMk=(Number(D.settings.freight)||0)-(Number(D.settings.freight_cost)||0);
+  var _cpm=30.44/((Number(D.settings.frequency_days)||14));
+  var _cycInc=bags*_frMk, _moInc=_cycInc*_cpm;
+  var _ovl=D.settings.freight_overhead||[]; var _ovt=_ovl.reduce(function(a,o){return a+(Number(o.amount)||0);},0);
+  var _net=_moInc-_ovt;
+  var freightPanel=(_frMk>0||_ovt>0)?('<div class="panel"><div class="panel-h"><h3>Freight</h3><span class="hint">markup '+money(_frMk)+'/bag vs monthly overhead</span></div><div class="pad" style="font-size:13.5px">'+
+    '<div style="display:flex;justify-content:space-between;padding:3px 0"><span>Freight markup income — this cycle ('+bags+' bags &times; '+money(_frMk)+')</span><b>'+money(_cycInc)+'</b></div>'+
+    '<div style="display:flex;justify-content:space-between;padding:3px 0"><span class="muted">Est. monthly markup income (&asymp;'+_cpm.toFixed(1)+' cycles)</span><span class="muted">'+money(_moInc)+'</span></div>'+
+    _ovl.map(function(o){return '<div style="display:flex;justify-content:space-between;padding:3px 0;color:#9C0006"><span>&minus; '+esc(o.label||"Overhead")+' (monthly)</span><span>'+money(Number(o.amount)||0)+'</span></div>';}).join("")+
+    '<div style="display:flex;justify-content:space-between;padding:7px 0;margin-top:4px;border-top:1px solid #e7ddc9;font-weight:bold;color:'+(_net>=0?'#2F6B3A':'#9C0006')+'"><span>Net freight / month</span><span>'+money(_net)+'</span></div>'+
+    '<p class="muted" style="font-size:11.5px;margin:6px 0 0">Set freight cost, markup &amp; overhead in the Pricing tab.</p></div></div>'):'';
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2 class="sec" style="margin:0">Dealer dashboard · '+esc(D.settings.dealer_name)+'</h2>'+mailBadge()+'</div>'+k+checkBanner+freightPanel+
     '<div class="panel"><div class="panel-h"><h3>Cycle delivering '+esc(D.cycle.delivery_label)+'</h3><span class="pill '+(D.window.open?'live':'warn')+'">'+(D.window.open?'● ORDERING OPEN':'ORDERING CLOSED')+'</span></div>'+
     '<div class="tabs">'+dtab("product","By product")+dtab("customer","By customer")+dtab("mill","Order to mill")+'</div>'+content+
     '<div class="pad" style="padding-top:0">'+actionBar+'</div></div>';
@@ -213,7 +224,9 @@ function renderPricing(){
   var ctl='<div class="panel"><div class="panel-h"><h3>Your pricing rules</h3><span class="hint">save → customer prices update</span></div><div class="pad"><div class="ctlgrid">'+
     '<div class="field"><label>Pricing basis</label><select id="p_basis"><option value="srp"'+(basisSrp?' selected':'')+'>% off Umbarger SRP</option><option value="cost"'+(!basisSrp?' selected':'')+'>Markup % on cost</option></select></div>'+
     '<div class="field"><label id="p_marginlbl">'+(basisSrp?'Discount off SRP (%)':'Markup on cost (%)')+'</label><input id="p_margin" type="number" step="0.5" value="'+s.margin_pct+'"></div>'+
-    '<div class="field"><label>Freight ($/bag)</label><input id="p_freight" type="number" step="0.25" value="'+s.freight+'"></div>'+
+    '<div class="field"><label>Freight cost ($/bag)</label><input id="p_freightcost" type="number" step="0.05" value="'+(s.freight_cost!=null?s.freight_cost:0)+'" oninput="updCharged()"></div>'+
+    '<div class="field"><label>Freight markup ($/bag)</label><input id="p_freightmk" type="number" step="0.05" value="'+(((Number(s.freight)||0)-(Number(s.freight_cost)||0)).toFixed(2))+'" oninput="updCharged()"></div>'+
+    '<div class="field"><label>Charged to customer</label><div style="height:43px;display:flex;align-items:center;font-weight:600;color:var(--navy)" id="p_charged">'+money(Number(s.freight)||0)+'/bag</div></div>'+
     '<div class="field"><label>Sales tax</label><div style="display:flex;gap:10px;align-items:center;height:43px"><label class="checkrow"><input type="checkbox" id="p_taxen" '+(s.tax_enabled?'checked':'')+'> charge</label><input id="p_taxpct" type="number" step="0.25" value="'+s.tax_pct+'" style="width:80px"> %</div></div>'+
     '</div><button class="btn primary sm" style="margin-top:10px" onclick="savePricing()">Save pricing</button></div></div>';
   var imp='<div class="panel"><div class="panel-h"><h3>Update prices from Umbarger sheet</h3><span class="hint">paste → preview → apply</span></div><div class="pad">'+
@@ -221,11 +234,29 @@ function renderPricing(){
     '<textarea id="imp_text" rows="6" style="width:100%;font-family:Menlo,Consolas,monospace;font-size:12.5px" placeholder="Primer Plus, 15.15, 17.65&#10;Barley Base, 15.53, 18.03&#10;Cattlelac, 18.95, 21.45"></textarea>'+
     '<div style="margin-top:8px"><button class="btn primary sm" onclick="previewSheet()">Preview changes</button> <span class="muted" id="imp_status" style="font-size:12.5px"></span></div>'+
     '<div id="imp_result" style="margin-top:10px"></div></div></div>';
+  window._ovh = (s.freight_overhead && s.freight_overhead.length) ? s.freight_overhead.slice() : [{label:"Unloading labor",amount:300},{label:"Container rent",amount:100}];
+  var ovh='<div class="panel"><div class="panel-h"><h3>Freight overhead (monthly)</h3><span class="hint">what your freight markup pays for</span></div><div class="pad">'+
+    '<p class="muted" style="font-size:13px;margin:0 0 8px">The freight <b>markup</b> you charge funds these fixed monthly costs. List them here and the dashboard shows whether your markup is covering them.</p>'+
+    '<div id="ovh_rows"></div>'+
+    '<div style="display:flex;align-items:center;gap:12px;margin-top:6px"><button class="btn ghost sm" onclick="ovhAdd()">+ Add line</button>'+
+    '<span class="muted" style="font-size:13px">Total: <b id="ovh_total">$0.00/mo</b></span>'+
+    '<button class="btn primary sm" style="margin-left:auto" onclick="saveOverhead()">Save overhead</button></div></div></div>';
   document.getElementById("view").innerHTML='<h2 class="sec">Pricing · '+esc(s.dealer_name)+'</h2>'+
-    '<p class="sub-h">Umbarger maintains wholesale + SRP; you set margin, freight and tax. The system computes every customer price.</p>'+ctl+imp+
+    '<p class="sub-h">Umbarger maintains wholesale + SRP; you set margin, freight and tax. The system computes every customer price.</p>'+ctl+ovh+imp+
     '<div class="panel"><div class="panel-h"><h3>Master sheet → your prices</h3><span class="hint">'+D.pricing.length+' products · tap a division</span></div>'+
     '<div class="pad">'+cats+'</div></div>';
+  renderOvh();
 }
+function updCharged(){ var c=(parseFloat(document.getElementById("p_freightcost").value)||0)+(parseFloat(document.getElementById("p_freightmk").value)||0); var el=document.getElementById("p_charged"); if(el) el.textContent=money(Math.round(c*100)/100)+"/bag"; }
+function ovhSync(){ var rows=document.querySelectorAll('#ovh_rows .ovh-row'); window._ovh=Array.prototype.map.call(rows,function(r){return {label:r.querySelector('.ovh-l').value, amount:parseFloat(r.querySelector('.ovh-a').value)||0};}); }
+function renderOvh(){ var c=document.getElementById('ovh_rows'); if(!c) return; var tot=0;
+  c.innerHTML=(window._ovh||[]).map(function(o,i){ tot+=Number(o.amount)||0;
+    return '<div class="ovh-row" style="display:flex;gap:8px;margin-bottom:6px"><input class="ovh-l" style="flex:1" value="'+esc(o.label||"")+'" placeholder="e.g. Unloading labor"><input class="ovh-a" type="number" step="10" style="width:120px" value="'+(o.amount||0)+'"><button class="btn ghost sm" onclick="ovhDel('+i+')" title="remove">&#10005;</button></div>';
+  }).join("")||'<p class="muted" style="font-size:12.5px">No overhead lines yet — add one.</p>';
+  var t=document.getElementById('ovh_total'); if(t) t.textContent=money(tot)+"/mo"; }
+function ovhAdd(){ ovhSync(); window._ovh.push({label:"",amount:0}); renderOvh(); }
+function ovhDel(i){ ovhSync(); window._ovh.splice(i,1); renderOvh(); }
+function saveOverhead(){ ovhSync(); api('/api/admin/settings','POST',{freight_overhead:window._ovh}).then(function(){ toast('Freight overhead saved.'); refresh(); }); }
 function parsePriceSheet(txt){
   var rows=[];
   (txt||"").split(/\r?\n/).forEach(function(line){
@@ -269,8 +300,10 @@ function applySheet(){
 }
 function togglePriceCat(n){ priceOpenCat=(priceOpenCat===n?"":n); renderPricing(); }
 function savePricing(){
+  var fc=parseFloat(document.getElementById("p_freightcost").value)||0;
+  var fmk=parseFloat(document.getElementById("p_freightmk").value)||0;
   var b={ pricing_basis:document.getElementById("p_basis").value, margin_pct:parseFloat(document.getElementById("p_margin").value)||0,
-    freight:parseFloat(document.getElementById("p_freight").value)||0, tax_enabled:document.getElementById("p_taxen").checked, tax_pct:parseFloat(document.getElementById("p_taxpct").value)||0 };
+    freight_cost:fc, freight:Math.round((fc+fmk)*100)/100, tax_enabled:document.getElementById("p_taxen").checked, tax_pct:parseFloat(document.getElementById("p_taxpct").value)||0 };
   api("/api/admin/settings","POST",b).then(function(){ toast("Pricing saved."); refresh(); });
 }
 
