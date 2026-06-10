@@ -974,10 +974,27 @@ const server = http.createServer(async (req, res) => {
           (v.lines || []).forEach(l => {
             const q = Number(l.qty) || 0; if (q <= 0) return;
             const nm = String(l.description || ""); const lk = nm.toLowerCase();
+            if (/^prior order system invoice/i.test(nm)) return; // summary-only import: no real product/bag detail
             bags += q; cust.bags += q; cyc.bags += q; freightBilled += Number(l.freight) || 0;
             const pr = byProduct[nm] = byProduct[nm] || { name: nm, category: catByName[lk] || "", bags: 0, revenue: 0 };
             pr.bags += q; pr.revenue += Number(l.total) || 0;
             const m = margByName[lk]; if (m != null) grossProfit += q * m;
+          });
+        });
+        // Fold in per-cycle aggregate bag totals for cycles imported without line detail
+        // (settings.cycle_bags: { "<cycle_label>": [ {product_id, bags} ] }). Reconstructs
+        // bags / by-product / gross profit / freight from the mill order for those cycles.
+        const cycleBags = s.cycle_bags || {};
+        Object.keys(cycleBags).forEach(cl => {
+          const cyc = byCycle[cl] = byCycle[cl] || { cycle: cl, date: "", bags: 0, revenue: 0, invoices: 0 };
+          (cycleBags[cl] || []).forEach(it => {
+            const q = Number(it.bags) || 0; if (q <= 0) return;
+            const pr0 = d.products.find(pp => pp.id === it.product_id);
+            const nm = pr0 ? pr0.name : (it.name || String(it.product_id));
+            bags += q; cyc.bags += q; freightBilled += q * (Number(s.freight) || 0);
+            const pr = byProduct[nm] = byProduct[nm] || { name: nm, category: pr0 ? pr0.category : "", bags: 0, revenue: 0 };
+            pr.bags += q;
+            if (pr0) { pr.revenue += q * allIn(pr0, s); grossProfit += q * marginBag(pr0, s); }
           });
         });
         const freightMarkup = bags * ((Number(s.freight) || 0) - freightCost);
