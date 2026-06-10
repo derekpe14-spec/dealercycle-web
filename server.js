@@ -774,6 +774,29 @@ const server = http.createServer(async (req, res) => {
       if (!cust) return json(res, 404, { error: "Invalid link." });
       return json(res, 200, bootstrapForCustomer(cust));
     }
+    // ----- public health check (no PII: counts, timestamps, flags only) -----
+    // A read-only heartbeat for the monitor. If the app is down the fetch fails
+    // outright; if it's up this reports failed sends, cycle-step timing, etc.
+    if (req.method === "GET" && p === "/api/health") {
+      const d = db(); const s = d.settings || {};
+      const since = Date.now() - 24 * 3600 * 1000;
+      const outbox = d.outbox || [];
+      const failed24 = outbox.filter(o => o.status === "failed" && new Date(o.created_at).getTime() >= since);
+      const payments = d.payments || [];
+      return json(res, 200, {
+        ok: true,
+        now: new Date().toISOString(),
+        mail_provider: mailer.providerName(),
+        outbox_total: outbox.length,
+        outbox_failed_24h: failed24.length,
+        outbox_failed_24h_kinds: failed24.map(o => o.kind),
+        schedule_state: s.schedule_state || {},
+        automation_enabled: !!s.automation_enabled,
+        automation_mode: s.automation_mode || null,
+        payments_unpaid: payments.filter(p => !p.paid).length,
+        customers_active: (d.customers || []).filter(c => c.active).length
+      });
+    }
     if (req.method === "POST" && p === "/api/order") {
       const body = await readBody(req);
       const cust = findCustomerByToken(body.token);
@@ -932,6 +955,43 @@ const server = http.createServer(async (req, res) => {
       if (!isAdmin(req)) return json(res, 401, { error: "Unauthorized" });
       if (req.method === "GET" && p === "/api/admin/data") return json(res, 200, adminData());
       if (req.method === "GET" && p === "/api/admin/mill") return json(res, 200, { text: millOrderText() });
+      if (req.method === "GET" && p === "/api/admin/breakdown") {
+        const d = db(); const s = d.settings;
+        const year = String(u.searchParams.get("year") || new Date().getFullYear());
+        const invs = d.invoices.filter(v => !v.cancelled && String(v.date_issued || "").slice(0, 4) === year);
+        const payByInv = {}; d.payments.forEach(pp => { payByInv[pp.invoice_id] = pp; });
+        const margByName = {}; const catByName = {};
+        d.products.forEach(pr => { const k = pr.name.toLowerCase(); margByName[k] = marginBag(pr, s); catByName[k] = pr.category || ""; });
+        const freightCost = Number(s.freight_cost) || 0;
+        const byProduct = {}, byCustomer = {}, byCycle = {};
+        let bags = 0, revenue = 0, grossProfit = 0, freightBilled = 0;
+        invs.forEach(v => {
+          const pay = payByInv[v.id]; const paid = !!(pay && pay.paid);
+          const cust = byCustomer[v.customer_name] = byCustomer[v.customer_name] || { name: v.customer_name, bags: 0, revenue: 0, paid: 0, outstanding: 0, invoices: 0 };
+          cust.invoices++; cust.revenue += v.total || 0; if (paid) cust.paid += v.total || 0; else cust.outstanding += v.total || 0;
+          const cyc = byCycle[v.cycle_label] = byCycle[v.cycle_label] || { cycle: v.cycle_label, date: v.date_issued || "", bags: 0, revenue: 0, invoices: 0 };
+          cyc.invoices++; cyc.revenue += v.total || 0; revenue += v.total || 0;
+          (v.lines || []).forEach(l => {
+            const q = Number(l.qty) || 0; if (q <= 0) return;
+            const nm = String(l.description || ""); const lk = nm.toLowerCase();
+            bags += q; cust.bags += q; cyc.bags += q; freightBilled += Number(l.freight) || 0;
+            const pr = byProduct[nm] = byProduct[nm] || { name: nm, category: catByName[lk] || "", bags: 0, revenue: 0 };
+            pr.bags += q; pr.revenue += Number(l.total) || 0;
+            const m = margByName[lk]; if (m != null) grossProfit += q * m;
+          });
+        });
+        const freightMarkup = bags * ((Number(s.freight) || 0) - freightCost);
+        const vals = o => Object.keys(o).map(k => o[k]);
+        const totalsPaid = vals(byCustomer).reduce((a, c) => a + c.paid, 0);
+        const totalsOut = vals(byCustomer).reduce((a, c) => a + c.outstanding, 0);
+        return json(res, 200, {
+          year,
+          totals: { invoices: invs.length, bags, revenue: round2(revenue), grossProfit: round2(grossProfit), freightBilled: round2(freightBilled), freightMarkup: round2(freightMarkup), cycles: Object.keys(byCycle).length, customers: Object.keys(byCustomer).length, paid: round2(totalsPaid), outstanding: round2(totalsOut) },
+          byProduct: vals(byProduct).map(x => ({ name: x.name, category: x.category, bags: x.bags, revenue: round2(x.revenue) })).sort((a, b) => b.bags - a.bags),
+          byCustomer: vals(byCustomer).map(x => ({ name: x.name, invoices: x.invoices, bags: x.bags, revenue: round2(x.revenue), paid: round2(x.paid), outstanding: round2(x.outstanding) })).sort((a, b) => b.revenue - a.revenue),
+          byCycle: vals(byCycle).map(x => ({ cycle: x.cycle, date: x.date, invoices: x.invoices, bags: x.bags, revenue: round2(x.revenue) })).sort((a, b) => String(a.date).localeCompare(String(b.date)))
+        });
+      }
       if (req.method === "GET" && p === "/api/admin/export") {
         const rows = [["Invoice #", "Customer", "Cycle", "Date Issued", "Amount", "Paid", "Date Paid", "Method", "Reminders"]];
         db().payments.forEach(p2 => rows.push([p2.invoice_num, p2.customer_name, p2.cycle, p2.date_issued, p2.amount, p2.paid ? "YES" : "NO", p2.date_paid || "", p2.method, p2.reminders]));

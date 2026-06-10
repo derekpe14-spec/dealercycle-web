@@ -32,7 +32,7 @@ var dealerTab = "product";
 var custScreen = "list";
 var priceOpenCat = null;
 
-var TABS = [["dashboard","Dashboard"],["customers","Customers"],["pricing","Pricing"],["inventory","Inventory"],["invoices","Invoices"],["payments","Payments"],["payables","Payables"],["billing","Billing"],["check","Cycle check"],["outbox","Outbox"],["setup","Setup"],["network","Umbarger"]];
+var TABS = [["dashboard","Dashboard"],["breakdown","Order breakdown"],["customers","Customers"],["pricing","Pricing"],["inventory","Inventory"],["invoices","Invoices"],["payments","Payments"],["payables","Payables"],["billing","Billing"],["check","Cycle check"],["outbox","Outbox"],["setup","Setup"],["network","Umbarger"]];
 
 function money(n){ return "$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function money0(n){ return "$"+Math.round(n).toLocaleString("en-US"); }
@@ -74,6 +74,7 @@ function go(v){ view=v; renderTabs(); render(); }
 /* =================== DASHBOARD =================== */
 function render(){
   if(view==="dashboard") return renderDash();
+  if(view==="breakdown") return renderBreakdown();
   if(view==="customers") return renderCustomers();
   if(view==="pricing") return renderPricing();
   if(view==="inventory") return renderInventory();
@@ -138,6 +139,34 @@ function renderDash(){
     '<div class="panel"><div class="panel-h"><h3>Cycle delivering '+esc(D.cycle.delivery_label)+'</h3><span class="pill '+(D.window.open?'live':'warn')+'">'+(D.window.open?'● ORDERING OPEN':'ORDERING CLOSED')+'</span></div>'+
     '<div class="tabs">'+dtab("product","By product")+dtab("customer","By customer")+dtab("mill","Order to mill")+'</div>'+content+
     '<div class="pad" style="padding-top:0">'+actionBar+'</div></div>';
+}
+/* =================== ORDER BREAKDOWN (year-to-date) =================== */
+function renderBreakdown(){
+  document.getElementById("view").innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px"><h2 class="sec" style="margin:0">Order breakdown · '+esc(D.settings.dealer_name)+'</h2><span class="pill live">Year to date</span></div>'+
+    '<div id="bdwrap"><div class="panel"><div class="pad muted">Loading year-to-date data…</div></div></div>';
+  api("/api/admin/breakdown").then(function(b){ renderBreakdownInto(b); }).catch(function(){ var el=document.getElementById("bdwrap"); if(el) el.innerHTML='<div class="panel"><div class="pad muted">Could not load breakdown.</div></div>'; });
+}
+function renderBreakdownInto(b){
+  var t=b.totals;
+  var k='<div class="kpis">'+
+    kpi(t.bags,"Total bags","YTD "+b.year)+
+    kpi(money0(t.revenue),"Revenue",t.invoices+" invoices · all-in")+
+    kpi(money0(t.grossProfit),"Est. gross profit","product margin")+
+    kpi(money0(t.freightMarkup),"Freight markup earned","YTD")+
+    kpi(t.cycles,"Cycles run","")+
+    kpi(t.customers,"Customers served","")+'</div>';
+  var ar='<div class="kpis">'+
+    kpi(money0(t.paid),"Collected","paid invoices")+
+    kpi(money0(t.outstanding),"Outstanding","unpaid invoices")+'</div>';
+  var maxc=b.byCycle.reduce(function(a,c){return Math.max(a,c.revenue);},0)||1;
+  var cycRows=b.byCycle.map(function(c){ var w=Math.round(c.revenue/maxc*100);
+    return '<tr><td><b>'+esc(c.cycle)+'</b><div class="muted" style="font-size:11.5px">'+esc(c.date||"")+' · '+c.invoices+' inv</div></td><td class="num">'+c.bags+'</td><td style="width:42%"><div style="background:#EAF1E5;border-radius:6px;overflow:hidden"><div style="background:#2F6B3A;height:16px;width:'+w+'%;min-width:2px"></div></div></td><td class="num"><b>'+money0(c.revenue)+'</b></td></tr>';}).join("");
+  var cyc='<div class="panel"><div class="panel-h"><h3>By cycle</h3><span class="hint">season trend</span></div><div style="overflow-x:auto"><table><thead><tr><th>Cycle</th><th class="num">Bags</th><th>Revenue</th><th class="num">$</th></tr></thead><tbody>'+(cycRows||'<tr><td colspan="4" class="muted" style="padding:20px;text-align:center">No cycles yet this year.</td></tr>')+'</tbody></table></div></div>';
+  var prodRows=b.byProduct.map(function(r){return '<tr><td><b>'+esc(r.name)+'</b></td><td class="hide-sm"><span class="pill cat" style="background:'+(D.categoryColors[r.category]||'#888')+'">'+esc(r.category||'—')+'</span></td><td class="num"><b>'+r.bags+'</b></td><td class="num">'+money0(r.revenue)+'</td></tr>';}).join("");
+  var prod='<div class="panel"><div class="panel-h"><h3>By product</h3><span class="hint">'+b.byProduct.length+' products · ranked by bags</span></div><div style="overflow-x:auto"><table><thead><tr><th>Product</th><th class="hide-sm">Category</th><th class="num">Bags</th><th class="num">Revenue</th></tr></thead><tbody>'+(prodRows||'<tr><td colspan="4" class="muted" style="padding:20px;text-align:center">No orders yet this year.</td></tr>')+'</tbody></table></div></div>';
+  var custRows=b.byCustomer.map(function(r){return '<tr><td><b>'+esc(r.name)+'</b><div class="muted" style="font-size:11.5px">'+r.invoices+' invoice'+(r.invoices===1?'':'s')+'</div></td><td class="num">'+r.bags+'</td><td class="num">'+money0(r.revenue)+'</td><td class="num">'+(r.outstanding>0?'<span class="pill warn">'+money0(r.outstanding)+'</span>':'<span class="pill live">paid</span>')+'</td></tr>';}).join("");
+  var cust='<div class="panel"><div class="panel-h"><h3>By customer</h3><span class="hint">ranked by revenue</span></div><div style="overflow-x:auto"><table><thead><tr><th>Customer</th><th class="num">Bags</th><th class="num">Revenue</th><th class="num">Outstanding</th></tr></thead><tbody>'+(custRows||'<tr><td colspan="4" class="muted" style="padding:20px;text-align:center">No customers yet.</td></tr>')+'</tbody></table></div></div>';
+  var el=document.getElementById("bdwrap"); if(el) el.innerHTML=k+ar+cyc+prod+cust;
 }
 function genInvoices(){ api("/api/admin/invoices/generate","POST",{}).then(function(d){ toast(d.made+" invoice(s) generated"+(d.emailed?(", "+d.emailed+" emailed"):"")+"."); refresh(); }); }
 function cycleOpen(){ if(!confirm("Email every customer (with an email on file) their private order link for this cycle?")) return; api("/api/admin/cycle-open","POST",{}).then(function(d){ toast("Order link: "+d.sent+" sent, "+d.captured+" to Outbox, "+d.noEmail+" had no email."); refresh(); }); }
