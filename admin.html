@@ -23,6 +23,8 @@
 </header>
 <div class="wrap" id="view"></div>
 <div id="overlay"></div>
+<button class="navtoggle" id="navtoggle" onclick="openNav()" aria-label="Open menu"><span aria-hidden="true" style="font-size:18px">&#9776;</span> <span id="navlabel">Menu</span></button>
+<div class="navsheet" id="navsheet" onclick="if(event.target===this)closeNav()"><div class="navsheet-card"><div class="nsh">Go to&hellip;</div><div id="navlist"></div></div></div>
 <script>
 "use strict";
 var PASS = localStorage.getItem("dc_pass") || "";
@@ -50,6 +52,8 @@ function refresh(){ return api("/api/admin/data").then(function(d){ D=d; renderT
 /* ---------- passcode gate ---------- */
 function promptPass(failed){
   var ab=document.querySelector(".appbar"); if(ab) ab.style.display="none";
+  var nt=document.getElementById("navtoggle"); if(nt) nt.style.display="none";
+  closeNav();
   document.getElementById("switch").innerHTML="";
   document.getElementById("view").innerHTML='<div class="loginwrap"><div class="loginbig">'+
     '<div class="spin"><svg viewBox="0 0 24 22" fill="none" stroke="#F5EEDD" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg></div>'+
@@ -67,9 +71,15 @@ function doLogin(){ PASS=document.getElementById("passin").value.trim(); localSt
 
 function renderTabs(){
   var ab=document.querySelector(".appbar"); if(ab) ab.style.display="";
-  document.getElementById("switch").innerHTML=TABS.map(function(t){return '<button class="'+(view===t[0]?'active':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>';}).join("");
+  var nt=document.getElementById("navtoggle"); if(nt) nt.style.display="";
+  var tabHtml=TABS.map(function(t){return '<button class="'+(view===t[0]?'active':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>';}).join("");
+  document.getElementById("switch").innerHTML=tabHtml;
+  var nl=document.getElementById("navlist"); if(nl) nl.innerHTML=tabHtml;
+  var lbl=document.getElementById("navlabel"); if(lbl){ var cur=TABS.filter(function(t){return t[0]===view;})[0]; lbl.textContent=cur?cur[1]:"Menu"; }
 }
-function go(v){ view=v; renderTabs(); render(); }
+function openNav(){ var s=document.getElementById("navsheet"); if(s) s.classList.add("open"); }
+function closeNav(){ var s=document.getElementById("navsheet"); if(s) s.classList.remove("open"); }
+function go(v){ view=v; closeNav(); renderTabs(); render(); window.scrollTo(0,0); }
 
 /* =================== DASHBOARD =================== */
 function render(){

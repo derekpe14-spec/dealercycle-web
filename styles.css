@@ -18,6 +18,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 .switch button{border:0;background:transparent;color:#dce8d6;font-size:12.5px;font-weight:600;padding:7px 11px;border-radius:7px;cursor:pointer;white-space:nowrap}
 .switch button.active{background:#fff;color:var(--navy);box-shadow:var(--shadow)}
 .switch button:hover:not(.active){color:#fff}
+/* mobile menu (phones only — see media query); hidden on desktop */
+.navtoggle{display:none}
+.navsheet{display:none}
 .wrap{max-width:1080px;margin:0 auto;padding:22px 18px 70px}
 h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:6px 0 12px}
 .sub-h{font-size:13px;color:var(--muted);margin:-4px 0 14px}
@@ -144,13 +147,22 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;op
 
 /* ---- Mobile: bottom tab bar + app-like polish (phone-first dealers) ---- */
 @media(max-width:760px){
-  .switch{position:fixed;left:0;right:0;bottom:0;z-index:60;margin:0;border-radius:0;background:var(--navy);
-    padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));gap:4px;flex-wrap:nowrap;overflow-x:auto;
-    -webkit-overflow-scrolling:touch;box-shadow:0 -3px 12px rgba(0,0,0,.20)}
-  .switch::-webkit-scrollbar{display:none}
-  .switch{scrollbar-width:none}
-  .switch button{flex:0 0 auto;font-size:12px;padding:10px 13px}
-  .wrap{padding-bottom:100px}             /* clear the fixed bottom bar */
+  /* No horizontal-scrolling tab strip on phones — it fights Safari's edge-swipe.
+     Use a fixed "Menu" button that opens a vertical sheet of all sections. */
+  .switch{display:none}
+  .navtoggle{display:flex;align-items:center;justify-content:center;gap:9px;
+    position:fixed;left:0;right:0;bottom:0;z-index:60;border:0;border-top:2px solid var(--gold);
+    background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer;
+    padding:13px 18px calc(13px + env(safe-area-inset-bottom,0px));box-shadow:0 -3px 12px rgba(0,0,0,.22)}
+  .navsheet.open{display:block;position:fixed;inset:0;z-index:70;background:rgba(40,32,20,.5)}
+  .navsheet-card{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:16px 16px 0 0;
+    padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px));max-height:78vh;overflow-y:auto;
+    -webkit-overflow-scrolling:touch;box-shadow:0 -10px 34px rgba(0,0,0,.32)}
+  .navsheet-card .nsh{font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);padding:6px 12px 6px}
+  .navsheet-card button{display:block;width:100%;text-align:left;border:0;background:transparent;
+    font-size:16px;font-weight:600;color:var(--navy);padding:14px 14px;border-radius:11px;cursor:pointer}
+  .navsheet-card button.active{background:var(--green);color:#fff}
+  .wrap{padding-bottom:96px}              /* clear the fixed bottom Menu button */
   .btn,.btn.sm{padding:12px 16px}         /* bigger tap targets on phones */
   .toggle{width:52px;height:30px}
   .toggle::after{width:24px;height:24px}
