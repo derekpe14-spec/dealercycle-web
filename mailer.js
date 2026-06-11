@@ -43,7 +43,7 @@ async function sendViaResend(msg, from) {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": "Bearer " + process.env.RESEND_API_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify(Object.assign({ from, to: [msg.to], subject: msg.subject, html: msg.html, text: msg.text }, msg.cc ? { cc: Array.isArray(msg.cc) ? msg.cc : [msg.cc] } : {}))
+      body: JSON.stringify(Object.assign({ from, to: [msg.to], subject: msg.subject, html: msg.html, text: msg.text }, msg.cc ? { cc: Array.isArray(msg.cc) ? msg.cc : [msg.cc] } : {}, msg.replyTo ? { reply_to: msg.replyTo } : {}, (msg.attachments && msg.attachments.length) ? { attachments: msg.attachments.map(a => ({ filename: a.filename, content: a.content })) } : {}))
     });
     if (!res.ok) { const t = await res.text(); return { status: "failed", provider: "resend", error: "Resend " + res.status + ": " + t.slice(0, 200) }; }
     const data = await res.json();
@@ -70,14 +70,16 @@ async function sendViaSmtp(msg, from, provider) {
       transport = { service: "gmail", auth: { user, pass } };
     }
     const t = nodemailer.createTransport(transport);
-    const info = await t.sendMail(Object.assign({ from, to: msg.to, subject: msg.subject, text: msg.text, html: msg.html }, msg.cc ? { cc: msg.cc } : {}));
+    const info = await t.sendMail(Object.assign({ from, to: msg.to, subject: msg.subject, text: msg.text, html: msg.html }, msg.cc ? { cc: msg.cc } : {}, msg.replyTo ? { replyTo: msg.replyTo } : {}, (msg.attachments && msg.attachments.length) ? { attachments: msg.attachments.map(a => ({ filename: a.filename, content: a.content, encoding: "base64" })) } : {}));
     return { status: "sent", provider, id: info.messageId };
   } catch (e) {
     return { status: "failed", provider, error: String(e) };
   }
 }
 
-// msg = { to, subject, text, html }; cfg = { dealerEmail, dealerName }
+// msg = { to, subject, text, html, cc, replyTo }; cfg = { dealerEmail, dealerName }
+// replyTo lets the platform send FROM its own domain (deliverability) while routing
+// replies to the dealer's own address (so customer questions stay with the dealer).
 async function send(msg, cfg) {
   cfg = cfg || {};
   const provider = providerName();

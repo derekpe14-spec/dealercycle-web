@@ -588,7 +588,9 @@ async function queueMail(kind, to, toName, msg) {
     const rt = ((s.reply_to_email !== undefined ? s.reply_to_email : s.email) || "").trim();
     if (rt && rt.toLowerCase() !== String(to || "").toLowerCase()) replyTo = rt;
   }
-  const result = await mailer.send({ to, cc, replyTo, subject: msg.subject, text: msg.text, html: msg.html }, { dealerEmail: s.email, dealerName: s.dealer_name });
+  // Attachments (e.g. the data backup) are passed straight to the mailer but NEVER stored in
+  // the outbox entry below — otherwise each backup would embed a copy of the whole DB in the DB.
+  const result = await mailer.send({ to, cc, replyTo, subject: msg.subject, text: msg.text, html: msg.html, attachments: msg.attachments }, { dealerEmail: s.email, dealerName: s.dealer_name });
   const entry = {
     id: nextId("outbox"), kind, to: to || "", to_name: toName || "", cc: cc || "", reply_to: replyTo || "",
     subject: msg.subject, text: msg.text, html: msg.html,
@@ -1520,6 +1522,29 @@ async function schedJobInvoices(keyIso, mode) {
   if (mode === "auto") { const r = await genAndSendInvoices(keyIso); console.log(`[scheduler] invoices generated + emailed (${r.made})`); }
   else { if (s.email) { try { await queueMail("nudge", s.email, s.dealer_name, dealerNudge("Invoice day — generate & send", "It’s invoice day for this cycle. Open the back office and tap “Generate invoices for this cycle” to create and email them.")); } catch (e) {} } console.log("[scheduler] invoices due (review mode — dealer nudged)"); }
 }
+// Email a full snapshot of the database (data.json) as an attachment, so there's always an
+// off-site copy of the real orders/invoices/customers even if the host or its disk is lost.
+// The attachment is NOT written to the outbox (see queueMail), so the DB never balloons.
+async function emailDataBackup(reason, nowMs) {
+  const s = db().settings;
+  const tz = s.timezone || "America/New_York";
+  const tp = tzParts(new Date(nowMs == null ? Date.now() : nowMs), tz);
+  const date = tp.year + "-" + tp.month + "-" + tp.day;
+  const to = ((s.backup_email !== undefined ? s.backup_email : (s.dealer_cc_email !== undefined ? s.dealer_cc_email : s.email)) || "").trim();
+  if (!to) return { ok: false, reason: "no backup recipient" };
+  const snapshot = JSON.stringify(db());
+  const b64 = Buffer.from(snapshot, "utf8").toString("base64");
+  const counts = (db().customers || []).length + " customers · " + (db().invoices || []).length + " invoices · " + (db().payments || []).length + " payments";
+  const fname = "dealercycle-data-" + date + ".json";
+  const msg = {
+    subject: "DealerCycle backup — " + date,
+    text: "Automatic data backup for " + (s.dealer_name || "DealerCycle") + " (" + date + ").\n\nSnapshot: " + counts + ".\nAttached is your full database (" + fname + "). Keep it somewhere safe; to restore, place it back as data.json on the app's data disk.",
+    html: wrapHtml('<h2 style="color:#2F6B3A;margin:0 0 8px">DealerCycle backup — ' + esc(date) + '</h2><p style="color:#555">Automatic data backup. Snapshot: ' + esc(counts) + '.</p><p style="color:#555">The attached <b>' + esc(fname) + '</b> is your full database. To restore, put it back as <code>data.json</code> on the app\'s data disk.</p>'),
+    attachments: [{ filename: fname, content: b64 }]
+  };
+  const e = await queueMail("backup", to, s.dealer_name || "Dealer", msg);
+  return { ok: true, to, status: e.status, bytes: snapshot.length, reason: reason || "daily" };
+}
 async function runScheduler(nowMs) {
   try {
     if (nowMs == null) nowMs = Date.now();
@@ -1527,9 +1552,21 @@ async function runScheduler(nowMs) {
     if (!s.automation_enabled) return;
     const mode = (s.automation_mode === "auto") ? "auto" : "review";
     const tz = s.timezone || "America/New_York";
+    s.schedule_state = s.schedule_state || {};
+    // --- Daily off-site data backup (independent of the order cycle) ---
+    if (s.backup_enabled !== false) {
+      const tpn = tzParts(new Date(nowMs), tz);
+      const today = tpn.year + "-" + tpn.month + "-" + tpn.day;
+      const bt = parseHM(s.backup_time || "6:00 AM");
+      const butc = zonedToUTC(+tpn.year, +tpn.month, +tpn.day, bt.h, bt.mi, tz);
+      if (nowMs >= butc && nowMs <= butc + 12 * 3600000 && s.schedule_state.backup !== today) {
+        s.schedule_state.backup = today; save();
+        try { const r = await emailDataBackup("daily", nowMs); console.log("[scheduler] data backup emailed:", JSON.stringify(r)); }
+        catch (e) { console.error("[scheduler] backup error:", e); }
+      }
+    }
     const sat = currentCycleSaturday(s, tz, nowMs); if (!sat) return;
     const key = isoUTC(sat);
-    s.schedule_state = s.schedule_state || {};
     const due = (job, dateObj, hm) => {
       const t = parseHM(hm);
       const utc = zonedToUTC(dateObj.getUTCFullYear(), dateObj.getUTCMonth() + 1, dateObj.getUTCDate(), t.h, t.mi, tz);
@@ -1541,7 +1578,7 @@ async function runScheduler(nowMs) {
     if (due("invoice", addDays(sat, 4), s.invoice_time || "8:00 AM")) { s.schedule_state.invoice = key; save(); await schedJobInvoices(key, mode); }
   } catch (e) { console.error("[scheduler] error:", e); }
 }
-module.exports = { runScheduler, cycleSaturdayForNow, currentCycleSaturday, emailMillOrder };
+module.exports = { runScheduler, cycleSaturdayForNow, currentCycleSaturday, emailMillOrder, emailDataBackup };
 
 server.listen(PORT, () => {
   reload();
