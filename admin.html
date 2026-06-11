@@ -20,10 +20,10 @@
 <header class="appbar">
   <div class="brand"><span class="dot"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F5EEDD" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/></svg></span><div><span class="brandmark">DealerCycle</span> <small>dealer back office</small></div></div>
   <div class="switch" id="switch"></div>
+  <button class="navtoggle" id="navtoggle" onclick="openNav()" aria-label="Open menu"><span aria-hidden="true" style="font-size:17px">&#9776;</span> <span id="navlabel">Menu</span></button>
 </header>
 <div class="wrap" id="view"></div>
 <div id="overlay"></div>
-<button class="navtoggle" id="navtoggle" onclick="openNav()" aria-label="Open menu"><span aria-hidden="true" style="font-size:18px">&#9776;</span> <span id="navlabel">Menu</span></button>
 <div class="navsheet" id="navsheet" onclick="if(event.target===this)closeNav()"><div class="navsheet-card"><div class="nsh">Go to&hellip;</div><div id="navlist"></div></div></div>
 <script>
 "use strict";

@@ -148,21 +148,21 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;op
 /* ---- Mobile: bottom tab bar + app-like polish (phone-first dealers) ---- */
 @media(max-width:760px){
   /* No horizontal-scrolling tab strip on phones — it fights Safari's edge-swipe.
-     Use a fixed "Menu" button that opens a vertical sheet of all sections. */
+     Use a Menu button in the top-right of the header that drops a list of all sections. */
   .switch{display:none}
-  .navtoggle{display:flex;align-items:center;justify-content:center;gap:9px;
-    position:fixed;left:0;right:0;bottom:0;z-index:60;border:0;border-top:2px solid var(--gold);
-    background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer;
-    padding:13px 18px calc(13px + env(safe-area-inset-bottom,0px));box-shadow:0 -3px 12px rgba(0,0,0,.22)}
+  .navtoggle{display:flex;align-items:center;gap:7px;border:0;cursor:pointer;
+    background:rgba(255,255,255,.16);color:#fff;font-size:13.5px;font-weight:700;
+    padding:9px 13px;border-radius:9px;max-width:55vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .navtoggle #navlabel{overflow:hidden;text-overflow:ellipsis}
   .navsheet.open{display:block;position:fixed;inset:0;z-index:70;background:rgba(40,32,20,.5)}
-  .navsheet-card{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:16px 16px 0 0;
-    padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px));max-height:78vh;overflow-y:auto;
-    -webkit-overflow-scrolling:touch;box-shadow:0 -10px 34px rgba(0,0,0,.32)}
-  .navsheet-card .nsh{font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);padding:6px 12px 6px}
+  .navsheet-card{position:fixed;left:0;right:0;top:0;background:#fff;border-radius:0 0 16px 16px;
+    padding:10px 10px 16px;max-height:88vh;overflow-y:auto;
+    -webkit-overflow-scrolling:touch;box-shadow:0 10px 34px rgba(0,0,0,.32)}
+  .navsheet-card .nsh{font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);padding:8px 12px 6px}
   .navsheet-card button{display:block;width:100%;text-align:left;border:0;background:transparent;
     font-size:16px;font-weight:600;color:var(--navy);padding:14px 14px;border-radius:11px;cursor:pointer}
   .navsheet-card button.active{background:var(--green);color:#fff}
-  .wrap{padding-bottom:96px}              /* clear the fixed bottom Menu button */
+  .wrap{padding-bottom:40px}
   .btn,.btn.sm{padding:12px 16px}         /* bigger tap targets on phones */
   .toggle{width:52px;height:30px}
   .toggle::after{width:24px;height:24px}
