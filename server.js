@@ -455,7 +455,6 @@ function markInvoicePaid(invoiceId, method, surcharge) {
   pay.date_paid = new Date().toISOString().slice(0, 10);
   pay.method = method || "Card";
   if (surcharge != null) pay.surcharge = round2(surcharge);
-  const inv = db().invoices.find(v => v.id === invoiceId);
   logQbo("Payment", (pay.invoice_num || "") + " · " + (pay.customer_name || "") + " (" + pay.method + (surcharge ? ", incl. " + money(surcharge) + " card fee" : "") + ")", round2((pay.amount || 0) + (surcharge || 0)));
   save();
   return true;
