@@ -204,7 +204,7 @@ function renderCustomers(){
   var rows=sorted.map(function(c){
     var link=origin+"/o/"+c.link_token;
     var ph=(c.phone||"").replace(/[^0-9+]/g,"");
-    var smsBody="Hi "+(c.name||"")+"! We've upgraded "+dealer+" feed ordering. Your old order link no longer works - use THIS new link every cycle from now on:\n"+link+"\n\nSave this text, and add the link to your phone's home screen so it opens like an app. Open the link, then on iPhone tap the Share icon and pick 'Add to Home Screen'; on Android tap the menu (3 dots) and pick 'Add to Home Screen'.\n\nQuestions or need your link? Call Derek at 217-218-0242.";
+    var smsBody="Hi "+(c.name||"")+"! We've upgraded "+dealer+" feed ordering. Your old order link no longer works - use THIS new link every cycle from now on:\n"+link+"\n\nOrdering opens Saturday 6/13 at 7 AM - tap your link then to place your order.\n\nSave this text, and add the link to your phone's home screen so it opens like an app. Open the link, then on iPhone tap the Share icon and pick 'Add to Home Screen'; on Android tap the menu (3 dots) and pick 'Add to Home Screen'.\n\nQuestions or need your link? Call Derek at 217-218-0242.";
     var textBtn=ph?'<a class="btn ghost sm" style="background:#e6f2e6;color:#2F6B3A" href="sms:'+ph+'?&body='+encodeURIComponent(smsBody)+'">Text</a>':'';
     return '<tr><td><b>'+esc(c.name)+'</b>'+(c.email?'<div class="muted" style="font-size:12px">'+esc(c.email)+'</div>':'')+'</td>'+
       '<td class="hide-sm">'+(esc(c.phone)||'<span class="muted">—</span>')+'</td>'+
